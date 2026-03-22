@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoachOS: The Operating System for Coaches</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #F8F7F5;
+  --surface:     #FFFFFF;
+  --surface2:    #FDFCFB;
+  --surface3:    #F0EDE8;
+  --border:      rgba(0,0,0,0.055);
+  --border2:     rgba(0,0,0,0.10);
+  --text:        #1C1A17;
+  --text2:       #72695F;
+  --text3:       #B8B0A6;
+  --accent:      #4A7C68;
+  --accent-lt:   #EEF6F2;
+  --accent-dim:  #D5EBE1;
+  --accent-dk:   #3d6b58;
+  --red:         #B83232;
+  --red-dim:     #FEF3F3;
+  --amber:       #A85C07;
+  --amber-dim:   #FEF8EE;
+  --blue:        #2558D9;
+  --blue-dim:    #EDF3FF;
+  --teal:        #0F766E;
+  --teal-dim:    #F0FDFA;
+  --purple:      #6D31D9;
+  --purple-dim:  #F5F2FF;
+  --r:           8px;
+  --rl:          14px;
+  --rxl:         20px;
+}
+
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Geist', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* ─── NAV ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(248,247,245,0.93);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 3rem; height: 60px;
+}
+.nav-logo { display: flex; align-items: center; gap: 0.625rem; text-decoration: none; }
+.logo-mark {
+  width: 30px; height: 30px; border-radius: var(--r);
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Instrument Serif', serif; font-size: 1.125rem; font-style: italic;
+}
+.logo-type { font-family: 'Instrument Serif', serif; font-size: 1.25rem; color: var(--text); }
+.nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+.nav-links a { text-decoration: none; color: var(--text2); font-size: 0.875rem; transition: color 0.15s; }
+.nav-links a:hover { color: var(--text); }
+.nav-right { display: flex; align-items: center; gap: 0.75rem; }
+.btn-nav-ghost {
+  background: none; border: 1px solid var(--border2); color: var(--text2);
+  padding: 0.45rem 1.125rem; border-radius: var(--r);
+  font-family: 'Geist', sans-serif; font-size: 0.8125rem; font-weight: 500;
+  cursor: pointer; transition: all 0.15s; text-decoration: none; display: inline-block;
+}
+.btn-nav-ghost:hover { background: var(--surface3); color: var(--text); }
+.btn-nav-cta {
+  background: var(--accent); color: #fff; padding: 0.45rem 1.125rem; border-radius: var(--r);
+  font-family: 'Geist', sans-serif; font-size: 0.8125rem; font-weight: 500;
+  cursor: pointer; transition: background 0.15s; text-decoration: none; display: inline-block; border: none;
+}
+.btn-nav-cta:hover { background: var(--accent-dk); }
+
+/* ─── SHARED ─── */
+.kicker {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-size: 0.72rem; font-weight: 500; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 1.25rem;
+}
+.kicker::before { content: ''; width: 18px; height: 1.5px; background: var(--accent); }
+.section-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(2rem, 3.5vw, 2.875rem);
+  font-weight: 400; line-height: 1.15; letter-spacing: -0.01em;
+  color: var(--text); margin-bottom: 1.25rem;
+}
+.section-title em { font-style: italic; color: var(--accent); }
+.section-lead { font-size: 1.0625rem; color: var(--text2); font-weight: 300; line-height: 1.8; max-width: 560px; }
+
+.btn-primary {
+  background: var(--accent); color: #fff; padding: 0.75rem 1.75rem; border-radius: var(--r);
+  font-family: 'Geist', sans-serif; font-size: 0.9375rem; font-weight: 500;
+  cursor: pointer; transition: background 0.15s; text-decoration: none; display: inline-block; border: none;
+}
+.btn-primary:hover { background: var(--accent-dk); }
+.btn-secondary {
+  background: none; border: 1px solid var(--border2); color: var(--text2);
+  padding: 0.75rem 1.75rem; border-radius: var(--r);
+  font-family: 'Geist', sans-serif; font-size: 0.9375rem; font-weight: 400;
+  cursor: pointer; transition: all 0.15s; text-decoration: none; display: inline-block;
+}
+.btn-secondary:hover { background: var(--surface3); color: var(--text); }
+
+/* ─── HERO ─── */
+.hero {
+  padding: 9rem 3rem 6rem; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.hero-inner {
+  max-width: 1080px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--accent-lt); border: 1px solid var(--accent-dim);
+  color: var(--accent); font-size: 0.72rem; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 0.35rem 0.875rem; border-radius: 99px; margin-bottom: 1.75rem;
+}
+.hero-eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.hero h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 400; line-height: 1.1; letter-spacing: -0.015em;
+  color: var(--text); margin-bottom: 1.5rem;
+}
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero-sub { font-size: 1.0625rem; color: var(--text2); font-weight: 300; line-height: 1.8; margin-bottom: 2.5rem; }
+.hero-actions { display: flex; align-items: center; gap: 0.875rem; margin-bottom: 3rem; flex-wrap: wrap; }
+.hero-proof { display: flex; gap: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.proof-num { font-family: 'Instrument Serif', serif; font-size: 1.75rem; color: var(--text); line-height: 1; }
+.proof-label { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem; }
+
+/* Hero CRM mockup */
+.hero-visual {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--rxl); box-shadow: 0 4px 40px rgba(0,0,0,0.06); overflow: hidden;
+}
+.mockup-bar {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0.875rem 1.25rem; display: flex; align-items: center; justify-content: space-between;
+}
+.mockup-bar-title { font-family: 'Instrument Serif', serif; font-size: 1rem; color: var(--text); }
+.mockup-bar-sub { font-size: 0.7rem; color: var(--text3); margin-top: 0.1rem; }
+.mockup-cta { background: var(--accent); color: #fff; font-size: 0.7rem; font-weight: 500; padding: 0.3rem 0.75rem; border-radius: 6px; }
+.mockup-body { padding: 1rem 1.25rem; background: var(--bg); }
+.mockup-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
+.mock-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 0.75rem; }
+.mock-stat-lbl { font-size: 0.6rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem; }
+.mock-stat-val { font-family: 'Instrument Serif', serif; font-size: 1.25rem; color: var(--text); }
+.mock-stat-d { font-size: 0.62rem; color: var(--accent); margin-top: 0.1rem; }
+.mockup-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.mock-card-head { padding: 0.625rem 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+.mock-card-title { font-size: 0.78rem; font-weight: 500; color: var(--text); }
+.mock-card-link { font-size: 0.7rem; color: var(--accent); }
+.mock-row {
+  display: grid; grid-template-columns: 1.8fr 1fr 0.8fr;
+  padding: 0.6rem 1rem; border-bottom: 1px solid var(--border);
+  align-items: center; gap: 0.5rem;
+}
+.mock-row:last-child { border-bottom: none; }
+.mock-client { display: flex; align-items: center; gap: 6px; }
+.mock-av {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 600;
+}
+.mock-name { font-size: 0.78rem; font-weight: 500; color: var(--text); }
+.mock-pkg { font-size: 0.65rem; color: var(--text3); }
+.mock-prog-wrap { background: var(--surface3); border-radius: 99px; height: 4px; overflow: hidden; margin-top: 3px; }
+.mock-prog { height: 100%; border-radius: 99px; }
+.mock-badge { display: inline-block; font-size: 0.62rem; font-weight: 500; padding: 0.18rem 0.55rem; border-radius: 99px; }
+.mb-g { background: var(--accent-dim); color: var(--accent); }
+.mb-a { background: var(--amber-dim); color: var(--amber); }
+.mb-r { background: var(--red-dim); color: var(--red); }
+
+/* ─── PROBLEM ─── */
+.problem { padding: 7rem 3rem; background: var(--bg); }
+.problem-inner {
+  max-width: 1080px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start;
+}
+.pain-stat {
+  background: var(--surface3); border-radius: var(--rl);
+  padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1rem; margin-top: 1.75rem;
+}
+.pain-stat-num { font-family: 'Instrument Serif', serif; font-size: 2.5rem; color: var(--accent); line-height: 1; flex-shrink: 0; }
+.pain-stat p { font-size: 0.875rem; color: var(--text2); line-height: 1.55; }
+.pain-stat strong { color: var(--text); font-weight: 500; }
+.pain-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.pain-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--rl); padding: 1.125rem 1.25rem;
+  display: flex; align-items: flex-start; gap: 0.875rem;
+  transition: border-color 0.15s;
+}
+.pain-item:hover { border-color: var(--border2); }
+.pain-icon { width: 36px; height: 36px; border-radius: var(--r); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+.pain-text h4 { font-size: 0.9rem; font-weight: 500; color: var(--text); margin-bottom: 0.25rem; }
+.pain-text p { font-size: 0.8125rem; color: var(--text2); line-height: 1.6; font-weight: 300; }
+
+/* ─── PRODUCTS ─── */
+.products { padding: 7rem 3rem; background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.products-header { text-align: center; margin-bottom: 4rem; }
+.products-header .kicker { justify-content: center; }
+.products-header .kicker::before { display: none; }
+.products-grid { max-width: 1080px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+
+.product-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--rxl); padding: 2.25rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.product-card:hover { border-color: var(--border2); box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
+.product-card.flagship {
+  grid-column: span 2;
+  background: var(--accent-lt); border-color: var(--accent-dim); border-top: 3px solid var(--accent);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;
+}
+.product-card.flagship:hover { border-color: var(--accent); }
+.card-website { border-top: 2px solid var(--blue-dim); }
+.card-addons  { border-top: 2px solid var(--amber-dim); }
+.card-promo   { border-top: 2px solid var(--purple-dim); }
+
+.prod-num-row { display: flex; align-items: center; gap: 0.625rem; margin-bottom: 1.5rem; }
+.prod-pill {
+  background: var(--surface3); border: 1px solid var(--border); border-radius: 99px;
+  padding: 0.2rem 0.625rem; font-size: 0.65rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3);
+}
+.flagship .prod-pill { background: var(--accent-dim); border-color: rgba(74,124,104,0.2); color: var(--accent); }
+.prod-cat { font-size: 0.72rem; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; }
+.flagship .prod-cat { color: var(--accent); opacity: 0.7; }
+
+.product-card h3 {
+  font-family: 'Instrument Serif', serif; font-size: 1.5rem; font-weight: 400;
+  color: var(--text); margin-bottom: 0.625rem; line-height: 1.2;
+}
+.flagship h3 { font-size: 2rem; }
+.prod-tagline { font-size: 0.9rem; color: var(--text2); line-height: 1.7; font-weight: 300; margin-bottom: 1.75rem; }
+.flagship .prod-tagline { font-size: 1rem; }
+
+.feat-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.75rem; }
+.feat-item { display: flex; align-items: center; gap: 0.625rem; font-size: 0.8125rem; color: var(--text2); font-weight: 300; }
+.feat-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; opacity: 0.7; }
+.card-website .feat-dot { background: var(--blue); }
+.card-addons .feat-dot { background: var(--amber); }
+.card-promo .feat-dot { background: var(--purple); }
+
+.prod-link { display: inline-flex; align-items: center; gap: 0.375rem; font-size: 0.875rem; font-weight: 500; color: var(--accent); text-decoration: none; transition: gap 0.15s; }
+.prod-link:hover { gap: 0.625rem; }
+.card-website .prod-link { color: var(--blue); }
+.card-addons .prod-link { color: var(--amber); }
+.card-promo .prod-link { color: var(--purple); }
+
+.flagship-pills { display: flex; flex-direction: column; gap: 0.625rem; padding-top: 0.5rem; }
+.flagship-pill {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 0.75rem 1rem;
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.fp-icon {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: var(--accent-dim); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; flex-shrink: 0;
+}
+.fp-text p { font-size: 0.8rem; font-weight: 500; color: var(--text); }
+.fp-text span { font-size: 0.72rem; color: var(--text3); }
+
+/* ─── HOW IT WORKS ─── */
+.howitworks { padding: 7rem 3rem; background: var(--bg); }
+.howitworks-inner { max-width: 1080px; margin: 0 auto; }
+.howitworks-header { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: end; margin-bottom: 4rem; }
+.steps-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; position: relative; }
+.steps-row::before {
+  content: ''; position: absolute; top: 23px; left: 24px; right: 24px;
+  height: 1px; background: var(--border2); z-index: 0;
+}
+.step { position: relative; z-index: 1; }
+.step-circle {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--surface); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Instrument Serif', serif; font-size: 1rem; color: var(--text2);
+  margin-bottom: 1.375rem; transition: all 0.2s;
+}
+.step:hover .step-circle { background: var(--accent); color: #fff; border-color: var(--accent); }
+.step h4 { font-size: 0.9375rem; font-weight: 500; color: var(--text); margin-bottom: 0.5rem; }
+.step p { font-size: 0.8125rem; color: var(--text2); line-height: 1.65; font-weight: 300; }
+
+/* ─── PRICING ─── */
+.pricing { padding: 7rem 3rem; background: var(--surface); border-top: 1px solid var(--border); }
+.pricing-inner { max-width: 1080px; margin: 0 auto; }
+.pricing-header { text-align: center; margin-bottom: 4rem; }
+.pricing-header .kicker { justify-content: center; }
+.pricing-header .kicker::before { display: none; }
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; align-items: start; }
+.price-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--rxl); padding: 2rem; position: relative; transition: border-color 0.15s;
+}
+.price-card:hover { border-color: var(--border2); }
+.price-card.featured { background: var(--accent-lt); border-color: var(--accent-dim); border-top: 3px solid var(--accent); }
+.price-card.featured:hover { border-color: var(--accent); }
+.popular-tag {
+  display: inline-block; background: var(--accent); color: #fff;
+  font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 99px; margin-bottom: 1.25rem;
+}
+.price-plan { font-family: 'Instrument Serif', serif; font-size: 1.25rem; font-weight: 400; color: var(--text); margin-bottom: 0.25rem; }
+.price-desc-text { font-size: 0.8125rem; color: var(--text2); line-height: 1.55; margin-bottom: 1.5rem; font-weight: 300; }
+.price-row { display: flex; align-items: baseline; gap: 0.25rem; margin-bottom: 0.25rem; }
+.price-cur { font-size: 1.125rem; font-weight: 500; color: var(--text); }
+.price-amt { font-family: 'Instrument Serif', serif; font-size: 3rem; font-weight: 400; color: var(--text); letter-spacing: -0.02em; line-height: 1; }
+.price-per { font-size: 0.875rem; color: var(--text3); }
+.price-yr { font-size: 0.75rem; color: var(--text3); margin-bottom: 1.75rem; }
+.price-yr strong { color: var(--accent); }
+.price-feats { list-style: none; display: flex; flex-direction: column; gap: 0.625rem; margin-bottom: 2rem; }
+.price-feats li { display: flex; align-items: flex-start; gap: 0.625rem; font-size: 0.8125rem; color: var(--text2); font-weight: 300; }
+.price-feats li .ck { color: var(--accent); font-size: 0.75rem; margin-top: 0.1rem; flex-shrink: 0; }
+.price-feats li.na { opacity: 0.4; }
+.price-feats li.na .ck { color: var(--text3); }
+.btn-plan {
+  display: block; width: 100%; padding: 0.75rem; border-radius: var(--r);
+  font-family: 'Geist', sans-serif; font-size: 0.9rem; font-weight: 500;
+  cursor: pointer; transition: all 0.15s; text-align: center; text-decoration: none; border: none;
+}
+.btn-plan-out { background: none; border: 1px solid var(--border2); color: var(--text2); }
+.btn-plan-out:hover { background: var(--surface3); color: var(--text); }
+.btn-plan-fill { background: var(--accent); color: #fff; }
+.btn-plan-fill:hover { background: var(--accent-dk); }
+
+.addons-box {
+  margin-top: 2.5rem; padding: 1.75rem;
+  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--rl);
+}
+.addons-box h4 { font-size: 0.9375rem; font-weight: 500; color: var(--text); margin-bottom: 0.25rem; }
+.addons-box p { font-size: 0.8125rem; color: var(--text2); margin-bottom: 1.125rem; font-weight: 300; }
+.addon-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.addon-chip {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 99px;
+  padding: 0.35rem 0.875rem; font-size: 0.78rem; color: var(--text2);
+  display: flex; align-items: center; gap: 0.375rem;
+}
+.addon-price { font-size: 0.7rem; color: var(--text3); }
+
+/* ─── TESTIMONIALS ─── */
+.testimonials { padding: 7rem 3rem; background: var(--bg); }
+.testimonials-inner { max-width: 1080px; margin: 0 auto; }
+.testimonials-header { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: end; margin-bottom: 3.5rem; }
+.testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+.testi-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--rxl); padding: 1.75rem;
+  display: flex; flex-direction: column; transition: border-color 0.15s;
+}
+.testi-card:hover { border-color: var(--border2); }
+.testi-stars { color: var(--amber); font-size: 0.875rem; letter-spacing: 0.04em; margin-bottom: 1rem; }
+.testi-quote {
+  font-family: 'Instrument Serif', serif; font-style: italic; font-size: 1.0625rem;
+  color: var(--text); line-height: 1.65; flex: 1; margin-bottom: 1.5rem;
+}
+.testi-author { display: flex; align-items: center; gap: 0.75rem; }
+.testi-av {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 600; flex-shrink: 0;
+}
+.testi-name { font-size: 0.875rem; font-weight: 500; color: var(--text); }
+.testi-role { font-size: 0.72rem; color: var(--text3); }
+
+/* ─── CTA ─── */
+.cta-section {
+  padding: 7rem 3rem; background: var(--surface);
+  border-top: 1px solid var(--border); text-align: center;
+}
+.cta-section .section-title { max-width: 520px; margin: 0 auto 1.25rem; }
+.cta-section .section-lead { margin: 0 auto 2.5rem; text-align: center; }
+.cta-note { font-size: 0.8125rem; color: var(--text3); margin-top: 1rem; }
+
+/* ─── FOOTER ─── */
+footer { background: var(--surface); border-top: 1px solid var(--border); padding: 3.5rem 3rem 2rem; }
+.footer-grid {
+  max-width: 1080px; margin: 0 auto;
+  display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem;
+}
+.footer-brand p { font-size: 0.8125rem; color: var(--text2); line-height: 1.7; margin-top: 0.875rem; font-weight: 300; max-width: 240px; }
+.footer-col h5 { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
+.footer-col a { display: block; color: var(--text2); text-decoration: none; font-size: 0.875rem; margin-bottom: 0.625rem; transition: color 0.15s; font-weight: 300; }
+.footer-col a:hover { color: var(--text); }
+.footer-bottom {
+  max-width: 1080px; margin: 0 auto;
+  border-top: 1px solid var(--border); padding-top: 1.75rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-bottom p { font-size: 0.8125rem; color: var(--text3); }
+.footer-legal { display: flex; gap: 1.5rem; }
+.footer-legal a { font-size: 0.8125rem; color: var(--text3); text-decoration: none; transition: color 0.15s; }
+.footer-legal a:hover { color: var(--text2); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 960px) {
+  nav { padding: 0 1.5rem; }
+  .nav-links { display: none; }
+  .hero { padding: 6rem 1.5rem 4rem; }
+  .hero-inner, .problem-inner, .testimonials-header, .howitworks-header { grid-template-columns: 1fr; gap: 2.5rem; }
+  .products, .pricing, .testimonials, .howitworks, .problem { padding: 5rem 1.5rem; }
+  .products-grid, .pricing-grid, .testi-grid { grid-template-columns: 1fr; }
+  .product-card.flagship { grid-column: span 1; grid-template-columns: 1fr; gap: 2rem; }
+  .steps-row { grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .steps-row::before { display: none; }
+  .cta-section { padding: 5rem 1.5rem; }
+  footer { padding: 3rem 1.5rem 1.5rem; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-left > * { animation: fadeUp 0.5s ease both; }
+.hero-eyebrow  { animation-delay: 0.05s; }
+.hero h1       { animation-delay: 0.12s; }
+.hero-sub      { animation-delay: 0.2s; }
+.hero-actions  { animation-delay: 0.27s; }
+.hero-proof    { animation-delay: 0.34s; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="logo-mark">C</div>
+    <span class="logo-type">CoachOS</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#products">Products</a></li>
+    <li><a href="#howitworks">How it works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#testimonials">Stories</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="#" class="btn-nav-ghost">Log in</a>
+    <a href="#pricing" class="btn-nav-cta">Start free →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-eyebrow">Built for professional life coaches</div>
+      <h1>Stop juggling tools.<br>Start <em>coaching</em>.</h1>
+      <p class="hero-sub">CoachOS is the complete operating system for independent coaches: your website, your client management, your tools, and your marketing. All in one place.</p>
+      <div class="hero-actions">
+        <a href="#pricing" class="btn-primary">Get started free →</a>
+        <a href="#products" class="btn-secondary">See what's inside</a>
+      </div>
+      <div class="hero-proof">
+        <div class="proof-item">
+          <div class="proof-num">500+</div>
+          <div class="proof-label">Coaches on waitlist</div>
+        </div>
+        <div class="proof-item">
+          <div class="proof-num">4 hrs</div>
+          <div class="proof-label">Saved per week</div>
+        </div>
+        <div class="proof-item">
+          <div class="proof-num">1 tab</div>
+          <div class="proof-label">Instead of 11</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mini CRM mockup -->
+    <div class="hero-visual">
+      <div class="mockup-bar">
+        <div>
+          <div class="mockup-bar-title">Dashboard</div>
+          <div class="mockup-bar-sub">Thursday, 19 March 2026</div>
+        </div>
+        <div class="mockup-cta">+ New Client</div>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-stats">
+          <div class="mock-stat">
+            <div class="mock-stat-lbl">Active Clients</div>
+            <div class="mock-stat-val">8</div>
+            <div class="mock-stat-d">↑ 2 this month</div>
+          </div>
+          <div class="mock-stat">
+            <div class="mock-stat-lbl">Revenue (Mar)</div>
+            <div class="mock-stat-val">€4,320</div>
+            <div class="mock-stat-d">↑ 12% vs Feb</div>
+          </div>
+          <div class="mock-stat">
+            <div class="mock-stat-lbl">Sessions</div>
+            <div class="mock-stat-val">14</div>
+            <div class="mock-stat-d" style="color:var(--text3);">2 remaining</div>
+          </div>
+          <div class="mock-stat">
+            <div class="mock-stat-lbl">Homeworks</div>
+            <div class="mock-stat-val">7</div>
+            <div class="mock-stat-d" style="color:var(--red);">3 overdue</div>
+          </div>
+        </div>
+        <div class="mockup-card">
+          <div class="mock-card-head">
+            <div class="mock-card-title">Client Pulse</div>
+            <div class="mock-card-link">All clients →</div>
+          </div>
+          <div class="mock-row">
+            <div class="mock-client">
+              <div class="mock-av" style="background:var(--accent-dim);color:var(--accent);">LM</div>
+              <div><div class="mock-name">Laura Martínez</div><div class="mock-pkg">Growth Journey</div></div>
+            </div>
+            <div>
+              <div class="mock-prog-wrap"><div class="mock-prog" style="width:66%;background:var(--accent);"></div></div>
+              <div style="font-size:0.6rem;color:var(--text3);margin-top:2px;">4/6 sessions</div>
+            </div>
+            <div><span class="mock-badge mb-g">Paid</span></div>
+          </div>
+          <div class="mock-row">
+            <div class="mock-client">
+              <div class="mock-av" style="background:var(--blue-dim);color:var(--blue);">JK</div>
+              <div><div class="mock-name">James Keane</div><div class="mock-pkg">Deep Transform.</div></div>
+            </div>
+            <div>
+              <div class="mock-prog-wrap"><div class="mock-prog" style="width:58%;background:var(--blue);"></div></div>
+              <div style="font-size:0.6rem;color:var(--text3);margin-top:2px;">7/12 sessions</div>
+            </div>
+            <div><span class="mock-badge mb-g">Paid</span></div>
+          </div>
+          <div class="mock-row">
+            <div class="mock-client">
+              <div class="mock-av" style="background:var(--amber-dim);color:var(--amber);">SR</div>
+              <div><div class="mock-name">Sophie Renard</div><div class="mock-pkg">Growth Journey</div></div>
+            </div>
+            <div>
+              <div class="mock-prog-wrap"><div class="mock-prog" style="width:17%;background:var(--amber);"></div></div>
+              <div style="font-size:0.6rem;color:var(--text3);margin-top:2px;">1/6 sessions</div>
+            </div>
+            <div><span class="mock-badge mb-a">Due Apr 1</span></div>
+          </div>
+          <div class="mock-row" style="background:#FEF5F4;">
+            <div class="mock-client">
+              <div class="mock-av" style="background:#F3F2F0;color:#72695F;">TD</div>
+              <div><div class="mock-name" style="color:var(--red);">Tom Dijk</div><div class="mock-pkg">Clarity Session</div></div>
+            </div>
+            <div>
+              <div class="mock-prog-wrap"><div class="mock-prog" style="width:100%;background:var(--surface3);"></div></div>
+              <div style="font-size:0.6rem;color:var(--text3);margin-top:2px;">Completed</div>
+            </div>
+            <div><span class="mock-badge mb-r">Overdue</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem" id="problem">
+  <div class="problem-inner">
+    <div>
+      <div class="kicker">The problem</div>
+      <h2 class="section-title">Coaches are great at coaching.<br>Not at <em>running software</em>.</h2>
+      <p class="section-lead">The average coach juggles 7–11 different tools just to run their practice. Booking here, invoices there, notes somewhere else. None of it talks to each other.</p>
+      <div class="pain-stat">
+        <div class="pain-stat-num">7–11</div>
+        <div><p><strong>tools the average coach uses</strong> to manage their practice. Each with its own login, subscription, and learning curve.</p></div>
+      </div>
+    </div>
+    <div class="pain-list">
+      <div class="pain-item">
+        <div class="pain-icon" style="background:var(--blue-dim);">🗓️</div>
+        <div class="pain-text"><h4>Booking chaos</h4><p>Calendly, Acuity, back-and-forth emails. Just to confirm a single session time.</p></div>
+      </div>
+      <div class="pain-item">
+        <div class="pain-icon" style="background:var(--amber-dim);">🧾</div>
+        <div class="pain-text"><h4>Invoice anxiety</h4><p>Manually tracking who paid, who owes, who's overdue. Every single month.</p></div>
+      </div>
+      <div class="pain-item">
+        <div class="pain-icon" style="background:var(--purple-dim);">📓</div>
+        <div class="pain-text"><h4>Scattered client notes</h4><p>Session notes in Notion, homework in email, goals on a sticky note somewhere.</p></div>
+      </div>
+      <div class="pain-item">
+        <div class="pain-icon" style="background:var(--teal-dim);">📢</div>
+        <div class="pain-text"><h4>No time for marketing</h4><p>Instagram, newsletter, referrals. All falling through the cracks between sessions.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="products" id="products">
+  <div class="products-header">
+    <div class="kicker">The solution</div>
+    <h2 class="section-title" style="max-width:520px;margin:0 auto 1.125rem;">Four products.<br>One <em>operating system</em>.</h2>
+    <p class="section-lead" style="text-align:center;margin:0 auto;">Everything a coach needs to run a modern, professional practice. Designed to work together from day one.</p>
+  </div>
+  <div class="products-grid">
+    <!-- 01 CoachOS flagship -->
+    <div class="product-card flagship">
+      <div>
+        <div class="prod-num-row">
+          <div class="prod-pill">01</div>
+          <div class="prod-cat">The Core</div>
+        </div>
+        <h3>CoachOS: The Operating System</h3>
+        <p class="prod-tagline">Your complete coaching practice in one dashboard. Manage every client, session, note, homework, payment, and referral. Built around how coaches actually work.</p>
+        <div class="feat-list">
+          <div class="feat-item"><div class="feat-dot"></div>Client CRM with full history & timeline</div>
+          <div class="feat-item"><div class="feat-dot"></div>Session notes, homework & progress tracking</div>
+          <div class="feat-item"><div class="feat-dot"></div>Package tracking: scheduled, remaining & past</div>
+          <div class="feat-item"><div class="feat-dot"></div>Payment dashboard: paid, remaining, overdue</div>
+          <div class="feat-item"><div class="feat-dot"></div>Monthly financial analytics & P&L reporting</div>
+          <div class="feat-item"><div class="feat-dot"></div>Referral network with gift tracking</div>
+        </div>
+        <a href="#pricing" class="prod-link">Explore CoachOS →</a>
+      </div>
+      <div class="flagship-pills">
+        <div class="flagship-pill">
+          <div class="fp-icon">👥</div>
+          <div class="fp-text"><p>Overall client management</p><span>Full client history, session notes, homework, goals and progress in one place</span></div>
+        </div>
+        <div class="flagship-pill">
+          <div class="fp-icon">📅</div>
+          <div class="fp-text"><p>Comprehensive planning</p><span>Schedule sessions, track remaining slots, manage packages across every client</span></div>
+        </div>
+        <div class="flagship-pill">
+          <div class="fp-icon">📊</div>
+          <div class="fp-text"><p>Financial analytics</p><span>Monthly revenue, payment status, P&L reporting and outstanding balances</span></div>
+        </div>
+        <div class="flagship-pill">
+          <div class="fp-icon">♦</div>
+          <div class="fp-text"><p>Referral tracking</p><span>Who referred who, gift management and conversion rates</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 Coach Website -->
+    <div class="product-card card-website">
+      <div class="prod-num-row">
+        <div class="prod-pill">02</div>
+        <div class="prod-cat">Your Presence</div>
+      </div>
+      <h3>Coach Website</h3>
+      <p class="prod-tagline">A beautiful, professional website that represents your coaching practice and turns visitors into booked clients. No developer, no technical knowledge needed.</p>
+      <div class="feat-list">
+        <div class="feat-item"><div class="feat-dot"></div>Custom bio, story & certifications</div>
+        <div class="feat-item"><div class="feat-dot"></div>Service pages with pricing tiers</div>
+        <div class="feat-item"><div class="feat-dot"></div>Integrated booking calendar</div>
+        <div class="feat-item"><div class="feat-dot"></div>Payment integration at checkout</div>
+        <div class="feat-item"><div class="feat-dot"></div>Testimonials & social proof</div>
+        <div class="feat-item"><div class="feat-dot"></div>Professional domain & hosting</div>
+      </div>
+      <a href="#pricing" class="prod-link">Learn more →</a>
+    </div>
+
+    <!-- 03 Promotion Suite -->
+    <div class="product-card card-promo">
+      <div class="prod-num-row">
+        <div class="prod-pill">03</div>
+        <div class="prod-cat">Your Voice</div>
+      </div>
+      <h3>Promotion Suite</h3>
+      <p class="prod-tagline">Built-in marketing tools so your practice keeps growing even when you're heads-down coaching. No separate subscription needed.</p>
+      <div class="feat-list">
+        <div class="feat-item"><div class="feat-dot"></div>Newsletter creation & subscriber management</div>
+        <div class="feat-item"><div class="feat-dot"></div>Social media post scheduler</div>
+        <div class="feat-item"><div class="feat-dot"></div>Referral programme management</div>
+        <div class="feat-item"><div class="feat-dot"></div>Lead capture forms & landing pages</div>
+        <div class="feat-item"><div class="feat-dot"></div>Automated follow-up sequences</div>
+        <div class="feat-item"><div class="feat-dot"></div>Analytics: what's bringing new clients</div>
+      </div>
+      <a href="#pricing" class="prod-link">See promotion tools →</a>
+    </div>
+
+    <!-- 04 Professional Coaching Tools -->
+    <div class="product-card card-addons" style="grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;">
+      <div>
+        <div class="prod-num-row">
+          <div class="prod-pill">04</div>
+          <div class="prod-cat">Your Toolkit</div>
+        </div>
+        <h3>Professional Coaching Tools</h3>
+        <p class="prod-tagline">Purpose-built tools for every coaching style. Activate what fits your practice. Each tool connects directly to CoachOS with no extra setup.</p>
+        <div class="feat-list">
+          <div class="feat-item"><div class="feat-dot"></div>📓 Client journaling & reflection prompts</div>
+          <div class="feat-item"><div class="feat-dot"></div>📊 Assessments: Wheel of Life, EQ, values</div>
+          <div class="feat-item"><div class="feat-dot"></div>👥 Group coaching & cohort management</div>
+          <div class="feat-item"><div class="feat-dot"></div>📚 Resource library with file sharing</div>
+          <div class="feat-item"><div class="feat-dot"></div>🤖 AI session prep & auto-summaries</div>
+          <div class="feat-item"><div class="feat-dot"></div>🔗 Zoom, Google Cal, WhatsApp integrations</div>
+        </div>
+        <a href="#pricing" class="prod-link" style="margin-top:0.5rem;display:inline-flex;">Explore tools →</a>
+      </div>
+      <div>
+        <div style="font-size:0.72rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:0.875rem;">Tool sets by coaching style</div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+          <div style="display:flex;align-items:flex-start;gap:0.875rem;padding:0.875rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);">
+            <span style="font-size:1.125rem;flex-shrink:0;margin-top:1px;">💼</span>
+            <div>
+              <div style="font-size:0.875rem;font-weight:500;color:var(--text);margin-bottom:0.2rem;">Career Coaching Tools</div>
+              <div style="font-size:0.78rem;color:var(--text3);line-height:1.5;">CV review workflows, career mapping boards, interview prep trackers, job search accountability</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:0.875rem;padding:0.875rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);">
+            <span style="font-size:1.125rem;flex-shrink:0;margin-top:1px;">❤️</span>
+            <div>
+              <div style="font-size:0.875rem;font-weight:500;color:var(--text);margin-bottom:0.2rem;">Relationship Coaching Tools</div>
+              <div style="font-size:0.78rem;color:var(--text3);line-height:1.5;">Communication pattern mapping, values alignment exercises, conflict resolution frameworks</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:0.875rem;padding:0.875rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);">
+            <span style="font-size:1.125rem;flex-shrink:0;margin-top:1px;">🧠</span>
+            <div>
+              <div style="font-size:0.875rem;font-weight:500;color:var(--text);margin-bottom:0.2rem;">Executive & Leadership Tools</div>
+              <div style="font-size:0.78rem;color:var(--text3);line-height:1.5;">360 feedback tools, leadership style assessments, decision-making frameworks, stakeholder mapping</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:0.875rem;padding:0.875rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);">
+            <span style="font-size:1.125rem;flex-shrink:0;margin-top:1px;">⚡</span>
+            <div>
+              <div style="font-size:0.875rem;font-weight:500;color:var(--text);margin-bottom:0.2rem;">Health & Wellness Tools</div>
+              <div style="font-size:0.78rem;color:var(--text3);line-height:1.5;">Habit tracking, energy mapping, mind-body check-ins, sleep and recovery journals</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:0.875rem;padding:0.875rem;background:var(--accent-lt);border:1px solid var(--accent-dim);border-radius:var(--r);">
+            <span style="font-size:1.125rem;flex-shrink:0;margin-top:1px;">✦</span>
+            <div>
+              <div style="font-size:0.875rem;font-weight:500;color:var(--accent);margin-bottom:0.2rem;">More tool sets coming</div>
+              <div style="font-size:0.78rem;color:var(--text3);line-height:1.5;">Business coaching, mindset, parenting, financial wellbeing and more</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="howitworks" id="howitworks">
+  <div class="howitworks-inner">
+    <div class="howitworks-header">
+      <div>
+        <div class="kicker">How it works</div>
+        <h2 class="section-title">Up and running<br>in one <em>afternoon</em>.</h2>
+      </div>
+      <p class="section-lead">We designed CoachOS around real coach workflows. Not the other way around. Most coaches are fully live within 2 hours of signing up.</p>
+    </div>
+    <div class="steps-row">
+      <div class="step">
+        <div class="step-circle">01</div>
+        <h4>Build your website</h4>
+        <p>Add your story, services, and pricing. Connect your domain. Takes about 30 minutes.</p>
+      </div>
+      <div class="step">
+        <div class="step-circle">02</div>
+        <h4>Set up CoachOS</h4>
+        <p>Import existing clients or start fresh. Configure packages and session types.</p>
+      </div>
+      <div class="step">
+        <div class="step-circle">03</div>
+        <h4>Activate tools</h4>
+        <p>Activate the Professional Coaching Tools that match your style and specialisation.</p>
+      </div>
+      <div class="step">
+        <div class="step-circle">04</div>
+        <h4>Grow on autopilot</h4>
+        <p>Referrals, newsletters, and social posts keep your pipeline full while you coach.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="pricing-inner">
+    <div class="pricing-header">
+      <div class="kicker">Pricing</div>
+      <h2 class="section-title">Simple, honest <em>pricing</em>.</h2>
+      <p class="section-lead">No per-client fees. No hidden charges. Cancel anytime.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-plan">Starter</div>
+        <p class="price-desc-text">Get your website live and start managing your first clients.</p>
+        <div class="price-row"><span class="price-cur">€</span><span class="price-amt">39</span><span class="price-per">/ month</span></div>
+        <p class="price-yr">Or €390/yr, <strong>2 months free</strong></p>
+        <ul class="price-feats">
+          <li><span class="ck">✓</span>Professional coach website</li>
+          <li><span class="ck">✓</span>Booking calendar + payment integration</li>
+          <li><span class="ck">✓</span>CoachOS CRM, up to 10 clients</li>
+          <li><span class="ck">✓</span>Session notes & homework tracking</li>
+          <li><span class="ck">✓</span>Basic payment tracking</li>
+          <li class="na"><span class="ck">○</span>Monthly analytics</li>
+          <li class="na"><span class="ck">○</span>Referral management</li>
+          <li class="na"><span class="ck">○</span>Promotion suite</li>
+        </ul>
+        <a href="#" class="btn-plan btn-plan-out">Start free trial →</a>
+      </div>
+      <div class="price-card featured">
+        <div class="popular-tag">Most popular</div>
+        <div class="price-plan">Professional</div>
+        <p class="price-desc-text">The full CoachOS experience for established coaches.</p>
+        <div class="price-row"><span class="price-cur">€</span><span class="price-amt">79</span><span class="price-per">/ month</span></div>
+        <p class="price-yr">Or €790/yr, <strong>2 months free</strong></p>
+        <ul class="price-feats">
+          <li><span class="ck">✓</span>Everything in Starter</li>
+          <li><span class="ck">✓</span>Unlimited clients</li>
+          <li><span class="ck">✓</span>Full financial analytics & reporting</li>
+          <li><span class="ck">✓</span>Referral management + gift tracking</li>
+          <li><span class="ck">✓</span>Client-facing progress portal</li>
+          <li><span class="ck">✓</span>Promotion suite (newsletter + social)</li>
+          <li><span class="ck">✓</span>Multilanguage support</li>
+          <li class="na"><span class="ck">○</span>Professional Coaching Tools available separately</li>
+        </ul>
+        <a href="#" class="btn-plan btn-plan-fill">Start free trial →</a>
+      </div>
+      <div class="price-card">
+        <div class="price-plan">Studio</div>
+        <p class="price-desc-text">For coaching businesses with multiple coaches or high volume.</p>
+        <div class="price-row"><span class="price-cur">€</span><span class="price-amt">149</span><span class="price-per">/ month</span></div>
+        <p class="price-yr">Or €1,490/yr, <strong>2 months free</strong></p>
+        <ul class="price-feats">
+          <li><span class="ck">✓</span>Everything in Professional</li>
+          <li><span class="ck">✓</span>Up to 5 coach seats</li>
+          <li><span class="ck">✓</span>Group coaching module included</li>
+          <li><span class="ck">✓</span>White-label client-facing portal</li>
+          <li><span class="ck">✓</span>Team revenue reporting</li>
+          <li><span class="ck">✓</span>Priority support & onboarding</li>
+          <li><span class="ck">✓</span>All current professional coaching tools included</li>
+          <li><span class="ck">✓</span>Custom integrations on request</li>
+        </ul>
+        <a href="#" class="btn-plan btn-plan-out">Talk to us →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="testimonials">
+  <div class="testimonials-inner">
+    <div class="testimonials-header">
+      <div>
+        <div class="kicker">Early access coaches</div>
+        <h2 class="section-title">They tried it.<br><em>Here's what happened.</em></h2>
+      </div>
+      <p class="section-lead">Coaches in our early access programme have been running their full practices on CoachOS since early 2026.</p>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"I used to spend Sunday evenings chasing invoices and updating spreadsheets. Now I literally don't think about any of that. CoachOS just handles it."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:var(--accent-dim);color:var(--accent);">SB</div>
+          <div><div class="testi-name">Sarah B.</div><div class="testi-role">ICF PCC · Amsterdam</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"The newsletter and social tools changed everything for me. I went from posting randomly to having a consistent presence — and my enquiries doubled in two months."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:var(--purple-dim);color:var(--purple);">AN</div>
+          <div><div class="testi-name">Anna N.</div><div class="testi-role">Life Coach · Vienna</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"I went from 7 tools to one. My website books clients automatically now. I haven't sent a manual invoice in 3 months. This is exactly what I needed."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:var(--amber-dim);color:var(--amber);">CR</div>
+          <div><div class="testi-name">Claire R.</div><div class="testi-role">Career Coach · Brussels</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="kicker" style="justify-content:center;">Ready to start?</div>
+  <h2 class="section-title">Your practice deserves<br>better <em>infrastructure</em>.</h2>
+  <p class="section-lead">Start your 14-day free trial. Setup takes less than an afternoon.</p>
+  <a href="#pricing" class="btn-primary">Start free trial →</a>
+  <p class="cta-note">14 days free · Cancel anytime</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo">
+        <div class="logo-mark">C</div>
+        <span class="logo-type">CoachOS</span>
+      </a>
+      <p>The complete operating system for independent life coaches. Website, CRM, tools, and promotion. All in one place.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Products</h5>
+      <a href="#">Coach Website</a>
+      <a href="#">CoachOS CRM</a>
+      <a href="#">Professional Coaching Tools</a>
+      <a href="#">Promotion Suite</a>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <a href="#">About</a>
+      <a href="#">Blog</a>
+      <a href="#">Careers</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h5>Support</h5>
+      <a href="#">Documentation</a>
+      <a href="#">Help centre</a>
+      <a href="#">Community</a>
+      <a href="#">Status</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 CoachOS. Built for coaches, by people who care about great work.</p>
+    <div class="footer-legal">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
+  navLinks.forEach(a => {
+    const active = a.getAttribute('href') === '#' + current;
+    a.style.color = active ? 'var(--text)' : '';
+    a.style.fontWeight = active ? '500' : '';
+  });
+}, { passive: true });
+</script>
+</body>
+</html>

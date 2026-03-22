@@ -1,0 +1,2711 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoachOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+:root {
+  --bg:        #F8F7F5;
+  --surface:   #FFFFFF;
+  --surface2:  #FDFCFB;
+  --surface3:  #F0EDE8;
+  --border:    rgba(0,0,0,0.05);
+  --border2:   rgba(0,0,0,0.09);
+  --text:      #1C1A17;
+  --text2:     #72695F;
+  --text3:     #B8B0A6;
+  --accent:    #4A7C68;
+  --accent-lt: #EEF6F2;
+  --accent-dim:#D5EBE1;
+  --accent-dim2:#EEF6F2;
+  --red:       #B83232;
+  --red-dim:   #FEF3F3;
+  --amber:     #A85C07;
+  --amber-dim: #FEF8EE;
+  --blue:      #2558D9;
+  --blue-dim:  #EDF3FF;
+  --teal:      #0F766E;
+  --teal-dim:  #F0FDFA;
+  --purple:    #6D31D9;
+  --purple-dim:#F5F2FF;
+  --gold:      #92400E;
+  --sidebar-w: 240px;
+  --radius:    8px;
+  --radius-lg: 14px;
+}
+
+html { font-size: 14px; }
+body {
+  font-family: 'Geist', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── SIDEBAR ─────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 50;
+  padding: 0;
+}
+.sidebar-logo {
+  padding: 1.5rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 0.625rem;
+}
+.logo-mark {
+  width: 30px; height: 30px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.875rem; font-weight: 600; color: #FFFFFF;
+  flex-shrink: 0;
+}
+.logo-text {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.125rem; color: var(--text);
+  letter-spacing: 0.01em;
+}
+.logo-text span { color: var(--text2); font-size: 0.75rem; display: block; font-family: 'Geist', sans-serif; font-weight: 400; letter-spacing: 0; }
+
+.sidebar-section {
+  padding: 1rem 0.75rem 0.5rem;
+}
+.sidebar-label {
+  font-size: 0.65rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--text3); padding: 0 0.5rem;
+  margin-bottom: 0.25rem;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 0.625rem;
+  padding: 0.55rem 0.75rem; border-radius: var(--radius);
+  cursor: pointer; transition: background 0.15s;
+  color: var(--text2); font-size: 0.875rem; font-weight: 400;
+  position: relative;
+  user-select: none;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--accent-lt); color: var(--accent); font-weight: 500; }
+.nav-item .nav-icon { width: 16px; text-align: center; font-size: 0.875rem; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--accent-lt); color: var(--accent);
+  font-size: 0.65rem; font-weight: 600;
+  padding: 0.1rem 0.45rem; border-radius: 99px;
+}
+.nav-item.active .nav-badge { background: var(--accent-lt); }
+
+.sidebar-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding: 0.875rem 1rem;
+}
+.coach-pill {
+  display: flex; align-items: center; gap: 0.625rem;
+  padding: 0.5rem; border-radius: var(--radius); cursor: pointer;
+  transition: background 0.15s;
+}
+.coach-pill:hover { background: var(--surface2); }
+.coach-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 600; flex-shrink: 0;
+}
+.coach-info p { font-size: 0.8125rem; font-weight: 500; color: var(--text); line-height: 1.2; }
+.coach-info span { font-size: 0.7rem; color: var(--text3); }
+.logout-btn {
+  margin-left: auto; color: var(--text3); font-size: 0.75rem;
+  background: none; border: none; cursor: pointer; transition: color 0.15s;
+}
+.logout-btn:hover { color: var(--red); }
+
+/* ── MAIN ─────────────────────────── */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky; top: 0; z-index: 40;
+}
+.topbar-left h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.375rem; font-weight: 400;
+  color: var(--text); line-height: 1.2;
+}
+.topbar-left p { font-size: 0.8125rem; color: var(--text3); margin-top: 0.1rem; }
+.topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+.btn {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  padding: 0.5rem 1rem; border-radius: var(--radius);
+  font-family: 'Geist', sans-serif; font-size: 0.8125rem; font-weight: 500;
+  cursor: pointer; transition: all 0.15s; border: none;
+}
+.btn-ghost {
+  background: var(--surface2); color: var(--text2);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: var(--surface3); color: var(--text); border-color: var(--border2); }
+.btn-accent {
+  background: var(--accent); color: #fff;
+}
+.btn-accent:hover { background: #3d6b58; }
+.search-box {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 0.45rem 0.875rem;
+  color: var(--text2); font-size: 0.8125rem;
+  transition: border-color 0.15s;
+}
+.search-box:focus-within { border-color: var(--border2); }
+.search-box input {
+  background: none; border: none; outline: none;
+  color: var(--text); font-family: 'Geist', sans-serif; font-size: 0.8125rem;
+  width: 180px;
+}
+.search-box input::placeholder { color: var(--text3); }
+
+/* ── CONTENT AREA ─────────────────────────── */
+.content { padding: 1.5rem 1.75rem; flex: 1; }
+
+/* ── VIEW TOGGLING ─────────────────────────── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── STAT CARDS ─────────────────────────── */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.25rem 1.375rem;
+}
+.stat-label { font-size: 0.75rem; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.625rem; }
+.stat-value { font-size: 1.75rem; font-weight: 300; color: var(--text); line-height: 1; font-family: 'Instrument Serif', serif; margin-bottom: 0.375rem; }
+.stat-delta { font-size: 0.75rem; display: flex; align-items: center; gap: 0.25rem; }
+.delta-up { color: var(--accent); }
+.delta-down { color: var(--red); }
+.delta-neutral { color: var(--text3); }
+
+/* ── TWO-COL LAYOUT ─────────────────────────── */
+.two-col { display: grid; grid-template-columns: 1fr 340px; gap: 1.25rem; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+/* ── CARD ─────────────────────────── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.card-head {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-title { font-size: 0.875rem; font-weight: 500; color: var(--text); }
+.card-sub { font-size: 0.75rem; color: var(--text3); margin-top: 0.1rem; }
+.card-action { font-size: 0.75rem; color: var(--accent); cursor: pointer; }
+.card-action:hover { text-decoration: underline; }
+.card-body { padding: 1.25rem; }
+
+/* ── CLIENT LIST ─────────────────────────── */
+.client-list { display: flex; flex-direction: column; }
+.client-row {
+  display: grid; grid-template-columns: 2.5fr 1.5fr 1.25fr 1.25fr 1fr 80px;
+  align-items: center; gap: 1rem;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+  cursor: pointer;
+}
+.client-row:last-child { border-bottom: none; }
+.client-row:hover { background: var(--surface2); }
+.client-row.header {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--text3); font-weight: 500;
+  cursor: default; padding: 0.625rem 1.25rem;
+}
+.client-row.header:hover { background: none; }
+.client-id {
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.client-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 600; flex-shrink: 0;
+}
+.client-name { font-size: 0.875rem; font-weight: 500; color: var(--text); }
+.client-email { font-size: 0.75rem; color: var(--text3); }
+
+/* ── BADGES ─────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center;
+  font-size: 0.7rem; font-weight: 500; letter-spacing: 0.03em;
+  padding: 0.25rem 0.625rem; border-radius: 99px;
+}
+.badge-green { background: rgba(200,240,76,0.12); color: var(--accent); }
+.badge-amber { background: var(--amber-dim); color: var(--amber); }
+.badge-red { background: var(--red-dim); color: var(--red); }
+.badge-blue { background: var(--blue-dim); color: var(--blue); }
+.badge-purple { background: var(--purple-dim); color: var(--purple); }
+.badge-teal { background: var(--teal-dim); color: var(--teal); }
+.badge-gray { background: rgba(255,255,255,0.06); color: var(--text3); }
+
+/* ── UPCOMING SESSIONS ─────────────────────────── */
+.session-item {
+  display: flex; align-items: flex-start; gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.session-item:last-child { border-bottom: none; padding-bottom: 0; }
+.session-date-block {
+  text-align: center; flex-shrink: 0;
+  background: var(--surface2); border-radius: var(--radius);
+  padding: 0.5rem 0.75rem; min-width: 52px;
+}
+.session-date-block .day { font-family: 'Instrument Serif', serif; font-size: 1.375rem; color: var(--text); line-height: 1; }
+.session-date-block .month { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-top: 0.15rem; }
+.session-meta { flex: 1; }
+.session-meta h4 { font-size: 0.875rem; font-weight: 500; color: var(--text); margin-bottom: 0.2rem; }
+.session-meta p { font-size: 0.75rem; color: var(--text3); }
+.session-time { font-size: 0.75rem; color: var(--text2); text-align: right; flex-shrink: 0; }
+.session-time .time { font-size: 0.875rem; font-weight: 500; color: var(--text); }
+.session-type-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 0.35rem;
+}
+
+/* ── ACTIVITY FEED ─────────────────────────── */
+.activity-item {
+  display: flex; align-items: flex-start; gap: 0.875rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; flex-shrink: 0; margin-top: 0.1rem;
+}
+.activity-content p { font-size: 0.8125rem; color: var(--text2); line-height: 1.5; }
+.activity-content p strong { color: var(--text); font-weight: 500; }
+.activity-content time { font-size: 0.7rem; color: var(--text3); }
+
+/* ── PROGRESS BAR ─────────────────────────── */
+.progress-bar-wrap {
+  background: var(--surface3); border-radius: 99px; height: 5px; overflow: hidden;
+}
+.progress-bar { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.5s; }
+.progress-bar.amber { background: var(--amber); }
+.progress-bar.red { background: var(--red); }
+.progress-bar.blue { background: var(--blue); }
+
+/* ── CLIENT PROFILE ─────────────────────────── */
+.profile-header {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.5rem;
+  display: flex; align-items: center; gap: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.profile-avatar-lg {
+  width: 64px; height: 64px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.375rem; font-weight: 600; flex-shrink: 0;
+}
+.profile-info h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.5rem; color: var(--text); font-weight: 400; margin-bottom: 0.25rem;
+}
+.profile-info p { font-size: 0.8125rem; color: var(--text3); margin-bottom: 0.625rem; }
+.profile-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.profile-actions { margin-left: auto; display: flex; gap: 0.625rem; }
+
+.profile-grid { display: grid; grid-template-columns: 280px 1fr; gap: 1.25rem; }
+.info-list { display: flex; flex-direction: column; gap: 0; }
+.info-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  gap: 1rem;
+}
+.info-row:last-child { border-bottom: none; }
+.info-key { font-size: 0.75rem; color: var(--text3); font-weight: 500; flex-shrink: 0; }
+.info-val { font-size: 0.8125rem; color: var(--text2); text-align: right; }
+
+/* ── SESSION NOTES ─────────────────────────── */
+.note-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.125rem;
+  margin-bottom: 0.875rem;
+}
+.note-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.note-header h4 { font-size: 0.875rem; font-weight: 500; color: var(--text); }
+.note-header time { font-size: 0.72rem; color: var(--text3); }
+.note-body { font-size: 0.8125rem; color: var(--text2); line-height: 1.7; margin-bottom: 0.875rem; }
+.note-tags { display: flex; gap: 0.375rem; flex-wrap: wrap; }
+
+/* ── HOMEWORK ─────────────────────────── */
+.hw-item {
+  display: flex; align-items: flex-start; gap: 0.875rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.hw-item:last-child { border-bottom: none; }
+.hw-check {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1.5px solid var(--border2); flex-shrink: 0;
+  margin-top: 0.15rem; display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; cursor: pointer; transition: all 0.15s;
+}
+.hw-check.done { background: var(--accent); border-color: var(--accent); color: #FFFFFF; }
+.hw-text h4 { font-size: 0.875rem; color: var(--text); font-weight: 400; margin-bottom: 0.2rem; }
+.hw-text p { font-size: 0.75rem; color: var(--text3); }
+.hw-due { margin-left: auto; font-size: 0.72rem; color: var(--text3); text-align: right; flex-shrink: 0; }
+.hw-due.overdue { color: var(--red); }
+
+/* ── PAYMENT TABLE ─────────────────────────── */
+.payment-row {
+  display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr 80px;
+  align-items: center; gap: 1rem;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8125rem;
+}
+.payment-row:last-child { border-bottom: none; }
+.payment-row.header {
+  font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500;
+  padding: 0.625rem 1.25rem;
+}
+.amount { font-weight: 500; color: var(--text); }
+
+/* ── REFERRAL ─────────────────────────── */
+.referral-row {
+  display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr;
+  align-items: center; gap: 1rem;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.referral-row:last-child { border-bottom: none; }
+.referral-row.header {
+  font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em;
+  font-weight: 500; padding: 0.625rem 1.25rem;
+}
+.referral-tree {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.8125rem; color: var(--text2);
+}
+.referral-tree .arrow { color: var(--text3); }
+
+/* ── PACKAGE / PROGRESS CARD ─────────────────────────── */
+.pkg-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.125rem; margin-bottom: 0.875rem;
+}
+.pkg-card h4 { font-size: 0.875rem; font-weight: 500; color: var(--text); margin-bottom: 0.375rem; }
+.pkg-meta { font-size: 0.75rem; color: var(--text3); margin-bottom: 0.875rem; }
+.pkg-sessions { display: flex; gap: 0.3rem; margin-bottom: 0.875rem; }
+.pkg-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--surface3); }
+.pkg-dot.done { background: var(--accent); }
+.pkg-dot.current { background: var(--amber); }
+
+/* ── MINI CHART ─────────────────────────── */
+.sparkline-row { display: flex; align-items: flex-end; gap: 3px; height: 36px; }
+.spark-bar { flex: 1; border-radius: 3px 3px 0 0; background: var(--surface3); transition: background 0.15s; min-height: 4px; }
+.spark-bar:hover { background: var(--accent-lt); }
+.spark-bar.peak { background: var(--accent); opacity: 0.7; }
+
+/* ── MODAL ─────────────────────────── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center; padding: 2rem;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--radius-lg); padding: 1.75rem;
+  width: 100%; max-width: 520px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+  position: relative;
+}
+.modal h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.5rem; font-weight: 400; color: var(--text);
+  margin-bottom: 0.375rem;
+}
+.modal-sub { font-size: 0.8125rem; color: var(--text3); margin-bottom: 1.5rem; }
+.modal-close {
+  position: absolute; top: 1.25rem; right: 1.25rem;
+  background: none; border: none; color: var(--text3); cursor: pointer;
+  font-size: 1.125rem; transition: color 0.15s;
+}
+.modal-close:hover { color: var(--text); }
+.form-group { margin-bottom: 1.125rem; }
+.form-group label {
+  display: block; font-size: 0.75rem; font-weight: 500;
+  color: var(--text2); margin-bottom: 0.375rem; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 0.625rem 0.875rem;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text); font-family: 'Geist', sans-serif;
+  font-size: 0.875rem; outline: none; transition: border-color 0.15s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--border2);
+}
+.form-group select option { background: var(--surface2); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.modal-footer { display: flex; gap: 0.625rem; justify-content: flex-end; margin-top: 1.375rem; }
+
+/* ── NOTE EDITOR ─────────────────────────── */
+.note-editor {
+  width: 100%; min-height: 120px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text);
+  font-family: 'Geist', sans-serif; font-size: 0.875rem;
+  padding: 0.75rem; outline: none; resize: vertical; line-height: 1.6;
+  transition: border-color 0.15s;
+}
+.note-editor:focus { border-color: var(--border2); }
+
+/* ── TABS ─────────────────────────── */
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; }
+.tab {
+  padding: 0.625rem 1.125rem; font-size: 0.8125rem; font-weight: 500;
+  color: var(--text3); cursor: pointer; transition: color 0.15s;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tab:hover { color: var(--text2); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── EMPTY STATE ─────────────────────────── */
+.empty {
+  text-align: center; padding: 3rem 1.5rem;
+  color: var(--text3); font-size: 0.875rem;
+}
+.empty .empty-icon { font-size: 2rem; margin-bottom: 0.75rem; opacity: 0.4; }
+
+/* ── TOOLTIP ─────────────────────────── */
+.tooltip { position: relative; }
+.tooltip:hover::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: var(--surface3); border: 1px solid var(--border2);
+  color: var(--text2); font-size: 0.72rem;
+  padding: 0.3rem 0.6rem; border-radius: 6px;
+  white-space: nowrap; pointer-events: none; z-index: 99;
+}
+
+/* ── SCROLL ─────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+/* ── LOGIN SCREEN ─────────────────────────── */
+#loginScreen {
+  position: fixed; inset: 0; z-index: 1000;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+}
+.login-box {
+  width: 380px;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 20px; padding: 2.5rem;
+}
+.login-logo {
+  display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;
+}
+.login-logo .logo-mark { width: 36px; height: 36px; font-size: 1rem; }
+.login-logo .logo-text { font-size: 1.25rem; }
+.login-box h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.625rem; font-weight: 400; color: var(--text);
+  margin-bottom: 0.375rem;
+}
+.login-box p { font-size: 0.8125rem; color: var(--text3); margin-bottom: 1.75rem; }
+.login-note {
+  background: var(--surface3); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 0.75rem 0.875rem;
+  font-size: 0.75rem; color: var(--text2); margin-bottom: 1.25rem;
+}
+.login-note strong { color: var(--accent); }
+.login-submit {
+  width: 100%; padding: 0.75rem; background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius); font-family: 'Geist', sans-serif;
+  font-size: 0.9375rem; font-weight: 600; cursor: pointer; transition: background 0.15s;
+}
+.login-submit:hover { background: #3d6b58; }
+.login-footer { text-align: center; margin-top: 1.25rem; font-size: 0.75rem; color: var(--text3); }
+.login-footer a { color: var(--text2); text-decoration: none; }
+
+/* ── NOTIFICATIONS ─────────────────────────── */
+.notif-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--red); position: absolute;
+  top: 6px; right: 6px;
+}
+
+/* ── MINI REVENUE CHART ─────────────────────────── */
+.rev-chart { display: flex; align-items: flex-end; gap: 4px; height: 80px; margin-top: 0.875rem; }
+.rev-bar {
+  flex: 1; border-radius: 4px 4px 0 0;
+  background: var(--surface3); position: relative;
+  cursor: pointer; transition: background 0.15s;
+}
+.rev-bar:hover { background: var(--accent-lt); }
+.rev-bar.current { background: var(--accent); opacity: 0.75; }
+.rev-label { font-size: 0.65rem; color: var(--text3); text-align: center; margin-top: 0.375rem; }
+.rev-labels { display: flex; gap: 4px; }
+.rev-labels span { flex: 1; font-size: 0.65rem; color: var(--text3); text-align: center; }
+
+/* ── QUICK ADD NOTE ─────────────────────────── */
+.quick-note-bar {
+  display: flex; gap: 0.625rem; margin-bottom: 1.25rem;
+}
+.quick-note-bar input {
+  flex: 1; padding: 0.625rem 0.875rem;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text);
+  font-family: 'Geist', sans-serif; font-size: 0.875rem; outline: none;
+  transition: border-color 0.15s;
+}
+.quick-note-bar input:focus { border-color: var(--border2); }
+
+/* ── GIFT BADGE ─────────────────────────── */
+.gift-badge {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  background: var(--purple-dim); border: 1px solid rgba(109,40,217,0.10);
+  color: var(--purple); font-size: 0.72rem; font-weight: 500;
+  padding: 0.25rem 0.625rem; border-radius: 99px;
+}
+
+/* ── MISC ─────────────────────────── */
+.divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
+.text-muted { color: var(--text3); font-size: 0.8125rem; }
+.text-sm { font-size: 0.8125rem; }
+.flex { display: flex; }
+.flex-center { display: flex; align-items: center; }
+.gap-sm { gap: 0.5rem; }
+.gap-md { gap: 0.875rem; }
+.mb-sm { margin-bottom: 0.75rem; }
+.mb-md { margin-bottom: 1.25rem; }
+.ml-auto { margin-left: auto; }
+
+.pill-tabs {
+  display: flex; gap: 0.375rem;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 99px; padding: 0.25rem;
+}
+.pill-tab {
+  padding: 0.35rem 0.875rem; border-radius: 99px;
+  font-size: 0.78rem; font-weight: 500; cursor: pointer;
+  color: var(--text3); transition: all 0.15s;
+}
+.pill-tab.active { background: var(--surface3); color: var(--text); }
+
+.score-ring {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--border2); display: flex;
+  align-items: center; justify-content: center;
+  flex-direction: column; flex-shrink: 0;
+}
+.score-ring .score-num { font-size: 1rem; font-weight: 600; color: var(--text); line-height: 1; }
+.score-ring .score-lbl { font-size: 0.55rem; color: var(--text3); text-transform: uppercase; }
+.score-ring.accent { border-color: var(--accent); }
+.score-ring.amber { border-color: var(--amber); }
+
+/* ── LANGUAGE SWITCHER ─────────────────────────── */
+.lang-switcher {
+  display: flex; gap: 0;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.lang-btn {
+  background: none; border: none; padding: 0.45rem 0.75rem;
+  font-family: 'Geist', sans-serif; font-size: 0.75rem; font-weight: 600;
+  letter-spacing: 0.06em; color: var(--text3); cursor: pointer;
+  transition: all 0.13s;
+}
+.lang-btn:hover { color: var(--text2); background: var(--surface3); }
+.lang-btn.active { background: var(--accent); color: #fff; }
+
+
+/* ── PAYMENT ANALYSIS ─────────────────────────── */
+.monthly-row { transition: background 0.12s; }
+.monthly-row:hover { background: var(--surface2); }
+.monthly-row td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8125rem;
+  vertical-align: middle;
+}
+.monthly-row:last-child td { border-bottom: none; }
+.monthly-row td:first-child { padding-left: 1.25rem; font-weight: 500; color: var(--text); }
+.monthly-row td:last-child { padding-right: 1.25rem; }
+.monthly-row.current-month td:first-child { color: var(--accent); }
+.monthly-row.current-month { background: var(--accent-lt); }
+.monthly-row.current-month:hover { background: var(--accent-dim); }
+.mom-up { color: var(--accent); font-weight: 500; }
+.mom-down { color: var(--red); font-weight: 500; }
+.mom-neutral { color: var(--text3); }
+.sparkline-cell { display: flex; align-items: flex-end; gap: 2px; height: 24px; }
+.sparkline-bar { width: 5px; border-radius: 2px 2px 0 0; background: var(--surface3); }
+.sparkline-bar.peak { background: var(--accent); }
+
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     LOGIN SCREEN
+═════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-mark">C</div>
+      <div class="logo-text">CoachOS <span>Client Management</span></div>
+    </div>
+    <h2 data-i18n="login.welcome">Welcome back</h2>
+    <p data-i18n="login.subtitle">Sign in to your coaching dashboard</p>
+    <div class="login-note">
+      <strong>Demo mode</strong>: enter any email and password to continue. No data is stored.
+    </div>
+    <div class="form-group">
+      <label data-i18n="login.email">Email address</label>
+      <input type="email" id="loginEmail" placeholder="sarah@brennan.coach" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label data-i18n="login.password">Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="login-submit" onclick="doLogin()" data-i18n="login.submit">Sign in →</button>
+    <div class="login-footer">
+      <a href="#" data-i18n="login.forgot">Forgot password?</a> · <a href="#">Privacy policy</a>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SIDEBAR
+═════════════════════════════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">C</div>
+    <div class="logo-text">CoachOS <span>Pro</span></div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label" data-i18n="nav.main">Main</div>
+    <div class="nav-item active" onclick="showView('dashboard', this)">
+      <span class="nav-icon">◈</span> <span data-i18n="nav.dashboard">Dashboard</span>
+    </div>
+    <div class="nav-item" onclick="showView('clients', this)">
+      <span class="nav-icon">◉</span> <span data-i18n="nav.clients">Clients</span>
+      <span class="nav-badge">8</span>
+    </div>
+    <div class="nav-item" onclick="showView('sessions', this)">
+      <span class="nav-icon">◷</span> <span data-i18n="nav.sessions" data-i18n="th.sessions">Sessions</span>
+      <span class="nav-badge">3</span>
+    </div>
+    <div class="nav-item" onclick="showView('payments', this)">
+      <span class="nav-icon">◎</span> <span data-i18n="nav.payments" data-i18n="tab.payments">Payments</span>
+    </div>
+    <div class="nav-item" onclick="showView('referrals', this)">
+      <span class="nav-icon">◌</span> <span data-i18n="nav.referrals">Referrals</span>
+      <span class="nav-badge" style="background:var(--purple-dim);color:var(--purple);">2</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label" data-i18n="nav.tools">Tools</div>
+    <div class="nav-item" onclick="showView('progress', this)">
+      <span class="nav-icon">◑</span> <span data-i18n="nav.progress" data-i18n="th.progress">Progress</span>
+    </div>
+    <div class="nav-item" onclick="alert('Add-ons coming in Phase 4!')">
+      <span class="nav-icon">⊕</span> <span data-i18n="nav.addons">Add-ons</span>
+      <span class="nav-badge" style="background:var(--amber-dim);color:var(--amber);">New</span>
+    </div>
+    <div class="nav-item" onclick="alert('Settings panel coming soon!')">
+      <span class="nav-icon">◧</span> <span data-i18n="nav.settings">Settings</span>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="coach-pill">
+      <div class="coach-avatar">SB</div>
+      <div class="coach-info">
+        <p>Sarah Brennan</p>
+        <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f2819380939ab29080979c9c939cdc919d93919a">[email&#160;protected]</a></span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">⏻</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════
+     MAIN
+═════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 id="pageTitle">Dashboard</h1>
+      <p id="pageSubtitle">Thursday, 19 March 2026</p>
+    </div>
+    <div class="topbar-right">
+      <div class="lang-switcher">
+        <button class="lang-btn active" id="langEN" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" id="langTR" onclick="setLang('tr')">TR</button>
+      </div>
+      <div class="search-box">
+        <span style="color:var(--text3);font-size:0.875rem;">⌕</span>
+        <input type="text" placeholder="Search clients…" data-i18n-placeholder="search.clients" id="searchInput" oninput="searchClients(this.value)">
+      </div>
+      <button class="btn btn-ghost" onclick="showView('sessions',null)"><span data-i18n="btn.addSession">+ Session</span></button>
+      <button class="btn btn-accent" onclick="openAddClient()"><span data-i18n="btn.newClient">+ New Client</span></button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══ DASHBOARD VIEW ══ -->
+    <div class="view active" id="view-dashboard">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label" data-i18n="stat.activeClients">Active Clients</div>
+          <div class="stat-value">8</div>
+          <div class="stat-delta delta-up" data-i18n="stat.plus2Month">↑ 2 this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label" data-i18n="stat.revenueMar">Revenue (Mar)</div>
+          <div class="stat-value">€4,320</div>
+          <div class="stat-delta delta-up" data-i18n="stat.plus12Feb">↑ 12% vs Feb</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label" data-i18n="stat.sessionsMonth">Sessions This Month</div>
+          <div class="stat-value">14</div>
+          <div class="stat-delta delta-neutral" data-i18n="stat.remaining2">2 remaining</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label" data-i18n="stat.openHw">Open Homeworks</div>
+          <div class="stat-value">7</div>
+          <div class="stat-delta delta-down">↑ 3 overdue</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- Left col -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+          <!-- Upcoming sessions -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title" data-i18n="card.upcomingSessions">Upcoming Sessions</div>
+                <div class="card-sub" data-i18n="card.next14Days">Next 14 days</div>
+              </div>
+              <span class="card-action" onclick="showView('sessions',null)" data-i18n="action.viewAll">View all →</span>
+            </div>
+            <div class="card-body" style="padding:0.75rem 0.25rem;">
+              <div class="session-item" style="padding:0.875rem 1rem;">
+                <div class="session-date-block"><div class="day">21</div><div class="month">Mar</div></div>
+                <div class="session-type-dot" style="background:var(--accent);margin-top:0.4rem;"></div>
+                <div class="session-meta"><h4>Laura Martínez</h4><p>Growth Journey · Session 4/6</p></div>
+                <div class="session-time"><div class="time">10:00</div><div style="color:var(--text3);font-size:0.7rem;">60 min</div></div>
+              </div>
+              <div class="session-item" style="padding:0.875rem 1rem;">
+                <div class="session-date-block"><div class="day">22</div><div class="month">Mar</div></div>
+                <div class="session-type-dot" style="background:var(--blue);margin-top:0.4rem;"></div>
+                <div class="session-meta"><h4>James Keane</h4><p>Deep Transformation · Session 7/12</p></div>
+                <div class="session-time"><div class="time">14:00</div><div style="color:var(--text3);font-size:0.7rem;">60 min</div></div>
+              </div>
+              <div class="session-item" style="padding:0.875rem 1rem;">
+                <div class="session-date-block"><div class="day">24</div><div class="month">Mar</div></div>
+                <div class="session-type-dot" style="background:var(--teal);margin-top:0.4rem;"></div>
+                <div class="session-meta"><h4>Amara Osei</h4><p>Clarity Session · Single</p></div>
+                <div class="session-time"><div class="time">11:00</div><div style="color:var(--text3);font-size:0.7rem;">90 min</div></div>
+              </div>
+              <div class="session-item" style="padding:0.875rem 1rem;border-bottom:none;">
+                <div class="session-date-block"><div class="day">28</div><div class="month">Mar</div></div>
+                <div class="session-type-dot" style="background:var(--amber);margin-top:0.4rem;"></div>
+                <div class="session-meta"><h4>Sophie Renard</h4><p>Growth Journey · Session 2/6</p></div>
+                <div class="session-time"><div class="time">15:00</div><div style="color:var(--text3);font-size:0.7rem;">60 min</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Client health -->
+          <div class="card">
+            <div class="card-head">
+              <div><div class="card-title" data-i18n="card.clientPulse">Client Pulse</div><div class="card-sub">Engagement & package status</div></div>
+              <span class="card-action" onclick="showView('clients',null)" data-i18n="action.allClients">All clients →</span>
+            </div>
+            <div class="client-list">
+              <div class="client-row header">
+                <div data-i18n="th.client">Client</div><div data-i18n="th.package">Package</div><div data-i18n="th.progress">Progress</div><div data-i18n="th.payment">Payment</div><div data-i18n="th.lastSession">Last session</div><div></div>
+              </div>
+              <div class="client-row" onclick="openClientProfile('laura')">
+                <div class="client-id"><div class="client-avatar" style="background:#D5EBE1;color:#2D6A50;">LM</div><div><div class="client-name">Laura Martínez</div><div class="client-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f894d695998a8c91969d82b89d95999194d69b9795">[email&#160;protected]</a></div></div></div>
+                <div><span class="badge badge-green">Growth Journey</span></div>
+                <div style="min-width:80px;">
+                  <div class="progress-bar-wrap"><div class="progress-bar" style="width:66%"></div></div>
+                  <div style="font-size:0.7rem;color:var(--text3);margin-top:0.25rem;">4/6 sessions</div>
+                </div>
+                <div><span class="badge badge-green">Paid</span></div>
+                <div class="text-muted">Mar 7</div>
+                <div><span class="badge badge-gray">Active</span></div>
+              </div>
+              <div class="client-row" onclick="openClientProfile('james')">
+                <div class="client-id"><div class="client-avatar" style="background:#DBEAFE;color:#1D4ED8;">JK</div><div><div class="client-name">James Keane</div><div class="client-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ea808b878f99c481aa8985989ac4838f">[email&#160;protected]</a></div></div></div>
+                <div><span class="badge badge-blue">Deep Transform.</span></div>
+                <div style="min-width:80px;">
+                  <div class="progress-bar-wrap"><div class="progress-bar blue" style="width:58%"></div></div>
+                  <div style="font-size:0.7rem;color:var(--text3);margin-top:0.25rem;">7/12 sessions</div>
+                </div>
+                <div><span class="badge badge-green">Paid</span></div>
+                <div class="text-muted">Mar 8</div>
+                <div><span class="badge badge-gray">Active</span></div>
+              </div>
+              <div class="client-row" onclick="openClientProfile('sophie')">
+                <div class="client-id"><div class="client-avatar" style="background:#FEE2D0;color:#B45309;">SR</div><div><div class="client-name">Sophie Renard</div><div class="client-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1c6f326e79727d6e785c6f6869787573327a6e">[email&#160;protected]</a></div></div></div>
+                <div><span class="badge badge-green">Growth Journey</span></div>
+                <div style="min-width:80px;">
+                  <div class="progress-bar-wrap"><div class="progress-bar amber" style="width:17%"></div></div>
+                  <div style="font-size:0.7rem;color:var(--text3);margin-top:0.25rem;">1/6 sessions</div>
+                </div>
+                <div><span class="badge badge-amber">Due Apr 1</span></div>
+                <div class="text-muted">Mar 14</div>
+                <div><span class="badge badge-gray">Active</span></div>
+              </div>
+              <div class="client-row" onclick="openClientProfile('tom')">
+                <div class="client-id"><div class="client-avatar" style="background:#EDE9FE;color:#6D31D9;">TD</div><div><div class="client-name">Tom Dijk</div><div class="client-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1a6e75775a7c687f7f767b74797f347476">[email&#160;protected]</a></div></div></div>
+                <div><span class="badge badge-amber">Clarity Session</span></div>
+                <div style="min-width:80px;">
+                  <div class="progress-bar-wrap"><div class="progress-bar" style="width:100%"></div></div>
+                  <div style="font-size:0.7rem;color:var(--text3);margin-top:0.25rem;">Completed</div>
+                </div>
+                <div><span class="badge badge-red">Overdue</span></div>
+                <div class="text-muted">Feb 28</div>
+                <div><span class="badge badge-amber">Follow-up</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right col -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+          <!-- Revenue -->
+          <div class="card">
+            <div class="card-head">
+              <div><div class="card-title" data-i18n="card.revenue">Revenue</div><div class="card-sub" data-i18n="card.last6months">Last 6 months</div></div>
+              <span class="badge badge-green">€4,320 Mar</span>
+            </div>
+            <div class="card-body">
+              <div class="rev-chart">
+                <div style="display:flex;flex-direction:column;flex:1;gap:4px;align-items:center;">
+                  <div class="rev-bar" style="height:55%" data-tip="€2,160"></div>
+                  <span class="rev-label">Oct</span>
+                </div>
+                <div style="display:flex;flex-direction:column;flex:1;gap:4px;align-items:center;">
+                  <div class="rev-bar" style="height:70%" data-tip="€2,880"></div>
+                  <span class="rev-label">Nov</span>
+                </div>
+                <div style="display:flex;flex-direction:column;flex:1;gap:4px;align-items:center;">
+                  <div class="rev-bar" style="height:45%" data-tip="€1,800"></div>
+                  <span class="rev-label">Dec</span>
+                </div>
+                <div style="display:flex;flex-direction:column;flex:1;gap:4px;align-items:center;">
+                  <div class="rev-bar" style="height:80%" data-tip="€3,240"></div>
+                  <span class="rev-label">Jan</span>
+                </div>
+                <div style="display:flex;flex-direction:column;flex:1;gap:4px;align-items:center;">
+                  <div class="rev-bar" style="height:95%" data-tip="€3,880"></div>
+                  <span class="rev-label">Feb</span>
+                </div>
+                <div style="display:flex;flex-direction:column;flex:1;gap:4px;align-items:center;">
+                  <div class="rev-bar current" style="height:100%" data-tip="€4,320"></div>
+                  <span class="rev-label">Mar</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent activity -->
+          <div class="card">
+            <div class="card-head">
+              <div><div class="card-title" data-i18n="card.activity">Activity</div><div class="card-sub" data-i18n="card.recentEvents">Recent events</div></div>
+            </div>
+            <div class="card-body" style="padding:0.5rem 1.25rem;">
+              <div class="activity-item">
+                <div class="activity-icon" style="background:var(--accent-lt);color:var(--accent);">✓</div>
+                <div class="activity-content"><p><strong>Laura Martínez</strong> completed homework: Values mapping exercise</p><time>2 hours ago</time></div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon" style="background:var(--blue-dim);color:var(--blue);">◷</div>
+                <div class="activity-content"><p><strong>James Keane</strong> booked session for Mar 22</p><time>Yesterday</time></div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon" style="background:var(--purple-dim);color:var(--purple);">♦</div>
+                <div class="activity-content"><p><strong>New referral</strong> from Laura Martínez, Emma Walsh</p><time>Mar 17</time></div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon" style="background:var(--red-dim);color:var(--red);">!</div>
+                <div class="activity-content"><p><strong>Tom Dijk</strong> payment overdue: €180 Clarity Session</p><time>Mar 15</time></div>
+              </div>
+              <div class="activity-item" style="border-bottom:none;">
+                <div class="activity-icon" style="background:var(--teal-dim);color:var(--teal);">★</div>
+                <div class="activity-content"><p><strong>Amara Osei</strong> left a 5-star testimonial</p><time>Mar 12</time></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Referral highlight -->
+          <div class="card">
+            <div class="card-head">
+              <div><div class="card-title" data-i18n="card.topReferrers">Top Referrers</div></div>
+              <span class="card-action" onclick="showView('referrals',null)" data-i18n="action.all">All →</span>
+            </div>
+            <div class="card-body" style="padding:0.75rem 1.25rem;">
+              <div style="display:flex;align-items:center;gap:0.875rem;margin-bottom:0.875rem;">
+                <div class="client-avatar" style="background:#D5EBE1;color:#2D6A50;width:32px;height:32px;font-size:0.8rem;">LM</div>
+                <div style="flex:1;"><div style="font-size:0.875rem;font-weight:500;color:var(--text);">Laura Martínez</div><div style="font-size:0.75rem;color:var(--text3);">2 referrals sent</div></div>
+                <div class="gift-badge">🎁 Gift pending</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.875rem;">
+                <div class="client-avatar" style="background:#DBEAFE;color:#1D4ED8;width:32px;height:32px;font-size:0.8rem;">JK</div>
+                <div style="flex:1;"><div style="font-size:0.875rem;font-weight:500;color:var(--text);">James Keane</div><div style="font-size:0.75rem;color:var(--text3);">1 referral sent</div></div>
+                <span class="badge badge-green">Rewarded ✓</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CLIENTS VIEW ══ -->
+    <div class="view" id="view-clients">
+      <div style="display:flex;gap:0.75rem;margin-bottom:1.25rem;align-items:center;">
+        <div class="pill-tabs">
+          <div class="pill-tab active" onclick="filterClients('all',this)" data-i18n="filter.all8">All (8)</div>
+          <div class="pill-tab" onclick="filterClients('active',this)" data-i18n="filter.active6">Active (6)</div>
+          <div class="pill-tab" onclick="filterClients('follow',this)" data-i18n="filter.followup1">Follow-up (1)</div>
+          <div class="pill-tab" onclick="filterClients('completed',this)" data-i18n="filter.completed1">Completed (1)</div>
+        </div>
+        <div class="ml-auto"></div>
+        <button class="btn btn-accent" onclick="openAddClient()"><span data-i18n="btn.newClient">+ New Client</span></button>
+      </div>
+
+      <div class="card">
+        <div class="client-list">
+          <div class="client-row header">
+            <div data-i18n="th.client">Client</div><div data-i18n="th.package">Package</div><div data-i18n="th.progress">Progress</div><div data-i18n="th.paymentStatus">Paid · Remaining · Overdue</div><div data-i18n="th.sessions">Sessions</div><div data-i18n="th.status">Status</div>
+          </div>
+          <div class="client-row" onclick="openClientProfile('laura')">
+            <div class="client-id"><div class="client-avatar" style="background:#D5EBE1;color:#2D6A50;">LM</div><div><div class="client-name">Laura Martínez</div><div class="client-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c1adefaca0b3b5a8afa4bb81a4aca0a8adefa2aeac">[email&#160;protected]</a> · Rotterdam</div></div></div>
+            <div><span class="badge badge-green">Growth Journey</span></div>
+            <div><div class="progress-bar-wrap" style="width:100px;"><div class="progress-bar" style="width:66%"></div></div><div style="font-size:0.7rem;color:var(--text3);margin-top:0.2rem;">4/6 · 2 left</div></div>
+            <div><div style="display:flex;flex-direction:column;gap:3px;"><span class="badge badge-green" style="font-size:0.67rem;">✓ €1,440 paid</span><span style="font-size:0.67rem;color:var(--text3);">— no balance</span></div></div>
+            <div class="text-muted">Next: Mar 21</div>
+            <div><span class="badge badge-gray">Active</span></div>
+          </div>
+          <div class="client-row" onclick="openClientProfile('james')">
+            <div class="client-id"><div class="client-avatar" style="background:#DBEAFE;color:#1D4ED8;">JK</div><div><div class="client-name">James Keane</div><div class="client-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="eb818a868e98c580ab8884999bc5828e">[email&#160;protected]</a> · Dublin</div></div></div>
+            <div><span class="badge badge-blue">Deep Transform.</span></div>
+            <div><div class="progress-bar-wrap" style="width:100px;"><div class="progress-bar blue" style="width:58%"></div></div><div style="font-size:0.7rem;color:var(--text3);margin-top:0.2rem;">7/12 · 5 left</div></div>
+            <div><div style="display:flex;flex-direction:column;gap:3px;"><span class="badge badge-green" style="font-size:0.67rem;">✓ €3,200 paid</span><span style="font-size:0.67rem;color:var(--text3);">— no balance</span></div></div>
+            <div class="text-muted">Next: Mar 22</div>
+            <div><span class="badge badge-gray">Active</span></div>
+          </div>
+          <div class="client-row" onclick="openClientProfile('amara')">
+            <div class="client-id"><div class="client-avatar" style="background:#CCFBF1;color:#0F766E;">AO</div><div><div class="client-name">Amara Osei</div><div class="client-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e3828e829182a38786908a848d808ccd848b">[email&#160;protected]</a> · Amsterdam</div></div></div>
+            <div><span class="badge badge-teal">Clarity Session</span></div>
+            <div><div class="progress-bar-wrap" style="width:100px;"><div class="progress-bar" style="width:0%"></div></div><div style="font-size:0.7rem;color:var(--text3);margin-top:0.2rem;">0/1 · upcoming</div></div>
+            <div><div style="display:flex;flex-direction:column;gap:3px;"><span class="badge badge-green" style="font-size:0.67rem;">✓ €180 paid</span><span style="font-size:0.67rem;color:var(--text3);">— no balance</span></div></div>
+            <div class="text-muted">Next: Mar 24</div>
+            <div><span class="badge badge-gray">Active</span></div>
+          </div>
+          <div class="client-row" onclick="openClientProfile('sophie')">
+            <div class="client-id"><div class="client-avatar" style="background:#FEE2D0;color:#B45309;">SR</div><div><div class="client-name">Sophie Renard</div><div class="client-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e192cf93848f809385a192959485888ecf8793">[email&#160;protected]</a> · Brussels</div></div></div>
+            <div><span class="badge badge-green">Growth Journey</span></div>
+            <div><div class="progress-bar-wrap" style="width:100px;"><div class="progress-bar amber" style="width:17%"></div></div><div style="font-size:0.7rem;color:var(--text3);margin-top:0.2rem;">1/6 · 5 left</div></div>
+            <div><div style="display:flex;flex-direction:column;gap:3px;"><span class="badge badge-green" style="font-size:0.67rem;">✓ €720 paid</span><span class="badge badge-amber" style="font-size:0.67rem;margin-top:1px;">€720 due Apr 1</span></div></div>
+            <div class="text-muted">Next: Mar 28</div>
+            <div><span class="badge badge-gray">Active</span></div>
+          </div>
+          <div class="client-row" onclick="openClientProfile('niels')">
+            <div class="client-id"><div class="client-avatar" style="background:#EDE9FE;color:#6D31D9;">NB</div><div><div class="client-name">Niels Berg</div><div class="client-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ff91d19d9a8d98bf899a918b8a8d9a8cd19193">[email&#160;protected]</a> · Utrecht</div></div></div>
+            <div><span class="badge badge-blue">Deep Transform.</span></div>
+            <div><div class="progress-bar-wrap" style="width:100px;"><div class="progress-bar blue" style="width:33%"></div></div><div style="font-size:0.7rem;color:var(--text3);margin-top:0.2rem;">4/12 · 8 left</div></div>
+            <div><div style="display:flex;flex-direction:column;gap:3px;"><span class="badge badge-green" style="font-size:0.67rem;">✓ €3,200 paid</span><span style="font-size:0.67rem;color:var(--text3);">— no balance</span></div></div>
+            <div class="text-muted">Apr 4</div>
+            <div><span class="badge badge-gray">Active</span></div>
+          </div>
+          <div class="client-row" onclick="openClientProfile('ines')">
+            <div class="client-id"><div class="client-avatar" style="background:#EDE9FE;color:#6D31D9;">IC</div><div><div class="client-name">Inês Costa</div><div class="client-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="254c4b4056654757444b410b5551">[email&#160;protected]</a> · Lisbon</div></div></div>
+            <div><span class="badge badge-green">Growth Journey</span></div>
+            <div><div class="progress-bar-wrap" style="width:100px;"><div class="progress-bar" style="width:83%"></div></div><div style="font-size:0.7rem;color:var(--text3);margin-top:0.2rem;">5/6 · 1 left</div></div>
+            <div><div style="display:flex;flex-direction:column;gap:3px;"><span class="badge badge-green" style="font-size:0.67rem;">✓ €1,440 paid</span><span style="font-size:0.67rem;color:var(--text3);">— no balance</span></div></div>
+            <div class="text-muted">Apr 8</div>
+            <div><span class="badge badge-gray">Active</span></div>
+          </div>
+          <div class="client-row" onclick="openClientProfile('tom')">
+            <div class="client-id"><div class="client-avatar" style="background:#F3F2F0;color:#72695F;">TD</div><div><div class="client-name">Tom Dijk</div><div class="client-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0b7f64664b6d796e6e676a65686e256567">[email&#160;protected]</a> · Amsterdam</div></div></div>
+            <div><span class="badge badge-amber">Clarity Session</span></div>
+            <div><div class="progress-bar-wrap" style="width:100px;"><div class="progress-bar" style="width:100%"></div></div><div style="font-size:0.7rem;color:var(--text3);margin-top:0.2rem;">Completed</div></div>
+            <div><div style="display:flex;flex-direction:column;gap:3px;"><span style="font-size:0.67rem;color:var(--text3);">€0 paid</span><span class="badge badge-red" style="font-size:0.67rem;margin-top:1px;">⚠ €180 overdue</span></div></div>
+            <div class="text-muted">Feb 28</div>
+            <div><span class="badge badge-amber">Follow-up</span></div>
+          </div>
+          <div class="client-row" onclick="openClientProfile('mei')">
+            <div class="client-id"><div class="client-avatar" style="background:#CCFBF1;color:#0F766E;">ML</div><div><div class="client-name">Mei Lin</div><div class="client-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="08656d61486c6d7b616f66267b6f">[email&#160;protected]</a> · Berlin</div></div></div>
+            <div><span class="badge badge-blue">Deep Transform.</span></div>
+            <div><div class="progress-bar-wrap" style="width:100px;"><div class="progress-bar" style="width:100%"></div></div><div style="font-size:0.7rem;color:var(--text3);margin-top:0.2rem;">12/12 · done</div></div>
+            <div><div style="display:flex;flex-direction:column;gap:3px;"><span class="badge badge-green" style="font-size:0.67rem;">✓ €3,200 paid</span><span style="font-size:0.67rem;color:var(--text3);">— settled</span></div></div>
+            <div class="text-muted">Feb 10</div>
+            <div><span class="badge badge-teal">Completed</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CLIENT PROFILE VIEW ══ -->
+    <div class="view" id="view-profile">
+      <div style="margin-bottom:1rem;">
+        <span class="card-action" onclick="showView('clients',null)" style="font-size:0.8125rem;color:var(--text3);display:inline-flex;align-items:center;gap:0.375rem;cursor:pointer;" data-i18n="action.backToClients">← Back to clients</span>
+      </div>
+      <div class="profile-header">
+        <div class="profile-avatar-lg" id="profileAvatar" style="background:#D5EBE1;color:#2D6A50;">LM</div>
+        <div class="profile-info">
+          <h2 id="profileName">Laura Martínez</h2>
+          <p id="profileEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d6baf8bbb7a4a2bfb8b3ac96b3bbb7bfbaf8b5b9bb">[email&#160;protected]</a> · Rotterdam NL, since Jan 2026</p>
+          <div class="profile-tags">
+            <span class="badge badge-green" id="profilePackage">Growth Journey</span>
+            <span class="badge badge-gray">4/6 sessions</span>
+            <span class="badge badge-green">Paid</span>
+            <span class="gift-badge" id="profileReferral">♦ Referred by James Keane</span>
+          </div>
+        </div>
+        <div class="profile-actions">
+          <button class="btn btn-ghost" onclick="openSessionModal()"><span data-i18n="btn.logSession">+ Log Session</span></button>
+          <button class="btn btn-ghost" onclick="openHwModal()" data-i18n="btn.addHwProfile">+ Homework</button>
+          <button class="btn btn-accent" onclick="openNoteModal()" data-i18n="btn.addNote">+ Note</button>
+        </div>
+      </div>
+
+      <div class="profile-grid">
+        <!-- Left: client info -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div class="card">
+            <div class="card-head"><div class="card-title" data-i18n="card.packageOverview">Package Overview</div></div>
+            <div class="info-list">
+              <div class="info-row"><div class="info-key" data-i18n="th.package">Package</div><div class="info-val">Growth Journey</div></div>
+              <div class="info-row"><div class="info-key">Started</div><div class="info-val">Jan 15, 2026</div></div>
+              <div class="info-row"><div class="info-key">Ends</div><div class="info-val">Apr 15, 2026</div></div>
+              <div class="info-row"><div class="info-key" data-i18n="th.sessions">Sessions</div><div class="info-val">4 / 6 used</div></div>
+              <div class="info-row"><div class="info-key">Paid</div><div class="info-val" style="color:var(--accent);">€1,440 ✓</div></div>
+              <div class="info-row"><div class="info-key">Focus Area</div><div class="info-val">Career transition</div></div>
+            </div>
+            <div style="padding:1rem 1.25rem 1.25rem;">
+              <div style="font-size:0.72rem;color:var(--text3);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.08em;">Session progress</div>
+              <div class="pkg-sessions">
+                <div class="pkg-dot done"></div>
+                <div class="pkg-dot done"></div>
+                <div class="pkg-dot done"></div>
+                <div class="pkg-dot done"></div>
+                <div class="pkg-dot current"></div>
+                <div class="pkg-dot"></div>
+              </div>
+              <div class="progress-bar-wrap"><div class="progress-bar" style="width:66%"></div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><div class="card-title" data-i18n="card.clientInfo">Client Info</div></div>
+            <div class="info-list">
+              <div class="info-row"><div class="info-key" data-i18n="form.phone">Phone</div><div class="info-val">+31 6 12345678</div></div>
+              <div class="info-row"><div class="info-key">Timezone</div><div class="info-val">CET (Amsterdam)</div></div>
+              <div class="info-row"><div class="info-key">Occupation</div><div class="info-val">Marketing Manager</div></div>
+              <div class="info-row"><div class="info-key">Referred by</div><div class="info-val" style="color:var(--purple);">James Keane</div></div>
+              <div class="info-row"><div class="info-key">Referrals sent</div><div class="info-val">Emma Walsh (pending)</div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Goals & Focus Areas</div>
+              <span class="card-action" data-i18n="action.edit">Edit</span>
+            </div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:0.875rem;">
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.375rem;">
+                  <div style="font-size:0.8125rem;color:var(--text2);">Career clarity</div>
+                  <div style="font-size:0.75rem;color:var(--accent);">70%</div>
+                </div>
+                <div class="progress-bar-wrap"><div class="progress-bar" style="width:70%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.375rem;">
+                  <div style="font-size:0.8125rem;color:var(--text2);">Self-confidence</div>
+                  <div style="font-size:0.75rem;color:var(--amber);">45%</div>
+                </div>
+                <div class="progress-bar-wrap"><div class="progress-bar amber" style="width:45%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.375rem;">
+                  <div style="font-size:0.8125rem;color:var(--text2);">Work-life balance</div>
+                  <div style="font-size:0.75rem;color:var(--blue);">55%</div>
+                </div>
+                <div class="progress-bar-wrap"><div class="progress-bar blue" style="width:55%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: tabs -->
+        <div>
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab('notes', this)" data-i18n="tab.sessionNotes">Session Notes</div>
+            <div class="tab" onclick="switchTab('homework', this)" data-i18n="tab.homework">Homework</div>
+            <div class="tab" onclick="switchTab('payments', this)" data-i18n="tab.payments">Payments</div>
+            <div class="tab" onclick="switchTab('timeline', this)" data-i18n="tab.timeline">Timeline</div>
+          </div>
+
+          <!-- Notes tab -->
+          <div id="tab-notes">
+            <div class="quick-note-bar">
+              <input type="text" placeholder="Quick note…" data-i18n-placeholder="placeholder.quickNote" onkeydown="if(event.key==='Enter')addQuickNote(this)">
+              <button class="btn btn-ghost" onclick="openNoteModal()" data-i18n="btn.fullNote">Full note</button>
+            </div>
+            <div id="notesList">
+              <div class="note-card">
+                <div class="note-header"><h4>Session 4: Breakthrough on values conflict</h4><time>Mar 7, 2026</time></div>
+                <div class="note-body">Laura arrived visibly energised. We spent the first 20 mins unpacking the tension between her desire for stability and her drive for creative autonomy. Key insight: she's been framing it as a binary when it's actually a spectrum. She identified three roles that could honour both. Ended session with a commitment to have the salary conversation by end of March.</div>
+                <div class="note-tags"><span class="badge badge-teal">Values</span><span class="badge badge-blue">Career</span><span class="badge badge-green">Breakthrough</span></div>
+              </div>
+              <div class="note-card">
+                <div class="note-header"><h4>Session 3: Inner critic exploration</h4><time>Feb 21, 2026</time></div>
+                <div class="note-body">Focused on the PQ work. Laura identified her primary saboteurs: Judge and Hyper-Achiever. Strong emotional response when exploring the Hyper-Achiever: connected it to early academic pressure. Assigned the daily PQ reps and the self-compassion letter.</div>
+                <div class="note-tags"><span class="badge badge-purple">PQ Work</span><span class="badge badge-amber">Saboteurs</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Homework tab -->
+          <div id="tab-homework" style="display:none;">
+            <div class="card" style="margin-bottom:0.875rem;">
+              <div class="client-list">
+                <div class="hw-item">
+                  <div class="hw-check done" onclick="toggleHw(this)">✓</div>
+                  <div class="hw-text"><h4>Values mapping exercise (v2)</h4><p>Ranked top 10 values and identified conflicts between career and personal life values</p></div>
+                  <div class="hw-due">Completed<br><span style="color:var(--accent);font-size:0.7rem;">Mar 18</span></div>
+                </div>
+                <div class="hw-item">
+                  <div class="hw-check done" onclick="toggleHw(this)">✓</div>
+                  <div class="hw-text"><h4>Daily PQ reps: 10 min/day for 7 days</h4><p>Positive Intelligence mental fitness practice</p></div>
+                  <div class="hw-due">Completed<br><span style="color:var(--accent);font-size:0.7rem;">Mar 10</span></div>
+                </div>
+                <div class="hw-item">
+                  <div class="hw-check" onclick="toggleHw(this)"></div>
+                  <div class="hw-text"><h4>Have the salary conversation with manager</h4><p>Use the framework we built in session 4</p></div>
+                  <div class="hw-due overdue">Due Mar 31</div>
+                </div>
+                <div class="hw-item" style="border-bottom:none;">
+                  <div class="hw-check" onclick="toggleHw(this)"></div>
+                  <div class="hw-text"><h4>Write self-compassion letter to 12-year-old self</h4><p>Focus on the Hyper-Achiever origin story</p></div>
+                  <div class="hw-due">Due Mar 28</div>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-ghost" onclick="openHwModal()" style="width:100%;justify-content:center;" data-i18n="btn.addHw">+ Add homework</button>
+          </div>
+
+          <!-- Payments tab -->
+          <div id="tab-payments" style="display:none;">
+            <div class="card">
+              <div class="payment-row header"><div>Description</div><div data-i18n="form.date">Date</div><div>Amount</div><div data-i18n="th.status">Status</div><div></div></div>
+              <div class="payment-row">
+                <div><div style="font-size:0.875rem;color:var(--text);font-weight:500;">Growth Journey Package</div><div style="font-size:0.75rem;color:var(--text3);">3-month programme</div></div>
+                <div class="text-muted">Jan 15, 2026</div>
+                <div class="amount">€1,440</div>
+                <div><span class="badge badge-green">Paid</span></div>
+                <div><span class="card-action">Receipt</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timeline tab -->
+          <div id="tab-timeline" style="display:none;">
+            <div class="card">
+              <div class="card-body" style="padding:1rem 1.25rem;">
+                <div style="display:flex;flex-direction:column;gap:0;">
+                  <div style="display:flex;gap:1rem;padding-bottom:1.25rem;border-left:1px solid var(--border);margin-left:0.875rem;">
+                    <div style="width:18px;height:18px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-left:-9.5px;margin-top:0.1rem;"></div>
+                    <div style="padding-left:0.625rem;"><div style="font-size:0.875rem;font-weight:500;color:var(--text);">Session 4 completed</div><div style="font-size:0.75rem;color:var(--text3);margin-top:0.2rem;">Mar 7 · Breakthrough on values conflict</div></div>
+                  </div>
+                  <div style="display:flex;gap:1rem;padding-bottom:1.25rem;border-left:1px solid var(--border);margin-left:0.875rem;">
+                    <div style="width:14px;height:14px;border-radius:50%;background:var(--surface3);border:1px solid var(--border2);flex-shrink:0;margin-left:-7.5px;margin-top:0.1rem;"></div>
+                    <div style="padding-left:0.625rem;"><div style="font-size:0.875rem;color:var(--text2);">Homework completed: Values mapping</div><div style="font-size:0.75rem;color:var(--text3);margin-top:0.2rem;">Mar 3</div></div>
+                  </div>
+                  <div style="display:flex;gap:1rem;padding-bottom:1.25rem;border-left:1px solid var(--border);margin-left:0.875rem;">
+                    <div style="width:14px;height:14px;border-radius:50%;background:var(--surface3);border:1px solid var(--border2);flex-shrink:0;margin-left:-7.5px;margin-top:0.1rem;"></div>
+                    <div style="padding-left:0.625rem;"><div style="font-size:0.875rem;color:var(--text2);">Session 3 completed</div><div style="font-size:0.75rem;color:var(--text3);margin-top:0.2rem;">Feb 21 · Inner critic work</div></div>
+                  </div>
+                  <div style="display:flex;gap:1rem;padding-bottom:1.25rem;border-left:1px solid var(--border);margin-left:0.875rem;">
+                    <div style="width:14px;height:14px;border-radius:50%;background:var(--surface3);border:1px solid var(--border2);flex-shrink:0;margin-left:-7.5px;margin-top:0.1rem;"></div>
+                    <div style="padding-left:0.625rem;"><div style="font-size:0.875rem;color:var(--text2);">Session 2 completed</div><div style="font-size:0.75rem;color:var(--text3);margin-top:0.2rem;">Feb 7 · Goal setting & wheel of life</div></div>
+                  </div>
+                  <div style="display:flex;gap:1rem;border-left:1px solid transparent;margin-left:0.875rem;">
+                    <div style="width:14px;height:14px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent);flex-shrink:0;margin-left:-7.5px;margin-top:0.1rem;"></div>
+                    <div style="padding-left:0.625rem;"><div style="font-size:0.875rem;color:var(--text2);">Onboarding & intake session</div><div style="font-size:0.75rem;color:var(--text3);margin-top:0.2rem;">Jan 15 · Growth Journey begins</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SESSIONS VIEW ══ -->
+    <div class="view" id="view-sessions">
+      <div style="display:flex;gap:0.75rem;margin-bottom:1.25rem;align-items:center;flex-wrap:wrap;">
+        <div class="pill-tabs" id="sessionsTabs">
+          <div class="pill-tab active" onclick="switchSessionsTab('scheduled',this)" data-i18n="filter.sessScheduled">Scheduled (4)</div>
+          <div class="pill-tab" onclick="switchSessionsTab('unscheduled',this)" data-i18n="filter.sessUnscheduled">To Schedule (16)</div>
+          <div class="pill-tab" onclick="switchSessionsTab('past',this)" data-i18n="filter.sessPast">Past (42)</div>
+        </div>
+        <div class="ml-auto"></div>
+        <button class="btn btn-ghost" onclick="openSessionModal()"><span data-i18n="btn.logSession">+ Log Session</span></button>
+        <button class="btn btn-accent" onclick="openScheduleModal()"><span data-i18n="btn.scheduleSession">+ Schedule</span></button>
+      </div>
+
+      <!-- SCHEDULED TAB -->
+      <div id="sess-scheduled">
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title" data-i18n="card.scheduledSessions">Scheduled Sessions</div><div class="card-sub" data-i18n="card.confirmedDates">Confirmed dates & times</div></div>
+          </div>
+          <div class="client-list">
+            <div class="client-row header" style="grid-template-columns:2.2fr 1.4fr 1fr 0.9fr 0.9fr 100px;">
+              <div data-i18n="th.client">Client</div><div data-i18n="th.package">Package</div><div data-i18n="form.date">Date</div><div>Time</div><div>Duration</div><div data-i18n="th.status">Status</div>
+            </div>
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 1fr 0.9fr 0.9fr 100px;">
+              <div class="client-id"><div class="client-avatar" style="background:#D5EBE1;color:#2D6A50;">LM</div><div><div class="client-name">Laura Martínez</div><div class="client-email">Session 5 of 6</div></div></div>
+              <div><span class="badge badge-green">Growth Journey</span></div>
+              <div class="text-muted">Mar 21</div><div class="text-muted">10:00</div><div class="text-muted">60 min</div>
+              <div><span class="badge badge-blue">Confirmed</span></div>
+            </div>
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 1fr 0.9fr 0.9fr 100px;">
+              <div class="client-id"><div class="client-avatar" style="background:#DBEAFE;color:#1D4ED8;">JK</div><div><div class="client-name">James Keane</div><div class="client-email">Session 8 of 12</div></div></div>
+              <div><span class="badge badge-blue">Deep Transform.</span></div>
+              <div class="text-muted">Mar 22</div><div class="text-muted">14:00</div><div class="text-muted">60 min</div>
+              <div><span class="badge badge-blue">Confirmed</span></div>
+            </div>
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 1fr 0.9fr 0.9fr 100px;">
+              <div class="client-id"><div class="client-avatar" style="background:#CCFBF1;color:#0F766E;">AO</div><div><div class="client-name">Amara Osei</div><div class="client-email">Session 1 of 1</div></div></div>
+              <div><span class="badge badge-teal">Clarity Session</span></div>
+              <div class="text-muted">Mar 24</div><div class="text-muted">11:00</div><div class="text-muted">90 min</div>
+              <div><span class="badge badge-blue">Confirmed</span></div>
+            </div>
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 1fr 0.9fr 0.9fr 100px;">
+              <div class="client-id"><div class="client-avatar" style="background:#FEE2D0;color:#B45309;">SR</div><div><div class="client-name">Sophie Renard</div><div class="client-email">Session 2 of 6</div></div></div>
+              <div><span class="badge badge-green">Growth Journey</span></div>
+              <div class="text-muted">Mar 28</div><div class="text-muted">15:00</div><div class="text-muted">60 min</div>
+              <div><span class="badge badge-blue">Confirmed</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UNSCHEDULED TAB -->
+      <div id="sess-unscheduled" style="display:none;">
+        <div style="background:var(--amber-dim);border:1px solid rgba(168,92,7,0.15);border-radius:var(--radius);padding:0.875rem 1.125rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:0.75rem;">
+          <span style="font-size:1rem;">📅</span>
+          <div>
+            <div style="font-size:0.8125rem;font-weight:500;color:var(--amber);" data-i18n="sess.unscheduledHint">16 sessions still need to be scheduled across 5 clients.</div>
+            <div style="font-size:0.75rem;color:var(--text3);margin-top:0.15rem;" data-i18n="sess.unscheduledSub">These are purchased but not yet booked. Click a row to schedule.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title" data-i18n="card.remainingSessions">Remaining Sessions</div><div class="card-sub" data-i18n="card.purchasedNotScheduled">Purchased · not yet scheduled</div></div>
+          </div>
+          <div class="client-list">
+            <div class="client-row header" style="grid-template-columns:2.2fr 1.4fr 0.8fr 0.8fr 1.2fr 110px;">
+              <div data-i18n="th.client">Client</div><div data-i18n="th.package">Package</div><div data-i18n="th.used">Used</div><div data-i18n="th.remaining">Remaining</div><div data-i18n="th.nextAvail">Next Available</div><div></div>
+            </div>
+            <!-- Laura: 6 total, 4 done, 1 scheduled → 1 unscheduled -->
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 0.8fr 0.8fr 1.2fr 110px;" onclick="openScheduleModal()">
+              <div class="client-id"><div class="client-avatar" style="background:#D5EBE1;color:#2D6A50;">LM</div><div><div class="client-name">Laura Martínez</div><div class="client-email">Growth Journey · 6 sessions</div></div></div>
+              <div>
+                <div style="display:flex;gap:3px;margin-bottom:4px;">
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--accent);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--accent);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--accent);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--accent);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--blue);opacity:0.6;"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                </div>
+              </div>
+              <div style="font-size:0.875rem;color:var(--text2);">4 done</div>
+              <div><span class="badge badge-amber">1 left</span></div>
+              <div class="text-muted">Apr 4–18</div>
+              <div><button class="btn btn-ghost" style="font-size:0.78rem;padding:0.35rem 0.7rem;" data-i18n="btn.schedule">Schedule</button></div>
+            </div>
+            <!-- James: 12 total, 7 done, 1 scheduled → 4 unscheduled -->
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 0.8fr 0.8fr 1.2fr 110px;" onclick="openScheduleModal()">
+              <div class="client-id"><div class="client-avatar" style="background:#DBEAFE;color:#1D4ED8;">JK</div><div><div class="client-name">James Keane</div><div class="client-email">Deep Transformation · 12 sessions</div></div></div>
+              <div>
+                <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px;max-width:130px;">
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--blue);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--blue);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--blue);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--blue);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--blue);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--blue);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--blue);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--blue);opacity:0.5;"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                </div>
+              </div>
+              <div style="font-size:0.875rem;color:var(--text2);">7 done</div>
+              <div><span class="badge badge-amber">4 left</span></div>
+              <div class="text-muted">Apr–Jun</div>
+              <div><button class="btn btn-ghost" style="font-size:0.78rem;padding:0.35rem 0.7rem;" data-i18n="btn.schedule">Schedule</button></div>
+            </div>
+            <!-- Sophie: 6 total, 1 done, 1 scheduled → 4 unscheduled -->
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 0.8fr 0.8fr 1.2fr 110px;" onclick="openScheduleModal()">
+              <div class="client-id"><div class="client-avatar" style="background:#FEE2D0;color:#B45309;">SR</div><div><div class="client-name">Sophie Renard</div><div class="client-email">Growth Journey · 6 sessions</div></div></div>
+              <div>
+                <div style="display:flex;gap:3px;margin-bottom:4px;">
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--amber);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--amber);opacity:0.5;"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                </div>
+              </div>
+              <div style="font-size:0.875rem;color:var(--text2);">1 done</div>
+              <div><span class="badge badge-red">4 left</span></div>
+              <div class="text-muted">Apr–Jun</div>
+              <div><button class="btn btn-ghost" style="font-size:0.78rem;padding:0.35rem 0.7rem;" data-i18n="btn.schedule">Schedule</button></div>
+            </div>
+            <!-- Niels: 12 total, 4 done, 0 scheduled → 8 unscheduled -->
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 0.8fr 0.8fr 1.2fr 110px;" onclick="openScheduleModal()">
+              <div class="client-id"><div class="client-avatar" style="background:#EDE9FE;color:#6D31D9;">NB</div><div><div class="client-name">Niels Berg</div><div class="client-email">Deep Transformation · 12 sessions</div></div></div>
+              <div>
+                <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px;max-width:130px;">
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--purple);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--purple);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--purple);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--purple);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                </div>
+              </div>
+              <div style="font-size:0.875rem;color:var(--text2);">4 done</div>
+              <div><span class="badge badge-red">8 left</span></div>
+              <div class="text-muted">Apr–Aug</div>
+              <div><button class="btn btn-ghost" style="font-size:0.78rem;padding:0.35rem 0.7rem;" data-i18n="btn.schedule">Schedule</button></div>
+            </div>
+            <!-- Ines: 6 total, 5 done, 0 scheduled → 1 unscheduled -->
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 0.8fr 0.8fr 1.2fr 110px;" onclick="openScheduleModal()">
+              <div class="client-id"><div class="client-avatar" style="background:#EDE9FE;color:#6D31D9;">IC</div><div><div class="client-name">Inês Costa</div><div class="client-email">Growth Journey · 6 sessions</div></div></div>
+              <div>
+                <div style="display:flex;gap:3px;margin-bottom:4px;">
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--purple);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--purple);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--purple);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--purple);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--purple);"></div>
+                  <div style="width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid var(--border2);"></div>
+                </div>
+              </div>
+              <div style="font-size:0.875rem;color:var(--text2);">5 done</div>
+              <div><span class="badge badge-amber">1 left</span></div>
+              <div class="text-muted">Apr 8</div>
+              <div><button class="btn btn-ghost" style="font-size:0.78rem;padding:0.35rem 0.7rem;" data-i18n="btn.schedule">Schedule</button></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:center;margin-top:0.875rem;">
+          <p style="font-size:0.78rem;color:var(--text3);" data-i18n="sess.legendHint">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--accent);margin-right:4px;vertical-align:middle;"></span>Done &nbsp;
+            <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--blue);opacity:0.5;margin-right:4px;vertical-align:middle;"></span>Scheduled &nbsp;
+            <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--surface3);border:1px solid #ccc;margin-right:4px;vertical-align:middle;"></span>To schedule
+          </p>
+        </div>
+      </div>
+
+      <!-- PAST TAB -->
+      <div id="sess-past" style="display:none;">
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title" data-i18n="card.pastSessions">Past Sessions</div><div class="card-sub" data-i18n="card.completedSessions">All completed sessions</div></div>
+            <span class="card-action" data-i18n="action.exportCSV">Export CSV</span>
+          </div>
+          <div class="client-list">
+            <div class="client-row header" style="grid-template-columns:2.2fr 1.4fr 1fr 0.9fr 0.9fr 100px;">
+              <div data-i18n="th.client">Client</div><div data-i18n="th.package">Package</div><div data-i18n="form.date">Date</div><div>Time</div><div>Duration</div><div data-i18n="th.status">Status</div>
+            </div>
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 1fr 0.9fr 0.9fr 100px;">
+              <div class="client-id"><div class="client-avatar" style="background:#DBEAFE;color:#1D4ED8;">JK</div><div><div class="client-name">James Keane</div><div class="client-email">Session 7 of 12</div></div></div>
+              <div><span class="badge badge-blue">Deep Transform.</span></div>
+              <div class="text-muted">Mar 8</div><div class="text-muted">14:00</div><div class="text-muted">60 min</div>
+              <div><span class="badge badge-gray">Done</span></div>
+            </div>
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 1fr 0.9fr 0.9fr 100px;">
+              <div class="client-id"><div class="client-avatar" style="background:#D5EBE1;color:#2D6A50;">LM</div><div><div class="client-name">Laura Martínez</div><div class="client-email">Session 4 of 6</div></div></div>
+              <div><span class="badge badge-green">Growth Journey</span></div>
+              <div class="text-muted">Mar 7</div><div class="text-muted">10:00</div><div class="text-muted">60 min</div>
+              <div><span class="badge badge-gray">Done</span></div>
+            </div>
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 1fr 0.9fr 0.9fr 100px;">
+              <div class="client-id"><div class="client-avatar" style="background:#F3F2F0;color:#72695F;">TD</div><div><div class="client-name">Tom Dijk</div><div class="client-email">Session 1 of 1</div></div></div>
+              <div><span class="badge badge-amber">Clarity</span></div>
+              <div class="text-muted">Feb 28</div><div class="text-muted">11:00</div><div class="text-muted">90 min</div>
+              <div><span class="badge badge-gray">Done</span></div>
+            </div>
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 1fr 0.9fr 0.9fr 100px;">
+              <div class="client-id"><div class="client-avatar" style="background:#D5EBE1;color:#2D6A50;">LM</div><div><div class="client-name">Laura Martínez</div><div class="client-email">Session 3 of 6</div></div></div>
+              <div><span class="badge badge-green">Growth Journey</span></div>
+              <div class="text-muted">Feb 21</div><div class="text-muted">10:00</div><div class="text-muted">60 min</div>
+              <div><span class="badge badge-gray">Done</span></div>
+            </div>
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 1fr 0.9fr 0.9fr 100px;">
+              <div class="client-id"><div class="client-avatar" style="background:#EDE9FE;color:#6D31D9;">NB</div><div><div class="client-name">Niels Berg</div><div class="client-email">Session 4 of 12</div></div></div>
+              <div><span class="badge badge-blue">Deep Transform.</span></div>
+              <div class="text-muted">Feb 14</div><div class="text-muted">15:00</div><div class="text-muted">60 min</div>
+              <div><span class="badge badge-gray">Done</span></div>
+            </div>
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 1fr 0.9fr 0.9fr 100px;">
+              <div class="client-id"><div class="client-avatar" style="background:#DBEAFE;color:#1D4ED8;">JK</div><div><div class="client-name">James Keane</div><div class="client-email">Session 6 of 12</div></div></div>
+              <div><span class="badge badge-blue">Deep Transform.</span></div>
+              <div class="text-muted">Feb 8</div><div class="text-muted">14:00</div><div class="text-muted">60 min</div>
+              <div><span class="badge badge-gray">Done</span></div>
+            </div>
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 1fr 0.9fr 0.9fr 100px;">
+              <div class="client-id"><div class="client-avatar" style="background:#D5EBE1;color:#2D6A50;">LM</div><div><div class="client-name">Laura Martínez</div><div class="client-email">Session 2 of 6</div></div></div>
+              <div><span class="badge badge-green">Growth Journey</span></div>
+              <div class="text-muted">Feb 7</div><div class="text-muted">10:00</div><div class="text-muted">60 min</div>
+              <div><span class="badge badge-gray">Done</span></div>
+            </div>
+            <div class="client-row" style="grid-template-columns:2.2fr 1.4fr 1fr 0.9fr 0.9fr 100px;opacity:0.6;">
+              <div class="client-id"><div style="font-size:0.8rem;color:var(--text3);padding:0.25rem 0;">↑ 35 more past sessions...</div></div>
+              <div></div><div></div><div></div><div></div>
+              <div><span class="card-action" style="font-size:0.78rem;">Load all</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAYMENTS VIEW ══ -->
+    <div class="view" id="view-payments">
+
+      <!-- KPI row -->
+      <div class="stats-row" style="grid-template-columns:repeat(5,1fr);margin-bottom:1.5rem;">
+        <div class="stat-card">
+          <div class="stat-label" data-i18n="stat.revenueYTD">Revenue YTD</div>
+          <div class="stat-value">€11,560</div>
+          <div class="stat-delta delta-up" data-i18n="stat.plus18">↑ 18% vs 2025</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label" data-i18n="stat.revenueMar">Revenue (Mar)</div>
+          <div class="stat-value">€4,320</div>
+          <div class="stat-delta delta-up">↑ 11% vs Feb</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label" data-i18n="stat.outstanding">Outstanding</div>
+          <div class="stat-value" style="color:var(--red);">€180</div>
+          <div class="stat-delta delta-down" data-i18n="stat.1overdueInvoice">1 overdue invoice</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label" data-i18n="stat.avgPackage">Avg Package</div>
+          <div class="stat-value">€1,945</div>
+          <div class="stat-delta delta-neutral" data-i18n="stat.acrossClients">across all clients</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label" data-i18n="stat.collectionRate">Collection Rate</div>
+          <div class="stat-value">98%</div>
+          <div class="stat-delta delta-up" data-i18n="stat.plus2pct">↑ 2% this month</div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;">
+
+        <!-- Monthly Revenue Bar Chart -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title" data-i18n="card.monthlyRevenue">Monthly Revenue</div>
+              <div class="card-sub" data-i18n="card.last12months">Last 12 months</div>
+            </div>
+            <div style="display:flex;gap:0.375rem;">
+              <div class="pill-tabs" style="padding:0.2rem;">
+                <div class="pill-tab active" onclick="switchChartView('revenue',this)">€</div>
+                <div class="pill-tab" onclick="switchChartView('clients',this)" data-i18n="nav.clients">Clients</div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body" style="padding-bottom:1rem;">
+            <canvas id="revenueChart" height="180"></canvas>
+          </div>
+        </div>
+
+        <!-- Monthly breakdown donut + table -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title" data-i18n="card.revenueByPackage">Revenue by Package</div>
+              <div class="card-sub" data-i18n="card.marchBreakdown">March 2026 breakdown</div>
+            </div>
+            <span class="badge badge-green">€4,320 total</span>
+          </div>
+          <div class="card-body" style="display:grid;grid-template-columns:140px 1fr;gap:1.5rem;align-items:center;">
+            <canvas id="donutChart" width="140" height="140"></canvas>
+            <div style="display:flex;flex-direction:column;gap:0.875rem;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;">
+                <div style="display:flex;align-items:center;gap:0.625rem;">
+                  <div style="width:10px;height:10px;border-radius:50%;background:var(--accent);flex-shrink:0;"></div>
+                  <span style="font-size:0.8125rem;color:var(--text2);">Deep Transformation</span>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:0.875rem;font-weight:500;color:var(--text);">€3,200</div>
+                  <div style="font-size:0.7rem;color:var(--text3);">74%</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;">
+                <div style="display:flex;align-items:center;gap:0.625rem;">
+                  <div style="width:10px;height:10px;border-radius:50%;background:var(--blue);flex-shrink:0;"></div>
+                  <span style="font-size:0.8125rem;color:var(--text2);">Growth Journey</span>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:0.875rem;font-weight:500;color:var(--text);">€1,440</div>
+                  <div style="font-size:0.7rem;color:var(--text3);">33%</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;">
+                <div style="display:flex;align-items:center;gap:0.625rem;">
+                  <div style="width:10px;height:10px;border-radius:50%;background:var(--amber);flex-shrink:0;"></div>
+                  <span style="font-size:0.8125rem;color:var(--text2);">Clarity Session</span>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:0.875rem;font-weight:500;color:var(--text);">€180</div>
+                  <div style="font-size:0.7rem;color:var(--text3);">4%</div>
+                </div>
+              </div>
+              <div style="border-top:1px solid var(--border);padding-top:0.75rem;display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:0.8rem;color:var(--text3);">Avg/session</span>
+                <span style="font-size:0.875rem;font-weight:500;color:var(--text);">€308</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly P&L table + MoM analysis -->
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:1.25rem;margin-bottom:1.25rem;">
+
+        <!-- Monthly breakdown table -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title" data-i18n="card.monthlyAnalysis">Monthly Analysis</div>
+              <div class="card-sub" data-i18n="card.ytd2026">Year to date 2026</div>
+            </div>
+            <span class="card-action" data-i18n="action.exportCSV">Export CSV</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:var(--surface2);">
+                  <th style="padding:0.625rem 1.25rem;text-align:left;font-size:0.7rem;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border);" data-i18n="th.month">Month</th>
+                  <th style="padding:0.625rem 1rem;text-align:right;font-size:0.7rem;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border);" data-i18n="th.revenue">Revenue</th>
+                  <th style="padding:0.625rem 1rem;text-align:right;font-size:0.7rem;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border);" data-i18n="th.sessions">Sessions</th>
+                  <th style="padding:0.625rem 1rem;text-align:right;font-size:0.7rem;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border);" data-i18n="th.newClients">New Clients</th>
+                  <th style="padding:0.625rem 1rem;text-align:right;font-size:0.7rem;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border);" data-i18n="th.avgPerSession">Avg/Session</th>
+                  <th style="padding:0.625rem 1rem;text-align:right;font-size:0.7rem;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border);" data-i18n="th.mom">MoM</th>
+                  <th style="padding:0.625rem 1rem;text-align:center;font-size:0.7rem;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border);"></th>
+                </tr>
+              </thead>
+              <tbody id="monthlyTableBody">
+                <!-- Filled by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right col: insights -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+          <!-- Best month / growth -->
+          <div class="card">
+            <div class="card-head"><div class="card-title" data-i18n="card.insights">Key Insights</div></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:1rem;">
+              <div style="background:var(--accent-lt);border-radius:var(--radius);padding:0.875rem;">
+                <div style="font-size:0.72rem;color:var(--accent);font-weight:500;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.375rem;" data-i18n="insight.bestMonth">Best Month</div>
+                <div style="font-size:1.25rem;font-family:'Instrument Serif',serif;color:var(--text);">March 2026</div>
+                <div style="font-size:0.8rem;color:var(--text2);margin-top:0.2rem;">€4,320 · 14 sessions</div>
+              </div>
+              <div style="background:var(--blue-dim);border-radius:var(--radius);padding:0.875rem;">
+                <div style="font-size:0.72rem;color:var(--blue);font-weight:500;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.375rem;" data-i18n="insight.growthRate">Growth Rate</div>
+                <div style="font-size:1.25rem;font-family:'Instrument Serif',serif;color:var(--text);">↑ 18%</div>
+                <div style="font-size:0.8rem;color:var(--text2);margin-top:0.2rem;" data-i18n="insight.vsLastYear">vs same period last year</div>
+              </div>
+              <div style="background:var(--amber-dim);border-radius:var(--radius);padding:0.875rem;">
+                <div style="font-size:0.72rem;color:var(--amber);font-weight:500;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.375rem;" data-i18n="insight.projected">Q2 Projected</div>
+                <div style="font-size:1.25rem;font-family:'Instrument Serif',serif;color:var(--text);">€13,200</div>
+                <div style="font-size:0.8rem;color:var(--text2);margin-top:0.2rem;" data-i18n="insight.basedOnPipeline">based on active pipeline</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Outstanding -->
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title" data-i18n="card.outstanding">Outstanding</div>
+              <span class="badge badge-red">€180</span>
+            </div>
+            <div style="padding:1rem 1.25rem;">
+              <div style="display:flex;align-items:center;gap:0.875rem;">
+                <div class="client-avatar" style="background:#F3F2F0;color:#72695F;width:32px;height:32px;font-size:0.75rem;">TD</div>
+                <div style="flex:1;">
+                  <div style="font-size:0.875rem;font-weight:500;color:var(--text);">Tom Dijk</div>
+                  <div style="font-size:0.75rem;color:var(--red);">€180 · 18 days overdue</div>
+                </div>
+                <button class="btn btn-ghost" style="font-size:0.75rem;padding:0.35rem 0.75rem;color:var(--red);border-color:rgba(184,50,50,0.2);" onclick="alert('Reminder sent!')">Remind</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- All Transactions -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title" data-i18n="card.allTransactions">All Transactions</div>
+            <div class="card-sub" data-i18n="card.ytd2026sub">January to March 2026</div>
+          </div>
+          <div style="display:flex;gap:0.625rem;align-items:center;">
+            <div class="pill-tabs" style="padding:0.2rem;">
+              <div class="pill-tab active" onclick="filterTx('all',this)" data-i18n="filter.allTx">All</div>
+              <div class="pill-tab" onclick="filterTx('paid',this)" data-i18n="filter.paid">Paid</div>
+              <div class="pill-tab" onclick="filterTx('pending',this)" data-i18n="filter.pending">Pending</div>
+              <div class="pill-tab" onclick="filterTx('overdue',this)" data-i18n="filter.overdue">Overdue</div>
+            </div>
+            <span class="card-action" data-i18n="action.exportCSV">Export CSV</span>
+          </div>
+        </div>
+        <div>
+          <div class="payment-row header" style="grid-template-columns:2fr 1.2fr 1fr 1fr 1fr 90px;">
+            <div data-i18n="th.clientPackage">Client & Package</div>
+            <div data-i18n="form.date">Date</div>
+            <div data-i18n="th.amount">Amount</div>
+            <div data-i18n="th.type">Type</div>
+            <div data-i18n="th.status">Status</div>
+            <div></div>
+          </div>
+          <div class="payment-row" style="grid-template-columns:2fr 1.2fr 1fr 1fr 1fr 90px;">
+            <div><div style="font-size:0.875rem;font-weight:500;color:var(--text);">Niels Berg</div><div style="font-size:0.72rem;color:var(--text3);">Deep Transformation (6m)</div></div>
+            <div class="text-muted">Feb 1, 2026</div><div class="amount">€3,200</div>
+            <div><span class="badge badge-blue">Package</span></div>
+            <div><span class="badge badge-green">Paid</span></div>
+            <div><span class="card-action">Receipt</span></div>
+          </div>
+          <div class="payment-row" style="grid-template-columns:2fr 1.2fr 1fr 1fr 1fr 90px;">
+            <div><div style="font-size:0.875rem;font-weight:500;color:var(--text);">James Keane</div><div style="font-size:0.72rem;color:var(--text3);">Deep Transformation (6m)</div></div>
+            <div class="text-muted">Jan 20, 2026</div><div class="amount">€3,200</div>
+            <div><span class="badge badge-blue">Package</span></div>
+            <div><span class="badge badge-green">Paid</span></div>
+            <div><span class="card-action">Receipt</span></div>
+          </div>
+          <div class="payment-row" style="grid-template-columns:2fr 1.2fr 1fr 1fr 1fr 90px;">
+            <div><div style="font-size:0.875rem;font-weight:500;color:var(--text);">Laura Martínez</div><div style="font-size:0.72rem;color:var(--text3);">Growth Journey (3m)</div></div>
+            <div class="text-muted">Jan 15, 2026</div><div class="amount">€1,440</div>
+            <div><span class="badge badge-green">Package</span></div>
+            <div><span class="badge badge-green">Paid</span></div>
+            <div><span class="card-action">Receipt</span></div>
+          </div>
+          <div class="payment-row" style="grid-template-columns:2fr 1.2fr 1fr 1fr 1fr 90px;">
+            <div><div style="font-size:0.875rem;font-weight:500;color:var(--text);">Sophie Renard</div><div style="font-size:0.72rem;color:var(--text3);">Growth Journey (3m)</div></div>
+            <div class="text-muted">Mar 1, 2026</div><div class="amount">€1,440</div>
+            <div><span class="badge badge-green">Package</span></div>
+            <div><span class="badge badge-amber">Due Apr 1</span></div>
+            <div><span class="card-action">Remind</span></div>
+          </div>
+          <div class="payment-row" style="grid-template-columns:2fr 1.2fr 1fr 1fr 1fr 90px;">
+            <div><div style="font-size:0.875rem;font-weight:500;color:var(--text);">Amara Osei</div><div style="font-size:0.72rem;color:var(--text3);">Clarity Session</div></div>
+            <div class="text-muted">Mar 18, 2026</div><div class="amount">€180</div>
+            <div><span class="badge badge-teal">Single</span></div>
+            <div><span class="badge badge-green">Paid</span></div>
+            <div><span class="card-action">Receipt</span></div>
+          </div>
+          <div class="payment-row row-overdue" style="grid-template-columns:2fr 1.2fr 1fr 1fr 1fr 90px;">
+            <div><div style="font-size:0.875rem;font-weight:500;color:var(--red);">Tom Dijk</div><div style="font-size:0.72rem;color:var(--text3);">Clarity Session</div></div>
+            <div class="text-muted">Feb 28, 2026</div>
+            <div class="amount" style="color:var(--red);">€180</div>
+            <div><span class="badge badge-teal">Single</span></div>
+            <div><span class="badge badge-red">18d overdue</span></div>
+            <div><button class="btn btn-ghost" style="font-size:0.75rem;padding:0.3rem 0.65rem;color:var(--red);border-color:rgba(184,50,50,0.2);" onclick="alert('Reminder sent!')">Remind</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ REFERRALS VIEW ══ -->
+    <div class="view" id="view-referrals">
+      <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem;">
+        <div class="stat-card"><div class="stat-label" data-i18n="stat.totalReferrals">Total Referrals</div><div class="stat-value">5</div><div class="stat-delta delta-up" data-i18n="stat.plus2Month">↑ 2 this month</div></div>
+        <div class="stat-card"><div class="stat-label" data-i18n="stat.converted">Converted</div><div class="stat-value">3</div><div class="stat-delta delta-neutral">60% conversion</div></div>
+        <div class="stat-card"><div class="stat-label" data-i18n="stat.giftsPending">Gifts Pending</div><div class="stat-value">1</div><div class="stat-delta delta-neutral">Laura Martínez</div></div>
+      </div>
+
+      <div class="two-col" style="grid-template-columns:1fr 300px;">
+        <div class="card">
+          <div class="card-head"><div class="card-title" data-i18n="card.referralNetwork">Referral Network</div><div class="card-sub" data-i18n="card.whoReferredWho">Who referred who</div></div>
+          <div>
+            <div class="referral-row header"><div>Source (Referrer)</div><div>Referred Person</div><div data-i18n="th.status">Status</div><div>Gift</div></div>
+            <div class="referral-row">
+              <div class="referral-tree">
+                <div class="client-avatar" style="width:26px;height:26px;font-size:0.7rem;background:#DBEAFE;color:#1D4ED8;">JK</div>
+                James Keane
+              </div>
+              <div class="referral-tree">
+                <div class="client-avatar" style="width:26px;height:26px;font-size:0.7rem;background:#D5EBE1;color:#2D6A50;">LM</div>
+                Laura Martínez
+              </div>
+              <div><span class="badge badge-green">Converted ✓</span></div>
+              <div><span class="badge badge-teal">Rewarded ✓</span></div>
+            </div>
+            <div class="referral-row">
+              <div class="referral-tree">
+                <div class="client-avatar" style="width:26px;height:26px;font-size:0.7rem;background:#D5EBE1;color:#2D6A50;">LM</div>
+                Laura Martínez
+              </div>
+              <div class="referral-tree">
+                <div class="client-avatar" style="width:26px;height:26px;font-size:0.7rem;background:#F0EDE8;color:#72695F;">EW</div>
+                Emma Walsh
+              </div>
+              <div><span class="badge badge-amber">Pending</span></div>
+              <div><div class="gift-badge">🎁 Send gift</div></div>
+            </div>
+            <div class="referral-row">
+              <div class="referral-tree">
+                <div class="client-avatar" style="width:26px;height:26px;font-size:0.7rem;background:#D5EBE1;color:#2D6A50;">LM</div>
+                Laura Martínez
+              </div>
+              <div class="referral-tree">
+                <div class="client-avatar" style="width:26px;height:26px;font-size:0.7rem;background:#F0EDE8;color:#72695F;">PH</div>
+                Piet Haan
+              </div>
+              <div><span class="badge badge-gray">Enquiry sent</span></div>
+              <div><span class="text-muted">—</span></div>
+            </div>
+            <div class="referral-row">
+              <div class="referral-tree">
+                <div class="client-avatar" style="width:26px;height:26px;font-size:0.7rem;background:#CCFBF1;color:#0F766E;">ML</div>
+                Mei Lin
+              </div>
+              <div class="referral-tree">
+                <div class="client-avatar" style="width:26px;height:26px;font-size:0.7rem;background:#EDE9FE;color:#6D31D9;">NB</div>
+                Niels Berg
+              </div>
+              <div><span class="badge badge-green">Converted ✓</span></div>
+              <div><span class="badge badge-teal">Rewarded ✓</span></div>
+            </div>
+            <div class="referral-row">
+              <div class="referral-tree">
+                <div class="client-avatar" style="width:26px;height:26px;font-size:0.7rem;background:#FEE2D0;color:#B45309;">SR</div>
+                Sophie Renard
+              </div>
+              <div class="referral-tree">
+                <div class="client-avatar" style="width:26px;height:26px;font-size:0.7rem;background:#EDE9FE;color:#6D31D9;">IC</div>
+                Inês Costa
+              </div>
+              <div><span class="badge badge-green">Converted ✓</span></div>
+              <div><span class="badge badge-teal">Rewarded ✓</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div class="card">
+            <div class="card-head"><div class="card-title" data-i18n="card.giftTracker">Gift Tracker</div></div>
+            <div class="card-body">
+              <div style="border-radius:var(--radius);background:var(--purple-dim);border:1px solid rgba(109,40,217,0.10);padding:1rem;margin-bottom:0.875rem;">
+                <div style="font-size:0.8125rem;font-weight:500;color:var(--purple);margin-bottom:0.375rem;">⚡ Action needed</div>
+                <div style="font-size:0.8125rem;color:var(--text2);margin-bottom:0.875rem;">Laura Martínez referred Emma Walsh (pending). Send a thank-you gift when Emma converts.</div>
+                <button class="btn btn-ghost" style="width:100%;justify-content:center;font-size:0.8125rem;" onclick="alert('Gift options: Book, Flowers (€35), Coaching credit (€50)')" data-i18n="btn.browseGifts">Browse gifts →</button>
+              </div>
+              <div style="font-size:0.75rem;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.625rem;">Reward history</div>
+              <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                <div style="font-size:0.8125rem;color:var(--text2);">James Keane → Book sent (Jan 20)</div>
+                <div style="font-size:0.8125rem;color:var(--text2);">Mei Lin → Coaching credit (Feb 12)</div>
+                <div style="font-size:0.8125rem;color:var(--text2);">Sophie Renard → Flowers (Mar 5)</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title" data-i18n="card.referralProgramme">Referral Programme</div></div>
+            <div class="card-body">
+              <div style="font-size:0.8125rem;color:var(--text2);line-height:1.7;margin-bottom:1rem;">Your current reward: <strong style="color:var(--text);">€50 coaching credit</strong> or <strong style="color:var(--text);">a curated gift</strong> for every referral that converts.</div>
+              <button class="btn btn-ghost" style="width:100%;justify-content:center;font-size:0.8125rem;" onclick="alert('Referral link copied! Share with clients.')" data-i18n="btn.copyLink">Copy referral link</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PROGRESS VIEW ══ -->
+    <div class="view" id="view-progress">
+      <div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem;">
+        <div class="stat-card"><div class="stat-label" data-i18n="stat.avgGoalProgress">Avg Goal Progress</div><div class="stat-value">62%</div><div class="stat-delta delta-up">↑ 8% this month</div></div>
+        <div class="stat-card"><div class="stat-label">Homeworks Complete</div><div class="stat-value">84%</div><div class="stat-delta delta-up">Completion rate</div></div>
+        <div class="stat-card"><div class="stat-label" data-i18n="stat.sessionsDelivered">Sessions Delivered</div><div class="stat-value">56</div><div class="stat-delta delta-neutral">Since Jan 2025</div></div>
+        <div class="stat-card"><div class="stat-label" data-i18n="stat.clientSatisfaction">Client Satisfaction</div><div class="stat-value">4.9</div><div class="stat-delta delta-up">Avg rating</div></div>
+      </div>
+      <div class="three-col">
+        <div class="card" style="cursor:pointer;" onclick="openClientProfile('laura')">
+          <div class="card-head"><div><div class="client-id" style="gap:0.625rem;"><div class="client-avatar" style="width:26px;height:26px;font-size:0.7rem;background:#D5EBE1;color:#2D6A50;">LM</div><div class="card-title">Laura Martínez</div></div></div><span class="badge badge-green">Active</span></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:0.875rem;">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:0.35rem;"><span style="font-size:0.8rem;color:var(--text2);">Career clarity</span><span style="font-size:0.8rem;color:var(--accent);">70%</span></div><div class="progress-bar-wrap"><div class="progress-bar" style="width:70%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:0.35rem;"><span style="font-size:0.8rem;color:var(--text2);">Self-confidence</span><span style="font-size:0.8rem;color:var(--amber);">45%</span></div><div class="progress-bar-wrap"><div class="progress-bar amber" style="width:45%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:0.35rem;"><span style="font-size:0.8rem;color:var(--text2);">Work-life balance</span><span style="font-size:0.8rem;color:var(--blue);">55%</span></div><div class="progress-bar-wrap"><div class="progress-bar blue" style="width:55%"></div></div></div>
+            <div class="divider" style="margin:0.25rem 0;"></div>
+            <div style="display:flex;gap:0.5rem;"><span class="badge badge-green">4/6 sessions</span><span class="badge badge-gray">3 HW open</span></div>
+          </div>
+        </div>
+        <div class="card" style="cursor:pointer;" onclick="openClientProfile('james')">
+          <div class="card-head"><div><div class="client-id" style="gap:0.625rem;"><div class="client-avatar" style="width:26px;height:26px;font-size:0.7rem;background:#DBEAFE;color:#1D4ED8;">JK</div><div class="card-title">James Keane</div></div></div><span class="badge badge-green">Active</span></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:0.875rem;">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:0.35rem;"><span style="font-size:0.8rem;color:var(--text2);">Leadership identity</span><span style="font-size:0.8rem;color:var(--accent);">80%</span></div><div class="progress-bar-wrap"><div class="progress-bar" style="width:80%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:0.35rem;"><span style="font-size:0.8rem;color:var(--text2);">Boundaries at work</span><span style="font-size:0.8rem;color:var(--accent);">65%</span></div><div class="progress-bar-wrap"><div class="progress-bar" style="width:65%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:0.35rem;"><span style="font-size:0.8rem;color:var(--text2);">Inner critic awareness</span><span style="font-size:0.8rem;color:var(--amber);">50%</span></div><div class="progress-bar-wrap"><div class="progress-bar amber" style="width:50%"></div></div></div>
+            <div class="divider" style="margin:0.25rem 0;"></div>
+            <div style="display:flex;gap:0.5rem;"><span class="badge badge-blue">7/12 sessions</span><span class="badge badge-gray">1 HW open</span></div>
+          </div>
+        </div>
+        <div class="card" style="cursor:pointer;" onclick="openClientProfile('ines')">
+          <div class="card-head"><div><div class="client-id" style="gap:0.625rem;"><div class="client-avatar" style="width:26px;height:26px;font-size:0.7rem;background:#EDE9FE;color:#6D31D9;">IC</div><div class="card-title">Inês Costa</div></div></div><span class="badge badge-amber">1 session left</span></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:0.875rem;">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:0.35rem;"><span style="font-size:0.8rem;color:var(--text2);">Brand vision clarity</span><span style="font-size:0.8rem;color:var(--accent);">90%</span></div><div class="progress-bar-wrap"><div class="progress-bar" style="width:90%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:0.35rem;"><span style="font-size:0.8rem;color:var(--text2);">Pricing confidence</span><span style="font-size:0.8rem;color:var(--accent);">75%</span></div><div class="progress-bar-wrap"><div class="progress-bar" style="width:75%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:0.35rem;"><span style="font-size:0.8rem;color:var(--text2);">Client boundaries</span><span style="font-size:0.8rem;color:var(--accent);">70%</span></div><div class="progress-bar-wrap"><div class="progress-bar" style="width:70%"></div></div></div>
+            <div class="divider" style="margin:0.25rem 0;"></div>
+            <div style="display:flex;gap:0.5rem;"><span class="badge badge-green">5/6 sessions</span><span class="badge badge-gray">All HW done</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ ADD-ONS VIEW ══ -->
+    <div class="view" id="view-addons">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:420px;text-align:center;padding:3rem;">
+        <div style="width:64px;height:64px;border-radius:var(--radius-lg);background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:1.75rem;margin:0 auto 1.5rem;">⊕</div>
+        <h2 style="font-family:'Instrument Serif',serif;font-size:1.75rem;font-weight:400;color:var(--text);margin-bottom:0.625rem;" data-i18n="addons.title">Add-ons: Coming Soon</h2>
+        <p style="font-size:0.9375rem;color:var(--text3);max-width:440px;line-height:1.7;margin-bottom:2rem;" data-i18n="addons.desc">Expand CoachOS with powerful modules. Each add-on can be activated per client or globally for your entire practice.</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:680px;width:100%;text-align:left;">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;">
+            <div style="font-size:1.25rem;margin-bottom:0.625rem;">📓</div>
+            <div style="font-size:0.875rem;font-weight:500;color:var(--text);margin-bottom:0.25rem;" data-i18n="addon.journaling">Client Journaling</div>
+            <div style="font-size:0.78rem;color:var(--text3);line-height:1.5;" data-i18n="addon.journalingDesc">Private reflection space between sessions with prompts.</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;">
+            <div style="font-size:1.25rem;margin-bottom:0.625rem;">📊</div>
+            <div style="font-size:0.875rem;font-weight:500;color:var(--text);margin-bottom:0.25rem;" data-i18n="addon.assessments">Assessments</div>
+            <div style="font-size:0.78rem;color:var(--text3);line-height:1.5;" data-i18n="addon.assessmentsDesc">Wheel of Life, values cards, EQ check-ins and more.</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;">
+            <div style="font-size:1.25rem;margin-bottom:0.625rem;">👥</div>
+            <div style="font-size:0.875rem;font-weight:500;color:var(--text);margin-bottom:0.25rem;" data-i18n="addon.group">Group Coaching</div>
+            <div style="font-size:0.78rem;color:var(--text3);line-height:1.5;" data-i18n="addon.groupDesc">Manage cohorts, group sessions and shared resources.</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;">
+            <div style="font-size:1.25rem;margin-bottom:0.625rem;">📚</div>
+            <div style="font-size:0.875rem;font-weight:500;color:var(--text);margin-bottom:0.25rem;" data-i18n="addon.resources">Resource Library</div>
+            <div style="font-size:0.78rem;color:var(--text3);line-height:1.5;" data-i18n="addon.resourcesDesc">Share PDFs, videos and worksheets directly with clients.</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;">
+            <div style="font-size:1.25rem;margin-bottom:0.625rem;">🔗</div>
+            <div style="font-size:0.875rem;font-weight:500;color:var(--text);margin-bottom:0.25rem;" data-i18n="addon.integrations">Integrations</div>
+            <div style="font-size:0.78rem;color:var(--text3);line-height:1.5;" data-i18n="addon.integrationsDesc">Zoom, Google Calendar, Stripe and WhatsApp sync.</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;">
+            <div style="font-size:1.25rem;margin-bottom:0.625rem;">🤖</div>
+            <div style="font-size:0.875rem;font-weight:500;color:var(--text);margin-bottom:0.25rem;" data-i18n="addon.ai">AI Session Prep</div>
+            <div style="font-size:0.78rem;color:var(--text3);line-height:1.5;" data-i18n="addon.aiDesc">Auto-generate session summaries and next-step suggestions.</div>
+          </div>
+        </div>
+        <p style="font-size:0.8rem;color:var(--text3);margin-top:2rem;" data-i18n="addons.notify">Want to be notified when add-ons launch? <a href="#" style="color:var(--accent);" data-i18n="addons.notifyLink">Join the waitlist →</a></p>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Add Client Modal -->
+<div class="modal-overlay" id="addClientModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addClientModal')">✕</button>
+    <h2>New Client</h2>
+    <p class="modal-sub">Add a new client to your roster</p>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="form.firstName">First name</label><input type="text" placeholder="Emma" autocomplete="given-name"></div>
+      <div class="form-group"><label data-i18n="form.lastName">Last name</label><input type="text" placeholder="Walsh" autocomplete="family-name"></div>
+    </div>
+    <div class="form-group"><label data-i18n="form.email">Email</label><input type="email" placeholder="emma@email.com" autocomplete="email"></div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="form.phone">Phone</label><input type="tel" placeholder="+31 6..."></div>
+      <div class="form-group"><label data-i18n="form.location">Location</label><input type="text" placeholder="Amsterdam, NL"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="th.package">Package</label>
+        <select><option>Clarity Session (€180)</option><option>Growth Journey (€1,440)</option><option>Deep Transformation (€3,200)</option></select>
+      </div>
+      <div class="form-group"><label>Referred by</label>
+        <select><option value="">— None —</option><option>Laura Martínez</option><option>James Keane</option><option>Sophie Renard</option><option>Mei Lin</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label data-i18n="form.initialFocus">Initial focus / notes</label><textarea placeholder="What are they hoping to work on?"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('addClientModal')" data-i18n="btn.cancel">Cancel</button>
+      <button class="btn btn-accent" onclick="closeModal('addClientModal');alert('Client added!')" data-i18n="btn.addClient">Add client →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Log Session Modal -->
+<div class="modal-overlay" id="sessionModal">
+  <div class="modal">
+    <button class="modal-close" onclickrea class="note-editor" style="min-height:160px;" placeholder="Key themes, client quotes, breakthroughs, observations..."></textarea></div>
+    <div class="form-group"><label data-i18n="form.tags">Tags (comma-separated)</label><input type="text" placeholder="Values, Career, Breakthrough"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('noteModal')" data-i18n="btn.cancel">Cancel</button>
+      <button class="btn btn-accent" onclick="closeModal('noteModal');alert('Note saved!')" data-i18n="btn.saveNote">Save note →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Homework Modal -->
+<div class="modal-overlay" id="hwModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('hwModal')">✕</button>
+    <h2>Assign Homework</h2>
+    <p class="modal-sub">Set a task for your client between sessions</p>
+    <div class="form-group"><label data-i18n="form.taskTitle">Task title</label><input type="text" placeholder="Write a letter to your future self..."></div>
+    <div class="form-group"><label data-i18n="form.description">Description / instructions</label><textarea placeholder="Give context, steps, or a prompt for reflection..."></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="form.dueDate">Due date</label><input type="date"></div>
+      <div class="form-group"><label data-i18n="form.category">Category</label><select><option>Reflection</option><option>Action</option><option>Practice</option><option>Assessment</option></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('hwModal')" data-i18n="btn.cancel">Cancel</button>
+      <button class="btn btn-accent" onclick="closeModal('hwModal');alert('Homework assigned!')" data-i18n="btn.assign">Assign →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// i18n: Translation System
+// ══════════════════════════════════════════════════════
+const TRANSLATIONS = {
+  en: {
+    'nav.main':'Main','nav.tools':'Tools','nav.dashboard':'Dashboard',
+    'nav.clients':'Clients','nav.sessions':'Sessions','nav.payments':'Payments',
+    'nav.referrals':'Referrals','nav.progress':'Progress','nav.addons':'Add-ons',
+    'nav.settings':'Settings',
+    'btn.addSession':'+ Session','btn.newClient':'+ New Client','btn.cancel':'Cancel',
+    'btn.addClient':'Add client →','btn.save':'Save →','btn.saveNote':'Save note →',
+    'btn.assign':'Assign →','btn.addHw':'+ Add homework','btn.fullNote':'Full note',
+    'btn.browseGifts':'Browse gifts →','btn.copyLink':'Copy referral link',
+    'btn.logSession':'+ Log Session','btn.remind':'Remind','btn.addHwProfile':'+ Homework',
+    'btn.addNote':'+ Note',
+    'search.clients':'Search clients…',
+    'stat.activeClients':'Active Clients','stat.revenueMar':'Revenue (Mar)',
+    'stat.sessionsMonth':'Sessions This Month','stat.openHw':'Open Homeworks',
+    'stat.plus2Month':'↑ 2 this month','stat.plus12Feb':'↑ 12% vs Feb',
+    'stat.remaining2':'2 remaining','stat.overdue3':'3 overdue',
+    'stat.revenueYTD':'Revenue YTD','stat.outstanding':'Outstanding',
+    'stat.avgPackage':'Avg Package','stat.collectionRate':'Collection Rate',
+    'stat.plus18':'↑ 18% vs 2025','stat.1overdueInvoice':'1 overdue invoice',
+    'stat.acrossClients':'across all clients','stat.plus2pct':'↑ 2% this month',
+    'stat.totalReferrals':'Total Referrals','stat.converted':'Converted',
+    'stat.giftsPending':'Gifts Pending','stat.avgGoalProgress':'Avg Goal Progress',
+    'stat.hwCompletion':'Homework Completion','stat.sessionsDelivered':'Sessions Delivered',
+    'stat.clientSatisfaction':'Client Satisfaction',
+    'card.upcomingSessions':'Upcoming Sessions','card.next14Days':'Next 14 days',
+    'card.clientPulse':'Client Pulse','card.engagementStatus':'Engagement & package status',
+    'card.revenue':'Revenue','card.last6months':'Last 6 months',
+    'card.activity':'Activity','card.recentEvents':'Recent events',
+    'card.topReferrers':'Top Referrers','card.packageOverview':'Package Overview',
+    'card.clientInfo':'Client Info','card.goals':'Goals',
+    'card.allTransactions':'All Transactions','card.referralNetwork':'Referral Network',
+    'card.whoReferredWho':'Who referred who','card.giftTracker':'Gift Tracker',
+    'card.referralProgramme':'Referral Programme',
+    'action.viewAll':'View all →','action.allClients':'All clients →','action.all':'All →',
+    'action.edit':'Edit','action.exportCSV':'Export CSV','action.backToClients':'← Back to clients',
+    'th.client':'Client','th.package':'Package','th.progress':'Progress',
+    'th.payment':'Payment','th.lastSession':'Last session','th.sessions':'Sessions',
+    'th.status':'Status',
+    'tab.sessionNotes':'Session Notes','tab.homework':'Homework',
+    'tab.payments':'Payments','tab.timeline':'Timeline',
+    'filter.all8':'All (8)','filter.active6':'Active (6)',
+    'filter.followup1':'Follow-up (1)','filter.completed1':'Completed (1)',
+    'filter.upcoming4':'Upcoming (4)','filter.past42':'Past (42)',
+    'info.package':'Package',
+    'placeholder.quickNote':'Quick note… (press Enter)',
+    'login.welcome':'Welcome back','login.subtitle':'Sign in to your coaching dashboard',
+    'login.email':'Email address','login.password':'Password',
+    'login.submit':'Sign in →','login.forgot':'Forgot password?',
+    'modal.newClientTitle':'New Client','modal.newClientSub':'Add a new client to your roster',
+    'modal.logSessionTitle':'Log Session','modal.logSessionSub':'Record a completed or scheduled session',
+    'modal.noteTitle':'Session Note','modal.noteSub':'Document a session in detail',
+    'modal.hwTitle':'Assign Homework','modal.hwSub':'Set a task for your client between sessions',
+    'form.firstName':'First name','form.lastName':'Last name','form.email':'Email',
+    'form.phone':'Phone','form.location':'Location','form.package':'Package',
+    'form.referredBy':'Referred by','form.initialFocus':'Initial focus / notes',
+    'form.client':'Client','form.sessionType':'Session type','form.date':'Date',
+    'form.sessionNotes':'Session notes','form.title':'Title','form.notes':'Notes',
+    'form.tags':'Tags (comma-separated)','form.taskTitle':'Task title',
+    'form.description':'Description / instructions','form.dueDate':'Due date',
+    'form.category':'Category',
+    'page.dashboard':'Dashboard','page.dashboardSub':'Thursday, 19 March 2026',
+    'page.clients':'Clients','page.clientsSub':'8 active · 1 follow-up',
+    'page.sessions':'Sessions','page.sessionsSub':'4 upcoming this month',
+    'page.payments':'Payments','page.paymentsSub':'€4,320 revenue in March',
+    'page.referrals':'Referrals','page.referralsSub':'5 total · 3 converted',
+    'page.progress':'Progress','page.progressSub':'Goal tracking across all clients',
+    'page.profile':'Client Profile','page.profileSub':'Full overview & history',
+    'demo.notice':'Demo mode: enter any email and password to continue.',
+    // Sessions tabs
+    'filter.sessScheduled':'Scheduled (4)',
+    'filter.sessUnscheduled':'To Schedule (16)',
+    'filter.sessPast':'Past (42)',
+    'card.scheduledSessions':'Scheduled Sessions',
+    'card.confirmedDates':'Confirmed dates & times',
+    'card.remainingSessions':'Remaining Sessions',
+    'card.purchasedNotScheduled':'Purchased · not yet scheduled',
+    'card.pastSessions':'Past Sessions',
+    'card.completedSessions':'All completed sessions',
+    'sess.unscheduledHint':'16 sessions still need to be scheduled across 5 clients.',
+    'sess.unscheduledSub':'These are purchased but not yet booked. Click a row to schedule.',
+    'sess.legendHint':'Done   Scheduled   To schedule',
+    'btn.schedule':'Schedule',
+    'btn.scheduleSession':'+ Schedule',
+    'btn.confirmSchedule':'Confirm & notify client →',
+    'modal.scheduleTitle':'Schedule Session',
+    'modal.scheduleSub':'Pick a date and time for a remaining session',
+    // Clients payment column
+    'th.paymentStatus':'Paid · Remaining · Overdue',
+    // Add-ons
+    'addons.title':'Add-ons: Coming Soon',
+    'addons.desc':'Expand CoachOS with powerful modules. Each add-on can be activated per client or globally.',
+    'addons.notify':'Want to be notified when add-ons launch?',
+    'addons.notifyLink':'Join the waitlist →',
+    'addon.journaling':'Client Journaling',
+    'addon.journalingDesc':'Private reflection space between sessions with prompts.',
+    'addon.assessments':'Assessments',
+    'addon.assessmentsDesc':'Wheel of Life, values cards, EQ check-ins and more.',
+    'addon.group':'Group Coaching',
+    'addon.groupDesc':'Manage cohorts, group sessions and shared resources.',
+    'addon.resources':'Resource Library',
+    'addon.resourcesDesc':'Share PDFs, videos and worksheets directly with clients.',
+    'addon.integrations':'Integrations',
+    'addon.integrationsDesc':'Zoom, Google Calendar, Stripe and WhatsApp sync.',
+    'addon.ai':'AI Session Prep',
+    'addon.aiDesc':'Auto-generate session summaries and next-step suggestions.',
+    // Nav
+    'nav.upcoming':'Upcoming',
+    // Page
+    'page.addons':'Add-ons',
+    'page.addonsSub':'Modules & integrations',
+    // Payments analysis
+    'card.monthlyRevenue':'Monthly Revenue',
+    'card.last12months':'Last 12 months',
+    'card.revenueByPackage':'Revenue by Package',
+    'card.marchBreakdown':'March 2026 breakdown',
+    'card.monthlyAnalysis':'Monthly Analysis',
+    'card.ytd2026':'Year to date 2026',
+    'card.ytd2026sub':'January to March 2026',
+    'card.insights':'Key Insights',
+    'card.outstanding':'Outstanding',
+    'insight.bestMonth':'Best Month',
+    'insight.growthRate':'Growth Rate',
+    'insight.vsLastYear':'vs same period last year',
+    'insight.projected':'Q2 Projected',
+    'insight.basedOnPipeline':'based on active pipeline',
+    'th.month':'Month',
+    'th.revenue':'Revenue',
+    'th.newClients':'New Clients',
+    'th.avgPerSession':'Avg/Session',
+    'th.mom':'MoM',
+    'th.amount':'Amount',
+    'th.type':'Type',
+    'th.clientPackage':'Client & Package',
+    'filter.allTx':'All',
+    'filter.paid':'Paid',
+    'filter.pending':'Pending',
+    'filter.overdue':'Overdue',
+  },
+  tr: {
+    'nav.main':'Ana Menü','nav.tools':'Araçlar','nav.dashboard':'Gösterge Paneli',
+    'nav.clients':'Danışanlar','nav.sessions':'Seanslar','nav.payments':'Ödemeler',
+    'nav.referrals':'Referanslar','nav.progress':'İlerleme','nav.addons':'Eklentiler',
+    'nav.settings':'Ayarlar',
+    'btn.addSession':'+ Seans','btn.newClient':'+ Yeni Danışan','btn.cancel':'İptal',
+    'btn.addClient':'Danışan ekle →','btn.save':'Kaydet →','btn.saveNote':'Notu kaydet →',
+    'btn.assign':'Ata →','btn.addHw':'+ Ödev ekle','btn.fullNote':'Tam not',
+    'btn.browseGifts':'Hediyelere göz at →','btn.copyLink':'Referans bağlantısını kopyala',
+    'btn.logSession':'+ Seans Kaydet','btn.remind':'Hatırlat','btn.addHwProfile':'+ Ödev',
+    'btn.addNote':'+ Not',
+    'search.clients':'Danışan ara…',
+    'stat.activeClients':'Aktif Danışanlar','stat.revenueMar':'Gelir (Mar)',
+    'stat.sessionsMonth':'Bu Ayki Seanslar','stat.openHw':'Açık Ödevler',
+    'stat.plus2Month':'↑ Bu ay 2 yeni','stat.plus12Feb':'↑ Şub\'a göre %12',
+    'stat.remaining2':'2 kalan','stat.overdue3':'3 gecikmiş',
+    'stat.revenueYTD':'Yıllık Gelir','stat.outstanding':'Bekleyen',
+    'stat.avgPackage':'Ort. Paket','stat.collectionRate':'Tahsilat Oranı',
+    'stat.plus18':'↑ 2025\'e göre %18','stat.1overdueInvoice':'1 gecikmiş fatura',
+    'stat.acrossClients':'tüm danışanlarda','stat.plus2pct':'↑ Bu ay %2',
+    'stat.totalReferrals':'Toplam Referans','stat.converted':'Dönüştürülen',
+    'stat.giftsPending':'Bekleyen Hediyeler','stat.avgGoalProgress':'Ort. Hedef İlerlemesi',
+    'stat.hwCompletion':'Ödev Tamamlama','stat.sessionsDelivered':'Verilen Seanslar',
+    'stat.clientSatisfaction':'Danışan Memnuniyeti',
+    'card.upcomingSessions':'Yaklaşan Seanslar','card.next14Days':'Önümüzdeki 14 gün',
+    'card.clientPulse':'Danışan Nabzı','card.engagementStatus':'Katılım & paket durumu',
+    'card.revenue':'Gelir','card.last6months':'Son 6 ay',
+    'card.activity':'Aktivite','card.recentEvents':'Son olaylar',
+    'card.topReferrers':'En İyi Referanslar','card.packageOverview':'Paket Özeti',
+    'card.clientInfo':'Danışan Bilgileri','card.goals':'Hedefler',
+    'card.allTransactions':'Tüm İşlemler','card.referralNetwork':'Referans Ağı',
+    'card.whoReferredWho':'Kim kimi yönlendirdi','card.giftTracker':'Hediye Takibi',
+    'card.referralProgramme':'Referans Programı',
+    'action.viewAll':'Tümünü gör →','action.allClients':'Tüm danışanlar →','action.all':'Tümü →',
+    'action.edit':'Düzenle','action.exportCSV':'CSV İndir','action.backToClients':'← Danışanlara dön',
+    'th.client':'Danışan','th.package':'Paket','th.progress':'İlerleme',
+    'th.payment':'Ödeme','th.lastSession':'Son seans','th.sessions':'Seanslar',
+    'th.status':'Durum',
+    'tab.sessionNotes':'Seans Notları','tab.homework':'Ödevler',
+    'tab.payments':'Ödemeler','tab.timeline':'Zaman Çizelgesi',
+    'filter.all8':'Tümü (8)','filter.active6':'Aktif (6)',
+    'filter.followup1':'Takip (1)','filter.completed1':'Tamamlanan (1)',
+    'filter.upcoming4':'Yaklaşan (4)','filter.past42':'Geçmiş (42)',
+    'info.package':'Paket',
+    'placeholder.quickNote':'Hızlı not… (Enter\'a bas)',
+    'login.welcome':'Tekrar hoş geldiniz','login.subtitle':'Koçluk panelinize giriş yapın',
+    'login.email':'E-posta adresi','login.password':'Şifre',
+    'login.submit':'Giriş yap →','login.forgot':'Şifremi unuttum?',
+    'modal.newClientTitle':'Yeni Danışan','modal.newClientSub':'Listenize yeni bir danışan ekleyin',
+    'modal.logSessionTitle':'Seans Kaydet','modal.logSessionSub':'Tamamlanan veya planlanan seans',
+    'modal.noteTitle':'Seans Notu','modal.noteSub':'Seansı ayrıntılı olarak belgeleyin',
+    'modal.hwTitle':'Ödev Ata','modal.hwSub':'Seanslar arası danışanınıza görev verin',
+    'form.firstName':'Ad','form.lastName':'Soyad','form.email':'E-posta',
+    'form.phone':'Telefon','form.location':'Konum','form.package':'Paket',
+    'form.referredBy':'Referans veren','form.initialFocus':'İlk odak / notlar',
+    'form.client':'Danışan','form.sessionType':'Seans türü','form.date':'Tarih',
+    'form.sessionNotes':'Seans notları','form.title':'Başlık','form.notes':'Notlar',
+    'form.tags':'Etiketler (virgülle ayırın)','form.taskTitle':'Görev başlığı',
+    'form.description':'Açıklama / talimatlar','form.dueDate':'Bitiş tarihi',
+    'form.category':'Kategori',
+    'page.dashboard':'Gösterge Paneli','page.dashboardSub':'Perşembe, 19 Mart 2026',
+    'page.clients':'Danışanlar','page.clientsSub':'8 aktif · 1 takip',
+    'page.sessions':'Seanslar','page.sessionsSub':'Bu ay 4 yaklaşan seans',
+    'page.payments':'Ödemeler','page.paymentsSub':'Mart\'ta €4.320 gelir',
+    'page.referrals':'Referanslar','page.referralsSub':'5 toplam · 3 dönüştürülen',
+    'page.progress':'İlerleme','page.progressSub':'Tüm danışanlarda hedef takibi',
+    'page.profile':'Danışan Profili','page.profileSub':'Tam genel bakış & geçmiş',
+    'demo.notice':'Demo modu: devam etmek için herhangi bir e-posta ve şifre girin.',
+    // Sessions tabs
+    'filter.sessScheduled':'Planlanmış (4)',
+    'filter.sessUnscheduled':'Planlanacak (16)',
+    'filter.sessPast':'Geçmiş (42)',
+    'card.scheduledSessions':'Planlanmış Seanslar',
+    'card.confirmedDates':'Onaylı tarih ve saatler',
+    'card.remainingSessions':'Kalan Seanslar',
+    'card.purchasedNotScheduled':'Satın alındı · henüz planlanmadı',
+    'card.pastSessions':'Geçmiş Seanslar',
+    'card.completedSessions':'Tüm tamamlanan seanslar',
+    'sess.unscheduledHint':'5 danışan için 16 seans henüz planlanmadı.',
+    'sess.unscheduledSub':'Bunlar satın alındı ama henüz rezerve edilmedi. Planlamak için tıklayın.',
+    'sess.legendHint':'Tamamlandı   Planlandı   Planlanacak',
+    'btn.schedule':'Planla',
+    'btn.scheduleSession':'+ Planla',
+    'btn.confirmSchedule':'Onayla ve danışana bildir →',
+    'modal.scheduleTitle':'Seans Planla',
+    'modal.scheduleSub':'Kalan seans için tarih ve saat seçin',
+    // Clients payment column
+    'th.paymentStatus':'Ödendi · Kalan · Gecikmiş',
+    // Add-ons
+    'addons.title':'Eklentiler: Yakında',
+    'addons.desc':'Güçlü modüllerle CoachOS\u2019u genişletin. Her eklenti danışan bazında veya tüm pratiğiniz için aktif edilebilir.',
+    'addons.notify':'Eklentiler yayına girdiğinde bildirim almak ister misiniz?',
+    'addons.notifyLink':'Bekleme listesine katıl →',
+    'addon.journaling':'Danışan Günlüğü',
+    'addon.journalingDesc':'Seanslar arası yönlendirmeli özel yansıma alanı.',
+    'addon.assessments':'Değerlendirmeler',
+    'addon.assessmentsDesc':'Yaşam Tekerleği, değer kartları, EQ kontrolleri ve daha fazlası.',
+    'addon.group':'Grup Koçluğu',
+    'addon.groupDesc':'Kohortları, grup seanslarını ve paylaşılan kaynakları yönetin.',
+    'addon.resources':'Kaynak Kütüphanesi',
+    'addon.resourcesDesc':'PDF, video ve çalışma sayfalarını doğrudan danışanlarla paylaşın.',
+    'addon.integrations':'Entegrasyonlar',
+    'addon.integrationsDesc':'Zoom, Google Takvim, Stripe ve WhatsApp senkronizasyonu.',
+    'addon.ai':'YZ Seans Hazırlığı',
+    'addon.aiDesc':'Seans özetleri ve sonraki adım önerileri otomatik oluşturulsun.',
+    // Nav
+    'nav.upcoming':'Yakında',
+    // Page
+    'page.addons':'Eklentiler',
+    'page.addonsSub':'Modüller ve entegrasyonlar',
+    // Payments analysis
+    'card.monthlyRevenue':'Aylık Gelir',
+    'card.last12months':'Son 12 ay',
+    'card.revenueByPackage':'Pakete Göre Gelir',
+    'card.marchBreakdown':'Mart 2026 dağılımı',
+    'card.monthlyAnalysis':'Aylık Analiz',
+    'card.ytd2026':'2026 yılı başından bugüne',
+    'card.ytd2026sub':'Ocak - Mart 2026',
+    'card.insights':'Temel Bulgular',
+    'card.outstanding':'Bekleyen Ödemeler',
+    'insight.bestMonth':'En İyi Ay',
+    'insight.growthRate':'Büyüme Oranı',
+    'insight.vsLastYear':'geçen yılın aynı dönemiyle',
+    'insight.projected':'2. Çeyrek Tahmini',
+    'insight.basedOnPipeline':'aktif pipeline\u2019a göre',
+    'th.month':'Ay',
+    'th.revenue':'Gelir',
+    'th.newClients':'Yeni Danışan',
+    'th.avgPerSession':'Seans Başı Ort.',
+    'th.mom':'AÜA',
+    'th.amount':'Tutar',
+    'th.type':'Tür',
+    'th.clientPackage':'Danışan & Paket',
+    'filter.allTx':'Tümü',
+    'filter.paid':'Ödendi',
+    'filter.pending':'Bekliyor',
+    'filter.overdue':'Gecikmiş',
+  }
+};
+
+let currentLang = localStorage.getItem('coachosLang') || 'en';
+
+function t(key) {
+  return (TRANSLATIONS[currentLang]?.[key]) || (TRANSLATIONS['en']?.[key]) || key;
+}
+
+function applyTranslations() {
+  document.getElementById('htmlRoot').setAttribute('lang', currentLang);
+  // All tagged elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const val = t(el.getAttribute('data-i18n'));
+    if (val) el.textContent = val;
+  });
+  // Placeholders
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+  });
+  // Sync topbar title with current view
+  const activeView = document.querySelector('.view.active');
+  if (activeView) {
+    const viewName = activeView.id.replace('view-', '');
+    const tk = 'page.' + viewName, sk = 'page.' + viewName + 'Sub';
+    if (t(tk) !== tk) {
+      document.getElementById('pageTitle').textContent = t(tk);
+      document.getElementById('pageSubtitle').textContent = t(sk);
+    }
+  }
+  // Sync lang buttons
+  document.getElementById('langEN').classList.toggle('active', currentLang === 'en');
+  document.getElementById('langTR').classList.toggle('active', currentLang === 'tr');
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  try { localStorage.setItem('coachosLang', lang); } catch(e) {}
+  applyTranslations();
+  // Rebuild chart labels if on payments view
+  const activeView = document.querySelector('.view.active');
+  if (activeView && activeView.id === 'view-payments') {
+    if (typeof buildRevenueChart === 'function') buildRevenueChart();
+    if (typeof buildMonthlyTable === 'function') buildMonthlyTable();
+  }
+}
+
+// ── AUTH ──────────────────────────────────
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  if (!email || !pass) { alert(currentLang === 'tr' ? 'Lütfen e-posta ve şifre girin.' : 'Please enter your email and password.'); return; }
+  // In production: POST to /api/auth/login with CSRF token, bcrypt verification server-side
+  document.getElementById('loginScreen').style.display = 'none';
+}
+function doLogout() {
+  // In production: POST to /api/auth/logout to invalidate session server-side
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+// Auto-login for demo
+window.addEventListener('load', () => {
+  setTimeout(() => { document.getElementById('loginScreen').style.display = 'none'; }, 400);
+});
+
+// ── NAVIGATION ───────────────────────────
+function showView(name, navEl) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('view-' + name);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.textContent.trim().toLowerCase().startsWith(name.slice(0,5))) n.classList.add('active');
+    });
+  }
+  const tk = 'page.' + name, sk = 'page.' + name + 'Sub';
+  document.getElementById('pageTitle').textContent = t(tk) !== tk ? t(tk) : name;
+  document.getElementById('pageSubtitle').textContent = t(sk) !== sk ? t(sk) : '';
+  // Init payment charts when navigating to payments
+  if (name === 'payments') {
+    setTimeout(() => {
+      if (typeof buildRevenueChart === 'function') buildRevenueChart();
+      if (typeof buildDonutChart === 'function') buildDonutChart();
+      if (typeof buildMonthlyTable === 'function') buildMonthlyTable();
+    }, 60);
+  }
+}
+
+// ── CLIENT PROFILE ───────────────────────
+const profiles = {
+  laura: { name: 'Laura Martínez', email: 'l.martinez@email.com, Rotterdam NL, since Jan 2026', initials: 'LM', bg: '#D5EBE1', col: '#2D6A50', pkg: 'Growth Journey', ref: '♦ Referred by James Keane' },
+  james: { name: 'James Keane', email: 'james.k@corp.ie, Dublin IE, since Jan 2026', initials: 'JK', bg: '#DBEAFE', col: '#1D4ED8', pkg: 'Deep Transformation', ref: '★ Top referrer' },
+  amara: { name: 'Amara Osei', email: 'amara@designco.gh, Amsterdam NL, since Mar 2026', initials: 'AO', bg: '#CCFBF1', col: '#0F766E', pkg: 'Clarity Session', ref: '' },
+  sophie: { name: 'Sophie Renard', email: 's.renard@studio.fr, Brussels BE, since Mar 2026', initials: 'SR', bg: '#FEE2D0', col: '#B45309', pkg: 'Growth Journey', ref: '' },
+  tom: { name: 'Tom Dijk', email: 'tom@freelance.nl, Amsterdam NL, since Feb 2026', initials: 'TD', bg: '#F3F2F0', col: '#72695F', pkg: 'Clarity Session', ref: '' },
+  niels: { name: 'Niels Berg', email: 'n.berg@ventures.nl, Utrecht NL, since Feb 2026', initials: 'NB', bg: '#EDE9FE', col: '#6D31D9', pkg: 'Deep Transformation', ref: '♦ Referred by Mei Lin' },
+  ines: { name: 'Inês Costa', email: 'ines@brand.pt, Lisbon PT, since Feb 2026', initials: 'IC', bg: '#EDE9FE', col: '#6D31D9', pkg: 'Growth Journey', ref: '♦ Referred by Sophie Renard' },
+  mei: { name: 'Mei Lin', email: 'mei@design.sg, Berlin DE, since Oct 2025', initials: 'ML', bg: '#CCFBF1', col: '#0F766E', pkg: 'Deep Transformation', ref: '★ Top referrer' },
+};
+
+function openClientProfile(id) {
+  const p = profiles[id];
+  if (!p) return;
+  document.getElementById('profileAvatar').textContent = p.initials;
+  document.getElementById('profileAvatar').style.background = p.bg;
+  document.getElementById('profileAvatar').style.color = p.col;
+  document.getElementById('profileName').textContent = p.name;
+  document.getElementById('profileEmail').textContent = p.email;
+  document.getElementById('profilePackage').textContent = p.pkg;
+  const refEl = document.getElementById('profileReferral');
+  refEl.textContent = p.ref;
+  refEl.style.display = p.ref ? 'inline-flex' : 'none';
+  showView('profile', null);
+  switchTab('notes', document.querySelector('.tab'));
+}
+
+// ── TABS ─────────────────────────────────
+function switchTab(name, el) {
+  ['notes', 'homework', 'payments', 'timeline'].forEach(t => {
+    const el = document.getElementById('tab-' + t);
+    if (el) el.style.display = t === name ? 'block' : 'none';
+  });
+  document.querySelectorAll('#view-profile .tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#view-profile .tab').forEach(t => {
+    if (t.textContent.toLowerCase().includes(name.slice(0,4))) t.classList.add('active');
+  });
+  if (el) { el.classList.add('active'); }
+}
+
+
+// ── SESSIONS TABS ────────────────────────────────────
+function switchSessionsTab(tab, el) {
+  ['scheduled','unscheduled','past'].forEach(id => {
+    const el = document.getElementById('sess-' + id);
+    if (el) el.style.display = id === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('#sessionsTabs .pill-tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function openScheduleModal() {
+  document.getElementById('scheduleModal').classList.add('open');
+}
+
+// ── MODALS ────────────────────────────────
+function openAddClient() { document.getElementById('addClientModal').classList.add('open'); }
+function openSessionModal() { document.getElementById('sessionModal').classList.add('open'); }
+function openNoteModal() { document.getElementById('noteModal').classList.add('open'); }
+function openHwModal() { document.getElementById('hwModal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+});
+
+// ── HOMEWORK TOGGLE ───────────────────────
+function toggleHw(el) {
+  el.classList.toggle('done');
+  el.textContent = el.classList.contains('done') ? '✓' : '';
+}
+
+// ── SEARCH ───────────────────────────────
+function searchClients(val) {
+  if (!val) return;
+  showView('clients', null);
+}
+
+// ── QUICK NOTE ────────────────────────────
+function addQuickNote(input) {
+  if (!input.value.trim()) return;
+  const list = document.getElementById('notesList');
+  const now = new Date();
+  const note = document.createElement('div');
+  note.className = 'note-card';
+  const locale = currentLang === 'tr' ? 'tr-TR' : 'en-GB';
+  const label = currentLang === 'tr' ? 'Hızlı not' : 'Quick note';
+  note.innerHTML = `<div class="note-header"><h4>${label}</h4><time>${now.toLocaleDateString(locale, {day:'numeric',month:'short',year:'numeric'})}</time></div><div class="note-body">${input.value}</div>`;
+  list.prepend(note);
+  input.value = '';
+}
+
+// ── FILTER ────────────────────────────────
+function filterClients(type, el) {
+  document.querySelectorAll('.pill-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+
+// ── MONTHLY DATA ─────────────────────────────────────
+const monthlyData = [
+  { month: 'Apr', month_tr: 'Nis', revenue: 1800, sessions: 6,  newClients: 1 },
+  { month: 'May', month_tr: 'May', revenue: 2160, sessions: 8,  newClients: 1 },
+  { month: 'Jun', month_tr: 'Haz', revenue: 1440, sessions: 5,  newClients: 0 },
+  { month: 'Jul', month_tr: 'Tem', revenue: 1800, sessions: 6,  newClients: 1 },
+  { month: 'Aug', month_tr: 'Ağu', revenue: 2160, sessions: 7,  newClients: 2 },
+  { month: 'Sep', month_tr: 'Eyl', revenue: 2880, sessions: 9,  newClients: 2 },
+  { month: 'Oct', month_tr: 'Eki', revenue: 2160, sessions: 7,  newClients: 1 },
+  { month: 'Nov', month_tr: 'Kas', revenue: 2880, sessions: 9,  newClients: 2 },
+  { month: 'Dec', month_tr: 'Ara', revenue: 1800, sessions: 6,  newClients: 0 },
+  { month: 'Jan', month_tr: 'Oca', revenue: 3900, sessions: 11, newClients: 3 },
+  { month: 'Feb', month_tr: 'Şub', revenue: 3880, sessions: 12, newClients: 1 },
+  { month: 'Mar', month_tr: 'Mar', revenue: 4320, sessions: 14, newClients: 2, current: true },
+];
+
+// ── REVENUE BAR CHART ────────────────────────────────
+let revenueChartInst = null;
+let chartMode = 'revenue';
+
+function getChartColor(alpha) {
+  const style = getComputedStyle(document.documentElement);
+  return `rgba(74, 124, 104, ${alpha})`;
+}
+
+function buildRevenueChart() {
+  const ctx = document.getElementById('revenueChart');
+  if (!ctx) return;
+  const isTR = currentLang === 'tr';
+  const labels = monthlyData.map(d => isTR ? d.month_tr : d.month);
+  const values = chartMode === 'revenue'
+    ? monthlyData.map(d => d.revenue)
+    : monthlyData.map(d => d.newClients);
+
+  const bgs = monthlyData.map(d =>
+    d.current ? 'rgba(74,124,104,0.85)' : 'rgba(74,124,104,0.18)'
+  );
+  const borders = monthlyData.map(d =>
+    d.current ? 'rgba(74,124,104,1)' : 'rgba(74,124,104,0.35)'
+  );
+
+  if (revenueChartInst) revenueChartInst.destroy();
+  revenueChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: bgs,
+        borderColor: borders,
+        borderWidth: 1.5,
+        borderRadius: 5,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#fff',
+          borderColor: 'rgba(0,0,0,0.08)',
+          borderWidth: 1,
+          titleColor: '#1C1A17',
+          bodyColor: '#72695F',
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: {
+            label: ctx => chartMode === 'revenue'
+              ? ` €${ctx.parsed.y.toLocaleString()}`
+              : ` ${ctx.parsed.y} ${isTR ? 'danışan' : 'clients'}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: { color: '#B8B0A6', font: { size: 11, family: 'Geist' } }
+        },
+        y: {
+          grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+          border: { display: false, dash: [4,4] },
+          ticks: {
+            color: '#B8B0A6',
+            font: { size: 11, family: 'Geist' },
+            callback: v => chartMode === 'revenue' ? '€' + (v/1000).toFixed(v>=1000?1:0) + (v>=1000?'k':'') : v
+          }
+        }
+      }
+    }
+  });
+}
+
+function switchChartView(mode, el) {
+  chartMode = mode;
+  document.querySelectorAll('#view-payments .pill-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  buildRevenueChart();
+}
+
+// ── DONUT CHART ──────────────────────────────────────
+let donutInst = null;
+function buildDonutChart() {
+  const ctx = document.getElementById('donutChart');
+  if (!ctx) return;
+  if (donutInst) donutInst.destroy();
+  donutInst = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Deep Transformation', 'Growth Journey', 'Clarity Session'],
+      datasets: [{
+        data: [3200, 1440, 180],
+        backgroundColor: ['rgba(74,124,104,0.8)', 'rgba(37,88,217,0.7)', 'rgba(168,92,7,0.7)'],
+        borderColor: ['#fff','#fff','#fff'],
+        borderWidth: 3,
+        hoverOffset: 4,
+      }]
+    },
+    options: {
+      responsive: false,
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#fff',
+          borderColor: 'rgba(0,0,0,0.08)',
+          borderWidth: 1,
+          titleColor: '#1C1A17',
+          bodyColor: '#72695F',
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: { label: ctx => ` €${ctx.parsed.toLocaleString()}` }
+        }
+      }
+    }
+  });
+}
+
+// ── MONTHLY TABLE ─────────────────────────────────────
+function buildMonthlyTable() {
+  const tbody = document.getElementById('monthlyTableBody');
+  if (!tbody) return;
+  const isTR = currentLang === 'tr';
+  let rows = '';
+  monthlyData.forEach((d, i) => {
+    const prev = monthlyData[i - 1];
+    const mom = prev
+      ? ((d.revenue - prev.revenue) / prev.revenue * 100).toFixed(1)
+      : null;
+    const momClass = !mom ? 'mom-neutral' : parseFloat(mom) >= 0 ? 'mom-up' : 'mom-down';
+    const momText = !mom ? '—' : (parseFloat(mom) >= 0 ? '↑' : '↓') + Math.abs(mom) + '%';
+    const avgSess = d.sessions > 0 ? '€' + Math.round(d.revenue / d.sessions) : '—';
+    const label = isTR ? d.month_tr : d.month;
+    const maxRev = Math.max(...monthlyData.map(x => x.revenue));
+
+    // Mini sparkline (relative bar heights)
+    const sparkH = Math.round((d.revenue / maxRev) * 20);
+    const isCurrent = d.current;
+
+    rows += `<tr class="monthly-row${isCurrent ? ' current-month' : ''}">
+      <td>${label} ${isCurrent ? '<span class="badge badge-green" style="font-size:0.62rem;padding:0.15rem 0.45rem;margin-left:0.375rem;">' + (isTR ? 'Şu an' : 'Now') + '</span>' : ''}</td>
+      <td style="text-align:right;font-weight:${isCurrent?'600':'400'};color:${isCurrent?'var(--accent)':'var(--text)'};">€${d.revenue.toLocaleString()}</td>
+      <td style="text-align:right;color:var(--text2);">${d.sessions}</td>
+      <td style="text-align:right;color:var(--text2);">${d.newClients > 0 ? '+' + d.newClients : '—'}</td>
+      <td style="text-align:right;color:var(--text2);">${avgSess}</td>
+      <td style="text-align:right;" class="${momClass}">${momText}</td>
+      <td style="text-align:right;padding-right:1.25rem;">
+        <div class="sparkline-cell" style="justify-content:flex-end;">
+          <div class="sparkline-bar${isCurrent?' peak':''}" style="height:${sparkH}px;"></div>
+        </div>
+      </td>
+    </tr>`;
+  });
+  tbody.innerHTML = rows;
+}
+
+// ── TRANSACTION FILTER ───────────────────────────────
+function filterTx(type, el) {
+  document.querySelectorAll('#view-payments .pill-tabs:last-of-type .pill-tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+// Charts are initialised via showView and setLang hooks below
+</script>
+</body>
+</html>

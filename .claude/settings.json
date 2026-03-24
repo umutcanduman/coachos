@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx next:*)",
+      "Bash(npx supabase:*)",
+      "Bash(cp supabase/migrations/001_initial_schema.sql supabase/migrations/20260323000000_initial_schema.sql)",
+      "Bash(supabase db:*)",
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(lsof -ti:4001)",
+      "Bash(curl -s http://localhost:4001/dashboard)",
+      "Bash(curl -s -c /tmp/cookies.txt -b /tmp/cookies.txt http://localhost:4001/dashboard -L -w \"\\\\n%{http_code}\\\\n\")",
+      "Bash(node -e \"console.log\\(require\\(''next/package.json''\\).version\\)\")",
+      "Bash(curl -s -L -c /tmp/cookies.txt http://localhost:3847/login)",
+      "Bash(ls /Users/udhome/Downloads/CoachOS/app/next.config.*)",
+      "Bash(cat /Users/udhome/Downloads/CoachOS/app/next.config.*)",
+      "Bash(node -e \":*)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} | %{redirect_url}\\\\n\" http://localhost:4001/dashboard)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:4001/login)",
+      "Bash(find /Users/udhome/Downloads/CoachOS/app/src -type f \\\\\\(-name *.ts -o -name *.tsx -o -name *.js -o -name *.jsx \\\\\\))",
+      "Bash(pbcopy)"
+    ],
+    "additionalDirectories": [
+      "/Users/udhome/Downloads/CoachOS/app/src/app/dashboard/clients",
+      "/Users/udhome/Downloads/CoachOS/app/src/app/admin/coaches"
+    ]
+  }
+}

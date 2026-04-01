@@ -3,7 +3,12 @@
 import { useState } from "react";
 import NewClientModal from "./NewClientModal";
 
-export default function ClientActions() {
+interface ClientOption {
+  id: string;
+  name: string;
+}
+
+export default function ClientActions({ existingClients = [] }: { existingClients?: ClientOption[] }) {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
@@ -14,7 +19,7 @@ export default function ClientActions() {
       >
         + New Client
       </button>
-      <NewClientModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <NewClientModal open={modalOpen} onClose={() => setModalOpen(false)} existingClients={existingClients} />
     </>
   );
 }

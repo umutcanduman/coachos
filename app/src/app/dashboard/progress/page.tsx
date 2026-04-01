@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import Topbar from "@/components/Topbar";
 import StatCard from "@/components/StatCard";
 
@@ -92,7 +93,7 @@ export default async function ProgressPage() {
       <Topbar title="Progress" subtitle="Goal tracking across all clients" />
       <div className="flex-1 p-7">
         {/* Stat cards */}
-        <div className="mb-6 grid grid-cols-4 gap-4">
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label="Total Goals" value={totalGoals} delta={`Across ${allClients.length} clients`} deltaType="neutral" />
           <StatCard
             label="On Track"
@@ -136,7 +137,7 @@ export default async function ProgressPage() {
               const sessionCount = sessions.length;
 
               return (
-                <div key={client.id} className="flex flex-col overflow-hidden rounded-card border border-border bg-surface">
+                <Link href={`/dashboard/clients/${client.id}`} key={client.id} className="flex flex-col overflow-hidden rounded-card border border-border bg-surface transition-shadow hover:shadow-sm">
                   <div className="flex items-center gap-3 border-b border-border px-5 py-4">
                     <div className={`flex h-[34px] w-[34px] flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold ${colorClass}`}>
                       {initials}
@@ -184,7 +185,7 @@ export default async function ProgressPage() {
                       {completedHomework === 0 && pendingHomework === 0 && <span>No homework</span>}
                     </span>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

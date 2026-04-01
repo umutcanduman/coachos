@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Topbar from "@/components/Topbar";
 import ProfileTabs from "./ProfileTabs";
+import ProfileActions from "./ProfileActions";
 
 export const dynamic = "force-dynamic";
 
@@ -168,14 +169,15 @@ export default async function ClientProfilePage({
               )}
             </div>
           </div>
-          <div className="flex gap-2.5">
-            <button className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-4 py-2 text-[0.8125rem] font-medium text-text-2 transition-all hover:bg-surface-3">
-              Edit
-            </button>
-            <button className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-[0.8125rem] font-medium text-white transition-all hover:bg-accent-hover">
-              + Session
-            </button>
-          </div>
+          <ProfileActions client={{
+            id: client.id,
+            name: client.name,
+            email: client.email,
+            phone: client.phone,
+            location: client.location,
+            package_type: client.package_type,
+            status: client.status,
+          }} />
         </div>
 
         {/* Content grid */}
@@ -301,6 +303,8 @@ export default async function ClientProfilePage({
             sessions={sessions}
             homework={homework}
             payments={payments}
+            goals={goals}
+            clientId={client.id}
             clientCreatedAt={client.created_at}
           />
         </div>

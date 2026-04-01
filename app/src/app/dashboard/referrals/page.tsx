@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Topbar from "@/components/Topbar";
 import StatCard from "@/components/StatCard";
+import CopyButton from "./CopyButton";
 
 export const dynamic = "force-dynamic";
 
@@ -244,6 +245,7 @@ export default async function ReferralsPage() {
                     <div className="flex-1 truncate rounded-lg border border-border bg-surface-2 px-3.5 py-2 font-mono text-xs text-text-3">
                       https://coachos.app/refer/{coachId ?? "..."}
                     </div>
+                    <CopyButton text={`https://coachos.app/refer/${coachId ?? ""}`} />
                   </div>
                 </div>
               </div>

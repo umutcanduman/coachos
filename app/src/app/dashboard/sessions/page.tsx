@@ -40,6 +40,7 @@ export default async function SessionsPage() {
     duration: number;
     type: string;
     status: string;
+    notes: string | null;
     clientName: string;
     clientId: string;
     packageType: string;
@@ -51,7 +52,7 @@ export default async function SessionsPage() {
     name: string;
     packageType: string;
     totalSessions: number;
-    usedSessions: number;
+    completedCount: number;
     scheduledCount: number;
     remaining: number;
   };
@@ -109,6 +110,7 @@ export default async function SessionsPage() {
           duration: s.duration,
           type: s.type,
           status: s.status,
+          notes: s.notes ?? null,
           clientName: client?.name ?? "Unknown",
           clientId: s.client_id,
           packageType: client?.package_type ?? "—",
@@ -125,19 +127,27 @@ export default async function SessionsPage() {
 
       toSchedule = clients
         .map((client) => {
-          const pkg = Array.isArray(client.packages) ? client.packages[0] : client.packages;
-          if (!pkg || pkg.status !== "active") return null;
+          // Find the active package — might be multiple, pick the active one
+          const packages = Array.isArray(client.packages) ? client.packages : (client.packages ? [client.packages] : []);
+          const pkg = packages.find((p: { status: string }) => p.status === "active") ?? packages[0] ?? null;
+          if (!pkg) return null;
           const total = pkg.total_sessions ?? 0;
-          const used = pkg.used_sessions ?? 0;
-          const schedCount = scheduled.filter((s) => s.clientId === client.id).length;
-          const remaining = total - used - schedCount;
+          if (total <= 0) return null;
+
+          // Count from actual session records — ALL sessions for this client
+          const clientSessions = sessions.filter((s) => s.client_id === client.id);
+          const completedCount = clientSessions.filter((s) => s.status === "completed").length;
+          const schedCount = clientSessions.filter(
+            (s) => s.status === "scheduled" && new Date(s.date) >= now
+          ).length;
+          const remaining = total - completedCount - schedCount;
           if (remaining <= 0) return null;
           return {
             id: client.id,
             name: client.name,
             packageType: client.package_type ?? "—",
             totalSessions: total,
-            usedSessions: used,
+            completedCount,
             scheduledCount: schedCount,
             remaining,
           };
@@ -148,6 +158,19 @@ export default async function SessionsPage() {
     }
   }
 
+  // Build client list for the Add Session dropdown
+  let clientOptions: { id: string; name: string }[] = [];
+  if (coachId) {
+    try {
+      const { data } = await supabase
+        .from("clients")
+        .select("id, name")
+        .eq("coach_id", coachId)
+        .order("name");
+      clientOptions = data ?? [];
+    } catch { /* */ }
+  }
+
   return (
     <>
       <Topbar title="Sessions" subtitle={`${allSessions.length} total sessions`} />
@@ -156,6 +179,7 @@ export default async function SessionsPage() {
         toSchedule={toSchedule}
         past={past}
         showReminders={whatsappEnabled}
+        clients={clientOptions}
       />
     </>
   );

@@ -91,7 +91,7 @@ export default async function ClientsPage({
         <div className="mb-5 flex items-center gap-3">
           <ClientFilters activeFilter={filter} />
           <div className="ml-auto">
-            <ClientActions />
+            <ClientActions existingClients={clients.map((c) => ({ id: c.id, name: c.name }))} />
           </div>
         </div>
 
@@ -121,10 +121,12 @@ export default async function ClientsPage({
                   .join("")
                   .toUpperCase()
                   .slice(0, 2);
-                const pkg = Array.isArray(client.packages) ? client.packages[0] : client.packages;
+                const pkgArr = Array.isArray(client.packages) ? client.packages : (client.packages ? [client.packages] : []);
+                const pkg = pkgArr.find((p: { status: string }) => p.status === "active") ?? pkgArr[0] ?? null;
                 const totalSessions = pkg?.total_sessions ?? 0;
-                const usedSessions = pkg?.used_sessions ?? 0;
-                const progress = totalSessions > 0 ? Math.round((usedSessions / totalSessions) * 100) : 0;
+                const clientSessions = Array.isArray(client.sessions) ? client.sessions : [];
+                const completedSessions = clientSessions.filter((s: { status: string }) => s.status === "completed").length;
+                const progress = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
 
                 const payments = Array.isArray(client.payments) ? client.payments : [];
                 const paidAmount = payments
@@ -136,8 +138,7 @@ export default async function ClientsPage({
                 );
                 const hasOverdue = payments.some((p: { status: string }) => p.status === "overdue");
 
-                const sessions = Array.isArray(client.sessions) ? client.sessions : [];
-                const nextSession = sessions
+                const nextSession = clientSessions
                   .filter(
                     (s: { date: string; status: string }) =>
                       new Date(s.date) > new Date() && s.status === "scheduled"
@@ -184,7 +185,7 @@ export default async function ClientsPage({
                         />
                       </div>
                       <div className="mt-1 text-[0.7rem] text-text-3">
-                        {usedSessions}/{totalSessions} sessions
+                        {completedSessions}/{totalSessions} sessions
                       </div>
                     </div>
                     <div>

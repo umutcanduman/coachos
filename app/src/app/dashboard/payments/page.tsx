@@ -3,6 +3,7 @@ import Topbar from "@/components/Topbar";
 import StatCard from "@/components/StatCard";
 import { MonthlyRevenueChart, RevenueByPackageChart } from "./PaymentCharts";
 import PaymentFilters from "./PaymentFilters";
+import { ReminderButton, SendReminderButton } from "./PaymentActions";
 
 export const dynamic = "force-dynamic";
 
@@ -238,9 +239,7 @@ export default async function PaymentsPage({
                 </div>
               </div>
               <div className="mt-3">
-                <button className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3.5 py-1.5 text-[0.75rem] font-medium text-text-2 transition-all hover:bg-surface-3">
-                  Send Reminder
-                </button>
+                <SendReminderButton clientName="Anya Petrova" />
               </div>
             </div>
           </div>
@@ -314,7 +313,7 @@ export default async function PaymentsPage({
                       {tx.status === "paid" ? (
                         <span className="text-xs text-text-3">Receipt</span>
                       ) : (
-                        <button className="text-xs font-medium text-accent hover:underline">Remind</button>
+                        <ReminderButton clientName={tx.client} />
                       )}
                     </div>
                   </div>

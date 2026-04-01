@@ -3,16 +3,27 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
+import Toast from "@/components/Toast";
+
+interface ClientOption {
+  id: string;
+  name: string;
+}
 
 interface NewClientModalProps {
   open: boolean;
   onClose: () => void;
+  existingClients: ClientOption[];
 }
 
-export default function NewClientModal({ open, onClose }: NewClientModalProps) {
+const inputClass = "w-full rounded-lg border border-border bg-surface-2 px-3.5 py-2.5 font-sans text-sm text-text outline-none transition-colors placeholder:text-text-3 focus:border-border-2";
+const labelClass = "mb-1.5 block text-xs font-medium uppercase tracking-[0.06em] text-text-2";
+
+export default function NewClientModal({ open, onClose, existingClients }: NewClientModalProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   if (!open) return null;
 
@@ -27,16 +38,23 @@ export default function NewClientModal({ open, onClose }: NewClientModalProps) {
     const phone = (formData.get("phone") as string).trim();
     const packageType = formData.get("package_type") as string;
     const location = (formData.get("location") as string).trim();
+    const referredBy = formData.get("referred_by") as string;
 
     if (!name || !email) {
       setError("Name and email are required.");
       return;
     }
 
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    let supabase;
+    try {
+      supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+    } catch {
+      setError("Failed to connect. Please refresh and try again.");
+      return;
+    }
 
     const {
       data: { user },
@@ -57,22 +75,50 @@ export default function NewClientModal({ open, onClose }: NewClientModalProps) {
       return;
     }
 
-    const { error: insertError } = await supabase.from("clients").insert({
-      coach_id: coach.id,
-      name,
-      email,
-      phone: phone || null,
-      location: location || null,
-      package_type: packageType || null,
-      status: "active",
-    });
+    const { data: newClient, error: insertError } = await supabase
+      .from("clients")
+      .insert({
+        coach_id: coach.id,
+        name,
+        email,
+        phone: phone || null,
+        location: location || null,
+        package_type: packageType || null,
+        status: "active",
+        referred_by: referredBy || null,
+      })
+      .select("id")
+      .single();
 
     if (insertError) {
       setError("Failed to create client. Please try again.");
-      console.error("Client insert error:", insertError);
       return;
     }
 
+    // Auto-create referral record if referred_by is set
+    if (referredBy && newClient) {
+      try {
+        const { data: referrerData } = await supabase
+          .from("clients")
+          .select("name, email")
+          .eq("id", referredBy)
+          .single();
+        await supabase.from("referrals").insert({
+          referrer_id: referredBy,
+          referred_client_id: newClient.id,
+          coach_id: coach.id,
+          referrer_name: referrerData?.name ?? "",
+          referrer_email: referrerData?.email ?? "",
+          referred_name: name,
+          referred_email: email,
+          status: "converted",
+        });
+      } catch {
+        // Non-critical — referral record is supplementary
+      }
+    }
+
+    setToast({ message: "Client created", type: "success" });
     startTransition(() => {
       router.refresh();
       onClose();
@@ -80,115 +126,89 @@ export default function NewClientModal({ open, onClose }: NewClientModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-8 backdrop-blur-sm">
-      <div className="relative w-full max-w-[520px] rounded-[14px] border border-border-2 bg-surface p-7 shadow-2xl">
-        <button
-          onClick={onClose}
-          className="absolute right-5 top-5 border-none bg-transparent text-[1.125rem] text-text-3 transition-colors hover:text-text"
-        >
-          ✕
-        </button>
+    <>
+      <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-8 backdrop-blur-sm">
+        <div className="relative w-full max-w-[520px] rounded-[14px] border border-border-2 bg-surface p-7 shadow-2xl">
+          <button
+            onClick={onClose}
+            className="absolute right-5 top-5 border-none bg-transparent text-[1.125rem] text-text-3 transition-colors hover:text-text"
+          >
+            ✕
+          </button>
 
-        <h2 className="mb-1 font-serif text-2xl font-normal text-text">
-          New Client
-        </h2>
-        <p className="mb-6 text-[0.8125rem] text-text-3">
-          Add a client to your practice
-        </p>
+          <h2 className="mb-1 font-serif text-2xl font-normal text-text">New Client</h2>
+          <p className="mb-6 text-[0.8125rem] text-text-3">Add a client to your practice</p>
 
-        {error && (
-          <div className="mb-4 rounded-lg border border-[rgba(184,50,50,0.15)] bg-c-red-dim px-4 py-3 text-[0.8125rem] text-c-red">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.06em] text-text-2">
-              Full name
-            </label>
-            <input
-              name="name"
-              type="text"
-              required
-              placeholder="Laura Martínez"
-              className="w-full rounded-lg border border-border bg-surface-2 px-3.5 py-2.5 font-sans text-sm text-text outline-none transition-colors placeholder:text-text-3 focus:border-border-2"
-            />
-          </div>
-
-          <div className="mb-4 grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.06em] text-text-2">
-                Email
-              </label>
-              <input
-                name="email"
-                type="email"
-                required
-                placeholder="laura@email.com"
-                className="w-full rounded-lg border border-border bg-surface-2 px-3.5 py-2.5 font-sans text-sm text-text outline-none transition-colors placeholder:text-text-3 focus:border-border-2"
-              />
+          {error && (
+            <div className="mb-4 rounded-lg border border-[rgba(184,50,50,0.15)] bg-c-red-dim px-4 py-3 text-[0.8125rem] text-c-red">
+              {error}
             </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.06em] text-text-2">
-                Phone
-              </label>
-              <input
-                name="phone"
-                type="tel"
-                placeholder="+31 6 12345678"
-                className="w-full rounded-lg border border-border bg-surface-2 px-3.5 py-2.5 font-sans text-sm text-text outline-none transition-colors placeholder:text-text-3 focus:border-border-2"
-              />
-            </div>
-          </div>
+          )}
 
-          <div className="mb-4 grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.06em] text-text-2">
-                Package
-              </label>
-              <select
-                name="package_type"
-                className="w-full rounded-lg border border-border bg-surface-2 px-3.5 py-2.5 font-sans text-sm text-text outline-none transition-colors focus:border-border-2"
-              >
-                <option value="">Select package</option>
-                <option value="Growth Journey">Growth Journey</option>
-                <option value="Deep Transformation">Deep Transformation</option>
-                <option value="Clarity Session">Clarity Session</option>
-                <option value="Single Session">Single Session</option>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className={labelClass}>Full name</label>
+              <input name="name" type="text" required placeholder="Laura Martínez" className={inputClass} />
+            </div>
+
+            <div className="mb-4 grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Email</label>
+                <input name="email" type="email" required placeholder="laura@email.com" className={inputClass} />
+              </div>
+              <div>
+                <label className={labelClass}>Phone</label>
+                <input name="phone" type="tel" placeholder="+31 6 12345678" className={inputClass} />
+              </div>
+            </div>
+
+            <div className="mb-4 grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Package</label>
+                <select name="package_type" className={inputClass}>
+                  <option value="">Select package</option>
+                  <option value="Growth Journey">Growth Journey</option>
+                  <option value="Deep Transformation">Deep Transformation</option>
+                  <option value="Clarity Session">Clarity Session</option>
+                  <option value="Single Session">Single Session</option>
+                </select>
+              </div>
+              <div>
+                <label className={labelClass}>Location</label>
+                <input name="location" type="text" placeholder="Rotterdam" className={inputClass} />
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className={labelClass}>Referred by</label>
+              <select name="referred_by" className={inputClass}>
+                <option value="">No referral</option>
+                {existingClients.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
               </select>
             </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-[0.06em] text-text-2">
-                Location
-              </label>
-              <input
-                name="location"
-                type="text"
-                placeholder="Rotterdam"
-                className="w-full rounded-lg border border-border bg-surface-2 px-3.5 py-2.5 font-sans text-sm text-text outline-none transition-colors placeholder:text-text-3 focus:border-border-2"
-              />
-            </div>
-          </div>
 
-          <div className="mt-5 flex justify-end gap-2.5">
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-4 py-2 text-[0.8125rem] font-medium text-text-2 transition-all hover:bg-surface-3"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-[0.8125rem] font-medium text-white transition-all hover:bg-accent-hover disabled:opacity-50"
-            >
-              {isPending ? "Adding…" : "Add Client"}
-            </button>
-          </div>
-        </form>
+            <div className="mt-5 flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-4 py-2 text-[0.8125rem] font-medium text-text-2 transition-all hover:bg-surface-3"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isPending}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-[0.8125rem] font-medium text-white transition-all hover:bg-accent-hover disabled:opacity-50"
+              >
+                {isPending ? "Adding…" : "Add Client"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+    </>
   );
 }

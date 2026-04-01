@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import Topbar from "@/components/Topbar";
 import StatCard from "@/components/StatCard";
 import RevenueChart from "@/components/RevenueChart";
+import DashboardSessionActions from "./DashboardSessionActions";
+import NoteIndicator from "./NoteIndicator";
 
 export const dynamic = "force-dynamic";
 
@@ -66,7 +68,7 @@ async function getDashboardData() {
     return {
       user,
       activeClients: 0,
-      upcomingSessions: [] as { id: string; date: string; duration: number; type: string; status: string }[],
+      upcomingSessions: [] as { id: string; date: string; duration: number; type: string; status: string; notes: string | null; clientName: string }[],
       openHomework: 0,
       totalRevenue: 0,
       allClients: [] as ClientWithRelations[],
@@ -76,7 +78,7 @@ async function getDashboardData() {
 
   // Fetch all data — each query is independent, catch individually
   let activeClients = 0;
-  let upcomingSessions: { id: string; date: string; duration: number; type: string; status: string }[] = [];
+  let upcomingSessions: { id: string; date: string; duration: number; type: string; status: string; notes: string | null; clientName: string }[] = [];
   let openHomework = 0;
   let totalRevenue = 0;
   let allClients: ClientWithRelations[] = [];
@@ -94,20 +96,37 @@ async function getDashboardData() {
   try {
     const { data } = await supabase
       .from("sessions")
-      .select("id, client_id, date, duration, type, status, notes")
+      .select("id, client_id, date, duration, type, status, notes, clients(name)")
       .eq("coach_id", coachId)
       .gte("date", new Date().toISOString())
       .order("date", { ascending: true })
       .limit(5);
-    upcomingSessions = data ?? [];
+    upcomingSessions = (data ?? []).map((s: Record<string, unknown>) => ({
+      id: s.id as string,
+      date: s.date as string,
+      duration: s.duration as number,
+      type: s.type as string,
+      status: s.status as string,
+      notes: (s.notes as string) ?? null,
+      clientName: ((s.clients as Record<string, unknown>)?.name as string) ?? "Client",
+    }));
   } catch { /* sessions table may not exist */ }
 
   try {
-    const { count } = await supabase
-      .from("homework")
-      .select("id", { count: "exact" })
-      .in("status", ["pending", "in-progress", "overdue"]);
-    openHomework = count ?? 0;
+    // Get client IDs for this coach, then filter homework
+    const { data: coachClients } = await supabase
+      .from("clients")
+      .select("id")
+      .eq("coach_id", coachId);
+    const clientIds = (coachClients ?? []).map((c) => c.id);
+    if (clientIds.length > 0) {
+      const { count } = await supabase
+        .from("homework")
+        .select("id", { count: "exact" })
+        .in("client_id", clientIds)
+        .in("status", ["pending", "in-progress", "overdue"]);
+      openHomework = count ?? 0;
+    }
   } catch { /* homework table may not exist */ }
 
   try {
@@ -203,7 +222,7 @@ export default async function DashboardPage() {
       <Topbar title="Dashboard" subtitle={subtitle} />
       <div className="flex-1 p-7">
         {/* Stat cards */}
-        <div className="mb-6 grid grid-cols-4 gap-4">
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             label="Active Clients"
             value={activeClients}
@@ -230,7 +249,7 @@ export default async function DashboardPage() {
           />
         </div>
 
-        <div className="grid grid-cols-[1fr_340px] gap-5">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_340px]">
           {/* Left column */}
           <div className="flex flex-col gap-5">
             {/* Upcoming Sessions */}
@@ -268,7 +287,7 @@ export default async function DashboardPage() {
                         </div>
                         <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-accent" />
                         <div className="flex-1">
-                          <h4 className="text-sm font-medium text-text">Session</h4>
+                          <h4 className="text-sm font-medium text-text">{session.clientName}</h4>
                           <p className="text-xs text-text-3">
                             {session.type} · {session.duration} min
                           </p>
@@ -283,6 +302,8 @@ export default async function DashboardPage() {
                           </div>
                           <div className="text-[0.7rem] text-text-3">{session.duration} min</div>
                         </div>
+                        {session.notes && <NoteIndicator notes={session.notes} />}
+                        <DashboardSessionActions sessionId={session.id} />
                       </div>
                     );
                   })
@@ -323,10 +344,12 @@ export default async function DashboardPage() {
                       .join("")
                       .toUpperCase()
                       .slice(0, 2);
-                    const pkg = Array.isArray(client.packages) ? client.packages[0] : client.packages;
+                    const pkgArr = Array.isArray(client.packages) ? client.packages : (client.packages ? [client.packages] : []);
+                    const pkg = pkgArr.find((p: { status: string }) => p.status === "active") ?? pkgArr[0] ?? null;
                     const totalSessions = pkg?.total_sessions ?? 0;
-                    const usedSessions = pkg?.used_sessions ?? 0;
-                    const progress = totalSessions > 0 ? Math.round((usedSessions / totalSessions) * 100) : 0;
+                    const clientSessions = Array.isArray(client.sessions) ? client.sessions : [];
+                    const completedSessions = clientSessions.filter((s: { status: string }) => s.status === "completed").length;
+                    const progress = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
                     const paidPayments = Array.isArray(client.payments)
                       ? client.payments.filter((p: { status: string }) => p.status === "paid")
                       : [];
@@ -365,7 +388,7 @@ export default async function DashboardPage() {
                             />
                           </div>
                           <div className="mt-1 text-[0.7rem] text-text-3">
-                            {usedSessions}/{totalSessions} sessions
+                            {completedSessions}/{totalSessions} sessions
                           </div>
                         </div>
                         <div>

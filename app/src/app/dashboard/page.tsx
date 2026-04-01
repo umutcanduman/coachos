@@ -71,6 +71,7 @@ async function getDashboardData() {
       upcomingSessions: [] as { id: string; date: string; duration: number; type: string; status: string; notes: string | null; clientName: string }[],
       openHomework: 0,
       totalRevenue: 0,
+      monthlyRevenue: [] as { month: string; revenue: number }[],
       allClients: [] as ClientWithRelations[],
       referrals: [] as Referral[],
     };
@@ -81,6 +82,7 @@ async function getDashboardData() {
   let upcomingSessions: { id: string; date: string; duration: number; type: string; status: string; notes: string | null; clientName: string }[] = [];
   let openHomework = 0;
   let totalRevenue = 0;
+  let monthlyRevenue: { month: string; revenue: number }[] = [];
   let allClients: ClientWithRelations[] = [];
   let referrals: Referral[] = [];
 
@@ -132,10 +134,30 @@ async function getDashboardData() {
   try {
     const { data } = await supabase
       .from("payments")
-      .select("id, amount, status")
+      .select("id, amount, status, paid_date")
       .eq("coach_id", coachId)
       .eq("status", "paid");
-    totalRevenue = (data ?? []).reduce((sum, p) => sum + Number(p.amount), 0);
+    const paidPayments = data ?? [];
+    totalRevenue = paidPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+
+    // Compute monthly revenue for last 6 months
+    const now = new Date();
+    const months: { month: string; revenue: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const label = d.toLocaleDateString("en-US", { month: "short" });
+      const year = d.getFullYear();
+      const month = d.getMonth();
+      const rev = paidPayments
+        .filter((p) => {
+          if (!p.paid_date) return false;
+          const pd = new Date(p.paid_date);
+          return pd.getFullYear() === year && pd.getMonth() === month;
+        })
+        .reduce((sum, p) => sum + Number(p.amount), 0);
+      months.push({ month: label, revenue: rev });
+    }
+    monthlyRevenue = months;
   } catch { /* payments table may not exist */ }
 
   try {
@@ -169,6 +191,7 @@ async function getDashboardData() {
     upcomingSessions,
     openHomework,
     totalRevenue,
+    monthlyRevenue,
     allClients,
     referrals,
   };
@@ -183,6 +206,7 @@ export default async function DashboardPage() {
     upcomingSessions = [],
     openHomework = 0,
     totalRevenue = 0,
+    monthlyRevenue = [],
     allClients = [],
     referrals = [],
   } = data ?? {};
@@ -425,7 +449,7 @@ export default async function DashboardPage() {
 
           {/* Right column */}
           <div className="flex flex-col gap-5">
-            <RevenueChart />
+            <RevenueChart data={monthlyRevenue} />
 
             {/* Activity Feed */}
             <div className="overflow-hidden rounded-card border border-border bg-surface">

@@ -98,7 +98,7 @@ export default async function AdminCoachesPage() {
                     )}
                   </td>
                   <td className="px-6 py-4 text-[0.8125rem] font-medium text-text">
-                    €{mrr}
+                    €{mrr.toFixed(2)}
                   </td>
                   <td className="px-6 py-4">
                     <Link

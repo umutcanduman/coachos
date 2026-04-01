@@ -80,23 +80,5 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (event.type === "customer.subscription.deleted") {
-    const subscription = event.data.object as Stripe.Subscription;
-    const coachId = subscription.metadata?.coach_id;
-    const moduleKey = subscription.metadata?.module_key;
-
-    if (coachId && moduleKey) {
-      await supabase
-        .from("coach_modules")
-        .update({
-          is_enabled: false,
-          deactivated_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("coach_id", coachId)
-        .eq("module_key", moduleKey);
-    }
-  }
-
   return NextResponse.json({ received: true });
 }

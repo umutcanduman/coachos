@@ -3,30 +3,21 @@ import Topbar from "@/components/Topbar";
 import StatCard from "@/components/StatCard";
 import { MonthlyRevenueChart, RevenueByPackageChart } from "./PaymentCharts";
 import PaymentFilters from "./PaymentFilters";
-import { ReminderButton, SendReminderButton } from "./PaymentActions";
+import { ReminderButton } from "./PaymentActions";
 
 export const dynamic = "force-dynamic";
 
-/* ── static fallback data ── */
-const monthlyAnalysis = [
-  { month: "Oct 2025", revenue: 4200, sessions: 28, newClients: 3, avgSession: 150, mom: null as number | null },
-  { month: "Nov 2025", revenue: 5100, sessions: 32, newClients: 4, avgSession: 159, mom: 21.4 },
-  { month: "Dec 2025", revenue: 4800, sessions: 30, newClients: 2, avgSession: 160, mom: -5.9 },
-  { month: "Jan 2026", revenue: 5600, sessions: 35, newClients: 5, avgSession: 160, mom: 16.7 },
-  { month: "Feb 2026", revenue: 6200, sessions: 38, newClients: 4, avgSession: 163, mom: 10.7 },
-  { month: "Mar 2026", revenue: 6850, sessions: 42, newClients: 6, avgSession: 163, mom: 10.5 },
-];
-
-const transactions = [
-  { id: "1", client: "Sarah Chen", pkg: "Premium 12-Session", date: "2026-03-20", amount: 1200, type: "Package", status: "paid" },
-  { id: "2", client: "Marcus Rivera", pkg: "Standard 8-Session", date: "2026-03-18", amount: 800, type: "Package", status: "paid" },
-  { id: "3", client: "Elena Vogt", pkg: "Intensive 6-Week", date: "2026-03-15", amount: 1800, type: "Package", status: "pending" },
-  { id: "4", client: "James Okafor", pkg: "Single Session", date: "2026-03-12", amount: 150, type: "Session", status: "paid" },
-  { id: "5", client: "Anya Petrova", pkg: "Premium 12-Session", date: "2026-03-10", amount: 1200, type: "Package", status: "overdue" },
-  { id: "6", client: "David Kim", pkg: "Standard 8-Session", date: "2026-03-08", amount: 800, type: "Package", status: "paid" },
-  { id: "7", client: "Lisa Moreau", pkg: "Single Session", date: "2026-03-05", amount: 150, type: "Session", status: "pending" },
-  { id: "8", client: "Thomas Braun", pkg: "Intensive 6-Week", date: "2026-03-01", amount: 1800, type: "Package", status: "paid" },
-];
+type PaymentRow = {
+  id: string;
+  amount: number;
+  status: string;
+  due_date: string | null;
+  paid_date: string | null;
+  description: string | null;
+  client_id: string;
+  created_at: string;
+  clients: { name: string; package_type: string | null } | null;
+};
 
 export default async function PaymentsPage({
   searchParams,
@@ -61,41 +52,35 @@ export default async function PaymentsPage({
     coachId = coach?.id ?? null;
   } catch { /* coaches table may not exist */ }
 
-  /* ── Fetch payments data ── */
-  let allPayments: { id: string; amount: number; status: string; due_date: string | null; paid_date: string | null; description: string | null; client_id: string }[] = [];
+  /* ── Fetch payments with client data ── */
+  let allPayments: PaymentRow[] = [];
 
   if (coachId) {
     try {
       const { data } = await supabase
         .from("payments")
-        .select("id, amount, status, due_date, paid_date, description, client_id")
+        .select("id, amount, status, due_date, paid_date, description, client_id, created_at, clients(name, package_type)")
         .eq("coach_id", coachId)
         .order("created_at", { ascending: false });
-      allPayments = data ?? [];
+      allPayments = (data ?? []) as unknown as PaymentRow[];
     } catch { /* payments table may not exist */ }
   }
 
-  const paidTotal = allPayments
-    .filter((p) => p.status === "paid")
-    .reduce((sum, p) => sum + Number(p.amount), 0);
-
+  /* ── KPI calculations ── */
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth();
 
-  const revenueYTD = allPayments
-    .filter(
-      (p) =>
-        p.status === "paid" &&
-        p.paid_date &&
-        new Date(p.paid_date).getFullYear() === currentYear
-    )
+  const paidPayments = allPayments.filter((p) => p.status === "paid");
+  const paidTotal = paidPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+
+  const revenueYTD = paidPayments
+    .filter((p) => p.paid_date && new Date(p.paid_date).getFullYear() === currentYear)
     .reduce((sum, p) => sum + Number(p.amount), 0);
 
-  const revenueMonth = allPayments
+  const revenueMonth = paidPayments
     .filter(
       (p) =>
-        p.status === "paid" &&
         p.paid_date &&
         new Date(p.paid_date).getFullYear() === currentYear &&
         new Date(p.paid_date).getMonth() === currentMonth
@@ -106,37 +91,91 @@ export default async function PaymentsPage({
     .filter((p) => p.status === "pending" || p.status === "overdue")
     .reduce((sum, p) => sum + Number(p.amount), 0);
 
-  const paidCount = allPayments.filter((p) => p.status === "paid").length;
+  const paidCount = paidPayments.length;
   const totalCount = allPayments.length;
   const collectionRate = totalCount > 0 ? Math.round((paidCount / totalCount) * 100) : 100;
   const avgPackage = paidCount > 0 ? Math.round(paidTotal / paidCount) : 0;
 
-  /* ── Use static data if DB is empty ── */
-  const hasData = allPayments.length > 0;
-  const displayRevenueYTD = hasData ? revenueYTD : 32850;
-  const displayRevenueMonth = hasData ? revenueMonth : 6850;
-  const displayOutstanding = hasData ? outstanding : 3150;
-  const displayAvgPackage = hasData ? avgPackage : 985;
-  const displayCollectionRate = hasData ? collectionRate : 91;
+  /* ── Monthly revenue chart data (last 6 months) ── */
+  const monthlyChartData: { month: string; revenue: number }[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(currentYear, currentMonth - i, 1);
+    const label = d.toLocaleDateString("en-US", { month: "short" });
+    const yr = d.getFullYear();
+    const mo = d.getMonth();
+    const rev = paidPayments
+      .filter((p) => {
+        if (!p.paid_date) return false;
+        const pd = new Date(p.paid_date);
+        return pd.getFullYear() === yr && pd.getMonth() === mo;
+      })
+      .reduce((sum, p) => sum + Number(p.amount), 0);
+    monthlyChartData.push({ month: label, revenue: rev });
+  }
 
-  const filter = searchParams.filter ?? "all";
+  /* ── Monthly analysis table data ── */
+  type MonthRow = { month: string; revenue: number; sessions: number; mom: number | null };
+  const monthlyAnalysis: MonthRow[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(currentYear, currentMonth - i, 1);
+    const label = d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+    const yr = d.getFullYear();
+    const mo = d.getMonth();
+    const rev = paidPayments
+      .filter((p) => {
+        if (!p.paid_date) return false;
+        const pd = new Date(p.paid_date);
+        return pd.getFullYear() === yr && pd.getMonth() === mo;
+      })
+      .reduce((sum, p) => sum + Number(p.amount), 0);
+    const txCount = allPayments.filter((p) => {
+      const cd = new Date(p.created_at);
+      return cd.getFullYear() === yr && cd.getMonth() === mo;
+    }).length;
+    monthlyAnalysis.push({ month: label, revenue: rev, sessions: txCount, mom: null });
+  }
+  // Compute MoM growth
+  for (let i = 1; i < monthlyAnalysis.length; i++) {
+    const prev = monthlyAnalysis[i - 1].revenue;
+    const curr = monthlyAnalysis[i].revenue;
+    monthlyAnalysis[i].mom = prev > 0 ? Math.round(((curr - prev) / prev) * 1000) / 10 : null;
+  }
 
-  const filteredTransactions =
-    filter === "all"
-      ? transactions
-      : transactions.filter((t) => t.status === filter);
+  /* ── Revenue by package (donut chart) ── */
+  const packageMap = new Map<string, number>();
+  for (const p of paidPayments) {
+    const pkgName = (p.clients as { name: string; package_type: string | null } | null)?.package_type ?? "Other";
+    packageMap.set(pkgName, (packageMap.get(pkgName) ?? 0) + Number(p.amount));
+  }
+  const packageChartData = Array.from(packageMap.entries())
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
 
-  const currentMonthLabel = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  /* ── Insights ── */
   const bestMonth = monthlyAnalysis.reduce((best, m) =>
     m.revenue > best.revenue ? m : best
   );
-  const recentMonths = monthlyAnalysis.slice(-3);
-  const avgGrowth =
-    recentMonths.filter((m) => m.mom !== null).reduce((sum, m) => sum + (m.mom ?? 0), 0) /
-    recentMonths.filter((m) => m.mom !== null).length;
-  const q2Projected = Math.round(
-    monthlyAnalysis[monthlyAnalysis.length - 1].revenue * 3 * (1 + avgGrowth / 100)
-  );
+  const recentWithMom = monthlyAnalysis.slice(-3).filter((m) => m.mom !== null);
+  const avgGrowth = recentWithMom.length > 0
+    ? recentWithMom.reduce((sum, m) => sum + (m.mom ?? 0), 0) / recentWithMom.length
+    : 0;
+  const lastMonthRev = monthlyAnalysis[monthlyAnalysis.length - 1]?.revenue ?? 0;
+  const q2Projected = lastMonthRev > 0
+    ? Math.round(lastMonthRev * 3 * (1 + avgGrowth / 100))
+    : 0;
+
+  /* ── Overdue payments for sidebar ── */
+  const overduePayments = allPayments
+    .filter((p) => p.status === "overdue")
+    .slice(0, 3);
+
+  /* ── Filter transactions ── */
+  const filter = searchParams.filter ?? "all";
+  const filteredPayments = filter === "all"
+    ? allPayments
+    : allPayments.filter((p) => p.status === filter);
+
+  const currentMonthLabel = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
   return (
     <>
@@ -144,17 +183,17 @@ export default async function PaymentsPage({
       <div className="flex-1 p-7">
         {/* ── KPI stat cards ── */}
         <div className="mb-6 grid grid-cols-5 gap-4">
-          <StatCard label="Revenue YTD" value={`€${displayRevenueYTD.toLocaleString()}`} delta={`${currentYear} total`} deltaType="up" />
-          <StatCard label="Revenue (Mar)" value={`€${displayRevenueMonth.toLocaleString()}`} delta="+10.5% vs last month" deltaType="up" />
-          <StatCard label="Outstanding" value={`€${displayOutstanding.toLocaleString()}`} delta={displayOutstanding > 0 ? "Requires follow-up" : "All clear"} deltaType={displayOutstanding > 0 ? "down" : "neutral"} />
-          <StatCard label="Avg Package" value={`€${displayAvgPackage.toLocaleString()}`} delta="Per transaction" deltaType="neutral" />
-          <StatCard label="Collection Rate" value={`${displayCollectionRate}%`} delta={displayCollectionRate >= 90 ? "Healthy" : "Needs attention"} deltaType={displayCollectionRate >= 90 ? "up" : "down"} />
+          <StatCard label="Revenue YTD" value={`€${revenueYTD.toLocaleString()}`} delta={`${currentYear} total`} deltaType="up" />
+          <StatCard label={`Revenue (${now.toLocaleDateString("en-US", { month: "short" })})`} value={`€${revenueMonth.toLocaleString()}`} delta="This month" deltaType="up" />
+          <StatCard label="Outstanding" value={`€${outstanding.toLocaleString()}`} delta={outstanding > 0 ? "Requires follow-up" : "All clear"} deltaType={outstanding > 0 ? "down" : "neutral"} />
+          <StatCard label="Avg Package" value={`€${avgPackage.toLocaleString()}`} delta="Per transaction" deltaType="neutral" />
+          <StatCard label="Collection Rate" value={`${collectionRate}%`} delta={collectionRate >= 90 ? "Healthy" : "Needs attention"} deltaType={collectionRate >= 90 ? "up" : "down"} />
         </div>
 
         {/* ── Charts ── */}
         <div className="mb-6 grid grid-cols-2 gap-5">
-          <MonthlyRevenueChart />
-          <RevenueByPackageChart />
+          <MonthlyRevenueChart data={monthlyChartData} />
+          <RevenueByPackageChart data={packageChartData} />
         </div>
 
         {/* ── Monthly Analysis + Insights ── */}
@@ -164,51 +203,51 @@ export default async function PaymentsPage({
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
               <div>
                 <div className="text-sm font-medium text-text">Monthly Analysis</div>
-                <div className="mt-0.5 text-xs text-text-3">Revenue and session trends</div>
+                <div className="mt-0.5 text-xs text-text-3">Revenue and transaction trends</div>
               </div>
             </div>
             <div className="flex flex-col">
-              <div className="grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3">
+              <div className="grid grid-cols-[1.5fr_1fr_1fr_1fr] items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3">
                 <div>Month</div>
                 <div className="text-right">Revenue</div>
-                <div className="text-right">Sessions</div>
-                <div className="text-right">New Clients</div>
-                <div className="text-right">Avg/Session</div>
+                <div className="text-right">Transactions</div>
                 <div className="text-right">MoM</div>
               </div>
-              {monthlyAnalysis.map((row, i) => {
-                const isCurrent = i === monthlyAnalysis.length - 1;
-                return (
-                  <div
-                    key={row.month}
-                    className={`grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center gap-4 border-b border-border px-5 py-3.5 last:border-b-0 ${
-                      isCurrent ? "bg-accent-lt" : ""
-                    }`}
-                  >
-                    <div className="text-sm font-medium text-text">
-                      {row.month}
-                      {isCurrent && (
-                        <span className="ml-2 inline-flex rounded-full bg-accent-dim px-2 py-0.5 text-[0.65rem] font-medium text-accent">
-                          Current
-                        </span>
-                      )}
+              {monthlyAnalysis.length === 0 ? (
+                <div className="py-12 text-center text-sm text-text-3">No data yet</div>
+              ) : (
+                monthlyAnalysis.map((row, i) => {
+                  const isCurrent = i === monthlyAnalysis.length - 1;
+                  return (
+                    <div
+                      key={row.month}
+                      className={`grid grid-cols-[1.5fr_1fr_1fr_1fr] items-center gap-4 border-b border-border px-5 py-3.5 last:border-b-0 ${
+                        isCurrent ? "bg-accent-lt" : ""
+                      }`}
+                    >
+                      <div className="text-sm font-medium text-text">
+                        {row.month}
+                        {isCurrent && (
+                          <span className="ml-2 inline-flex rounded-full bg-accent-dim px-2 py-0.5 text-[0.65rem] font-medium text-accent">
+                            Current
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-right text-[0.8125rem] text-text">€{row.revenue.toLocaleString()}</div>
+                      <div className="text-right text-[0.8125rem] text-text-2">{row.sessions}</div>
+                      <div className="text-right text-[0.8125rem]">
+                        {row.mom === null ? (
+                          <span className="text-text-3">&mdash;</span>
+                        ) : row.mom > 0 ? (
+                          <span className="text-accent">+{row.mom}%</span>
+                        ) : (
+                          <span className="text-c-red">{row.mom}%</span>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-right text-[0.8125rem] text-text">€{row.revenue.toLocaleString()}</div>
-                    <div className="text-right text-[0.8125rem] text-text-2">{row.sessions}</div>
-                    <div className="text-right text-[0.8125rem] text-text-2">{row.newClients}</div>
-                    <div className="text-right text-[0.8125rem] text-text-2">€{row.avgSession}</div>
-                    <div className="text-right text-[0.8125rem]">
-                      {row.mom === null ? (
-                        <span className="text-text-3">&mdash;</span>
-                      ) : row.mom > 0 ? (
-                        <span className="text-accent">+{row.mom}%</span>
-                      ) : (
-                        <span className="text-c-red">{row.mom}%</span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
 
@@ -217,11 +256,11 @@ export default async function PaymentsPage({
             <div className="rounded-card border border-border bg-accent-lt p-5">
               <div className="mb-1 text-xs font-medium uppercase tracking-[0.08em] text-accent">Best Month</div>
               <div className="mb-1 font-serif text-[1.375rem] leading-none text-text">{bestMonth.month}</div>
-              <div className="text-xs text-text-2">€{bestMonth.revenue.toLocaleString()} revenue · {bestMonth.sessions} sessions</div>
+              <div className="text-xs text-text-2">€{bestMonth.revenue.toLocaleString()} revenue</div>
             </div>
             <div className="rounded-card border border-border bg-c-blue-dim p-5">
               <div className="mb-1 text-xs font-medium uppercase tracking-[0.08em] text-c-blue">Growth Rate</div>
-              <div className="mb-1 font-serif text-[1.375rem] leading-none text-text">+{avgGrowth.toFixed(1)}%</div>
+              <div className="mb-1 font-serif text-[1.375rem] leading-none text-text">{avgGrowth > 0 ? "+" : ""}{avgGrowth.toFixed(1)}%</div>
               <div className="text-xs text-text-2">Average MoM over last 3 months</div>
             </div>
             <div className="rounded-card border border-border bg-c-amber-dim p-5">
@@ -229,19 +268,26 @@ export default async function PaymentsPage({
               <div className="mb-1 font-serif text-[1.375rem] leading-none text-text">€{q2Projected.toLocaleString()}</div>
               <div className="text-xs text-text-2">Based on current growth trend</div>
             </div>
-            <div className="rounded-card border border-border bg-surface p-5">
-              <div className="mb-3 text-xs font-medium uppercase tracking-[0.08em] text-c-red">Overdue Payment</div>
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-c-red-dim text-xs font-semibold text-c-red">AP</div>
-                <div>
-                  <div className="text-sm font-medium text-text">Anya Petrova</div>
-                  <div className="text-xs text-text-3">Premium 12-Session · €1,200</div>
+            {overduePayments.length > 0 && (
+              <div className="rounded-card border border-border bg-surface p-5">
+                <div className="mb-3 text-xs font-medium uppercase tracking-[0.08em] text-c-red">
+                  Overdue {overduePayments.length > 1 ? `(${overduePayments.length})` : ""}
                 </div>
+                {overduePayments.map((op) => {
+                  const clientName = (op.clients as { name: string } | null)?.name ?? "Client";
+                  const initials = clientName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+                  return (
+                    <div key={op.id} className="mb-2 flex items-center gap-3 last:mb-0">
+                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-c-red-dim text-xs font-semibold text-c-red">{initials}</div>
+                      <div>
+                        <div className="text-sm font-medium text-text">{clientName}</div>
+                        <div className="text-xs text-text-3">€{Number(op.amount).toLocaleString()}</div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="mt-3">
-                <SendReminderButton clientName="Anya Petrova" />
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -250,60 +296,55 @@ export default async function PaymentsPage({
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
             <div>
               <div className="text-sm font-medium text-text">All Transactions</div>
-              <div className="mt-0.5 text-xs text-text-3">{transactions.length} total transactions</div>
+              <div className="mt-0.5 text-xs text-text-3">{allPayments.length} total transactions</div>
             </div>
           </div>
           <div className="border-b border-border px-5 py-3">
             <PaymentFilters activeFilter={filter} />
           </div>
           <div className="flex flex-col">
-            <div className="grid grid-cols-[2fr_1.2fr_1fr_1fr_1fr_90px] items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3">
+            <div className="grid grid-cols-[2fr_1.2fr_1fr_1fr_90px] items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3">
               <div>Client &amp; Package</div>
               <div>Date</div>
               <div className="text-right">Amount</div>
-              <div>Type</div>
               <div>Status</div>
               <div>Action</div>
             </div>
-            {filteredTransactions.length === 0 ? (
+            {filteredPayments.length === 0 ? (
               <div className="py-16 text-center text-sm text-text-3">
                 <div className="mb-3 text-2xl opacity-40">◎</div>
                 No transactions found
               </div>
             ) : (
-              filteredTransactions.map((tx) => {
-                const initials = tx.client.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+              filteredPayments.map((tx) => {
+                const clientData = tx.clients as { name: string; package_type: string | null } | null;
+                const clientName = clientData?.name ?? "Client";
+                const pkgType = clientData?.package_type ?? tx.description ?? "Payment";
+                const initials = clientName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+                const displayDate = tx.paid_date ?? tx.due_date ?? tx.created_at;
                 const statusStyles: Record<string, string> = {
                   paid: "bg-accent-lt text-accent",
                   pending: "bg-c-amber-dim text-c-amber",
                   overdue: "bg-c-red-dim text-c-red",
-                };
-                const typeStyles: Record<string, string> = {
-                  Package: "bg-c-blue-dim text-c-blue",
-                  Session: "bg-c-purple-dim text-c-purple",
+                  refunded: "bg-surface-3 text-text-3",
                 };
 
                 return (
                   <div
                     key={tx.id}
-                    className="grid grid-cols-[2fr_1.2fr_1fr_1fr_1fr_90px] items-center gap-4 border-b border-border px-5 py-3.5 transition-colors last:border-b-0 hover:bg-surface-2"
+                    className="grid grid-cols-[2fr_1.2fr_1fr_1fr_90px] items-center gap-4 border-b border-border px-5 py-3.5 transition-colors last:border-b-0 hover:bg-surface-2"
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-full bg-accent-dim text-xs font-semibold text-accent">{initials}</div>
                       <div>
-                        <div className="text-sm font-medium text-text">{tx.client}</div>
-                        <div className="text-xs text-text-3">{tx.pkg}</div>
+                        <div className="text-sm font-medium text-text">{clientName}</div>
+                        <div className="text-xs text-text-3">{pkgType}</div>
                       </div>
                     </div>
                     <div className="text-[0.8125rem] text-text-2">
-                      {new Date(tx.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {new Date(displayDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </div>
-                    <div className="text-right text-[0.8125rem] font-medium text-text">€{tx.amount.toLocaleString()}</div>
-                    <div>
-                      <span className={`inline-flex rounded-full px-2.5 py-1 text-[0.7rem] font-medium ${typeStyles[tx.type] ?? "bg-surface-3 text-text-3"}`}>
-                        {tx.type}
-                      </span>
-                    </div>
+                    <div className="text-right text-[0.8125rem] font-medium text-text">€{Number(tx.amount).toLocaleString()}</div>
                     <div>
                       <span className={`inline-flex rounded-full px-2.5 py-1 text-[0.7rem] font-medium capitalize ${statusStyles[tx.status] ?? "bg-surface-3 text-text-3"}`}>
                         {tx.status}
@@ -313,7 +354,7 @@ export default async function PaymentsPage({
                       {tx.status === "paid" ? (
                         <span className="text-xs text-text-3">Receipt</span>
                       ) : (
-                        <ReminderButton clientName={tx.client} />
+                        <ReminderButton clientName={clientName} />
                       )}
                     </div>
                   </div>

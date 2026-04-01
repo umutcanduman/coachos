@@ -19,6 +19,17 @@ async function getCoachId(): Promise<string | null> {
   }
 }
 
+async function verifyClientOwnership(clientId: string, coachId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("clients")
+    .select("id")
+    .eq("id", clientId)
+    .eq("coach_id", coachId)
+    .single();
+  return !!data;
+}
+
 export async function updateClient(clientId: string, formData: FormData) {
   const coachId = await getCoachId();
   if (!coachId) return { success: false, error: "Not authenticated" };
@@ -52,6 +63,10 @@ export async function createHomework(clientId: string, formData: FormData) {
   const coachId = await getCoachId();
   if (!coachId) return { success: false, error: "Not authenticated" };
 
+  if (!(await verifyClientOwnership(clientId, coachId))) {
+    return { success: false, error: "Client not found" };
+  }
+
   const title = (formData.get("title") as string)?.trim();
   const description = (formData.get("description") as string)?.trim() || null;
   const dueDate = (formData.get("due_date") as string) || null;
@@ -81,12 +96,17 @@ export async function toggleHomeworkStatus(homeworkId: string, clientId: string,
   const coachId = await getCoachId();
   if (!coachId) return { success: false, error: "Not authenticated" };
 
+  if (!(await verifyClientOwnership(clientId, coachId))) {
+    return { success: false, error: "Client not found" };
+  }
+
   try {
     const supabase = await createClient();
     const { error } = await supabase
       .from("homework")
       .update({ status: newStatus })
-      .eq("id", homeworkId);
+      .eq("id", homeworkId)
+      .eq("client_id", clientId);
     if (error) return { success: false, error: error.message };
     revalidatePath(`/dashboard/clients/${clientId}`);
     return { success: true };
@@ -98,6 +118,10 @@ export async function toggleHomeworkStatus(homeworkId: string, clientId: string,
 export async function createGoal(clientId: string, formData: FormData) {
   const coachId = await getCoachId();
   if (!coachId) return { success: false, error: "Not authenticated" };
+
+  if (!(await verifyClientOwnership(clientId, coachId))) {
+    return { success: false, error: "Client not found" };
+  }
 
   const title = (formData.get("title") as string)?.trim();
   if (!title) return { success: false, error: "Title is required" };
@@ -122,6 +146,10 @@ export async function createGoal(clientId: string, formData: FormData) {
 export async function updateGoalProgress(goalId: string, clientId: string, progress: number) {
   const coachId = await getCoachId();
   if (!coachId) return { success: false, error: "Not authenticated" };
+
+  if (!(await verifyClientOwnership(clientId, coachId))) {
+    return { success: false, error: "Client not found" };
+  }
 
   const clampedProgress = Math.min(Math.max(Math.round(progress), 0), 100);
   const status = clampedProgress >= 100 ? "completed" : "active";
@@ -163,6 +191,10 @@ export async function updateSessionNotes(sessionId: string, clientId: string, no
 export async function createSession(clientId: string, formData: FormData) {
   const coachId = await getCoachId();
   if (!coachId) return { success: false, error: "Not authenticated" };
+
+  if (!(await verifyClientOwnership(clientId, coachId))) {
+    return { success: false, error: "Client not found" };
+  }
 
   const date = formData.get("date") as string;
   const time = formData.get("time") as string;

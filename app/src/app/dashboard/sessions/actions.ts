@@ -19,6 +19,17 @@ async function getCoachId(): Promise<string | null> {
   }
 }
 
+async function verifyClientOwnership(clientId: string, coachId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("clients")
+    .select("id")
+    .eq("id", clientId)
+    .eq("coach_id", coachId)
+    .single();
+  return !!data;
+}
+
 export async function addSession(formData: FormData) {
   const coachId = await getCoachId();
   if (!coachId) return { success: false, error: "Not authenticated" };
@@ -32,6 +43,10 @@ export async function addSession(formData: FormData) {
 
   if (!clientId) return { success: false, error: "Client is required" };
   if (!date || !time) return { success: false, error: "Date and time are required" };
+
+  if (!(await verifyClientOwnership(clientId, coachId))) {
+    return { success: false, error: "Client not found" };
+  }
 
   const dateTime = new Date(`${date}T${time}`).toISOString();
 
@@ -94,6 +109,10 @@ export async function scheduleSession(clientId: string, formData: FormData) {
   const duration = Number(formData.get("duration")) || 60;
 
   if (!date || !time) return { success: false, error: "Date and time are required" };
+
+  if (!(await verifyClientOwnership(clientId, coachId))) {
+    return { success: false, error: "Client not found" };
+  }
 
   const dateTime = new Date(`${date}T${time}`).toISOString();
 

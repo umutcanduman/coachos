@@ -118,13 +118,24 @@ export async function sendPasswordReset() {
 }
 
 export async function deleteAccount() {
-  // This is a placeholder — actual account deletion requires service role
-  // and careful cleanup. For now, mark the account as inactive.
   const coachId = await getCoachId();
   if (!coachId) return { success: false, error: "Not authenticated" };
 
   try {
     const supabase = await createClient();
+
+    // Mark coach profile as inactive (full deletion requires service role)
+    await supabase
+      .from("coaches")
+      .update({ status: "inactive", updated_at: new Date().toISOString() })
+      .eq("id", coachId);
+
+    // Deactivate all clients
+    await supabase
+      .from("clients")
+      .update({ status: "archived" })
+      .eq("coach_id", coachId);
+
     await supabase.auth.signOut();
     return { success: true };
   } catch (e) {

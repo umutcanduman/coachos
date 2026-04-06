@@ -1,10 +1,18 @@
 {
   "version": 2,
   "builds": [
-    { "src": "index.html", "use": "@vercel/static" }
+    { "src": "**/*.html", "use": "@vercel/static" },
+    { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/", "dest": "/index.html" },
+    { "src": "/index-tr.html", "dest": "/index-tr.html" },
+    { "src": "/privacy.html", "dest": "/privacy.html" },
+    { "src": "/terms.html", "dest": "/terms.html" },
+    { "src": "/cookies.html", "dest": "/cookies.html" },
+    { "src": "/about.html", "dest": "/about.html" },
+    { "src": "/blog.html", "dest": "/blog.html" },
+    { "src": "/contact.html", "dest": "/contact.html" },
     { "src": "/crm", "dest": "/public/crm.html" }
   ]
 }

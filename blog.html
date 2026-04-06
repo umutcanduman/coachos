@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog, CoachOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#F8F7F5;--surface:#FFFFFF;--surface2:#FDFCFB;--surface3:#F0EDE8;
+  --border:rgba(0,0,0,0.055);--border2:rgba(0,0,0,0.10);
+  --text:#1C1A17;--text2:#72695F;--text3:#B8B0A6;
+  --accent:#4A7C68;--accent-lt:#EEF6F2;--accent-dim:#D5EBE1;--accent-dk:#3d6b58;
+  --r:8px;--rl:14px;--rxl:20px;
+}
+html{scroll-behavior:smooth;font-size:16px;}
+body{font-family:'Geist',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(248,247,245,0.93);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:60px;}
+.nav-logo{display:flex;align-items:center;gap:0.625rem;text-decoration:none;}
+.logo-mark{width:30px;height:30px;border-radius:var(--r);background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Instrument Serif',serif;font-size:1.125rem;font-style:italic;}
+.logo-type{font-family:'Instrument Serif',serif;font-size:1.25rem;color:var(--text);}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none;}
+.nav-links a{text-decoration:none;color:var(--text2);font-size:0.875rem;transition:color 0.15s;}
+.nav-links a:hover{color:var(--text);}
+.nav-right{display:flex;align-items:center;gap:0.75rem;}
+.btn-nav-ghost{background:none;border:1px solid var(--border2);color:var(--text2);padding:0.45rem 1.125rem;border-radius:var(--r);font-family:'Geist',sans-serif;font-size:0.8125rem;font-weight:500;cursor:pointer;transition:all 0.15s;text-decoration:none;display:inline-block;}
+.btn-nav-ghost:hover{background:var(--surface3);color:var(--text);}
+.btn-nav-cta{background:var(--accent);color:#fff;padding:0.45rem 1.125rem;border-radius:var(--r);font-family:'Geist',sans-serif;font-size:0.8125rem;font-weight:500;cursor:pointer;transition:background 0.15s;text-decoration:none;display:inline-block;border:none;}
+.btn-nav-cta:hover{background:var(--accent-dk);}
+/* Page layout */
+.page-wrap{max-width:800px;margin:0 auto;padding:8rem 2rem 5rem;}
+.page-hero{padding:7rem 3rem 3rem;background:var(--surface);border-bottom:1px solid var(--border);text-align:center;}
+.page-hero h1{font-family:'Instrument Serif',serif;font-size:clamp(2rem,4vw,3rem);font-weight:400;color:var(--text);margin-bottom:0.75rem;}
+.page-hero p{font-size:1.0625rem;color:var(--text2);font-weight:300;}
+.page-body{max-width:760px;margin:0 auto;padding:4rem 2rem 6rem;}
+.page-body h2{font-family:'Instrument Serif',serif;font-size:1.5rem;font-weight:400;color:var(--text);margin:2.5rem 0 1rem;}
+.page-body h3{font-size:1rem;font-weight:500;color:var(--text);margin:1.75rem 0 0.75rem;}
+.page-body p{font-size:0.9375rem;color:var(--text2);line-height:1.8;margin-bottom:1rem;font-weight:300;}
+.page-body ul,.page-body ol{padding-left:1.5rem;margin-bottom:1rem;}
+.page-body li{font-size:0.9375rem;color:var(--text2);line-height:1.8;margin-bottom:0.375rem;font-weight:300;}
+.page-body a{color:var(--accent);text-decoration:none;}
+.page-body a:hover{text-decoration:underline;}
+.page-body strong{color:var(--text);font-weight:500;}
+.page-meta{font-size:0.8125rem;color:var(--text3);margin-bottom:3rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
+.section-divider{height:1px;background:var(--border);margin:2.5rem 0;}
+/* Footer */
+footer{background:var(--surface);border-top:1px solid var(--border);padding:3.5rem 3rem 2rem;}
+.footer-grid{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem;}
+.footer-brand p{font-size:0.8125rem;color:var(--text2);line-height:1.7;margin-top:0.875rem;font-weight:300;max-width:240px;}
+.footer-col h5{font-size:0.7rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem;}
+.footer-col a{display:block;color:var(--text2);text-decoration:none;font-size:0.875rem;margin-bottom:0.625rem;transition:color 0.15s;font-weight:300;}
+.footer-col a:hover{color:var(--text);}
+.footer-bottom{max-width:1080px;margin:0 auto;border-top:1px solid var(--border);padding-top:1.75rem;display:flex;align-items:center;justify-content:space-between;}
+.footer-bottom p{font-size:0.8125rem;color:var(--text3);}
+.footer-legal{display:flex;gap:1.5rem;}
+.footer-legal a{font-size:0.8125rem;color:var(--text3);text-decoration:none;transition:color 0.15s;}
+.footer-legal a:hover{color:var(--text2);}
+@media(max-width:768px){nav{padding:0 1.5rem;}.nav-links{display:none;}.page-hero{padding:5rem 1.5rem 2rem;}.page-body{padding:2.5rem 1.5rem 4rem;}footer{padding:3rem 1.5rem 1.5rem;}.footer-grid{grid-template-columns:1fr 1fr;gap:2rem;}.footer-bottom{flex-direction:column;gap:1rem;text-align:center;}}
+</style>
+<style>
+.blog-hero{padding:8rem 3rem 4rem;background:var(--surface);border-bottom:1px solid var(--border);}
+.blog-hero-inner{max-width:1080px;margin:0 auto;}
+.kicker{display:inline-flex;align-items:center;gap:0.5rem;font-size:0.72rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:1.25rem;}
+.kicker::before{content:'';width:18px;height:1.5px;background:var(--accent);}
+.section-title{font-family:'Instrument Serif',serif;font-size:clamp(2rem,3.5vw,2.875rem);font-weight:400;line-height:1.15;color:var(--text);margin-bottom:1.25rem;}
+.section-title em{font-style:italic;color:var(--accent);}
+.blog-grid{max-width:1080px;margin:0 auto;padding:4rem 3rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;}
+.blog-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rxl);padding:2rem;display:flex;flex-direction:column;transition:border-color 0.15s;}
+.blog-card:hover{border-color:var(--border2);}
+.blog-tag{display:inline-block;background:var(--accent-lt);border:1px solid var(--accent-dim);color:var(--accent);font-size:0.7rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;padding:0.25rem 0.625rem;border-radius:99px;margin-bottom:1.25rem;}
+.blog-card h2{font-family:'Instrument Serif',serif;font-size:1.375rem;font-weight:400;color:var(--text);line-height:1.3;margin-bottom:0.875rem;flex:1;}
+.blog-card p{font-size:0.875rem;color:var(--text2);line-height:1.7;font-weight:300;margin-bottom:1.5rem;}
+.blog-meta{font-size:0.78rem;color:var(--text3);display:flex;align-items:center;justify-content:space-between;}
+.blog-read-more{font-size:0.875rem;font-weight:500;color:var(--accent);text-decoration:none;}
+.blog-read-more:hover{text-decoration:underline;}
+.coming-soon-banner{background:var(--accent-lt);border:1px solid var(--accent-dim);border-radius:var(--rl);padding:2rem;text-align:center;margin:0 3rem 3rem;max-width:1080px;margin-left:auto;margin-right:auto;}
+.coming-soon-banner h3{font-family:'Instrument Serif',serif;font-size:1.25rem;color:var(--text);margin-bottom:0.5rem;}
+.coming-soon-banner p{font-size:0.875rem;color:var(--text2);font-weight:300;}
+.coming-soon-banner a{color:var(--accent);font-weight:500;}
+@media(max-width:768px){.blog-hero{padding:6rem 1.5rem 3rem;}.blog-grid{grid-template-columns:1fr;padding:2rem 1.5rem;}.coming-soon-banner{margin:0 1.5rem 2rem;}}
+</style>
+</head>
+<body>
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="logo-mark">C</div>
+    <span class="logo-type">CoachOS</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html#products">Products</a></li>
+    <li><a href="index.html#howitworks">How it works</a></li>
+    <li><a href="index.html#pricing">Pricing</a></li>
+    <li><a href="blog.html">Blog</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="https://coachos-app.vercel.app/login" class="btn-nav-ghost">Log in</a>
+    <a href="https://coachos-app.vercel.app/signup" class="btn-nav-cta">Start free →</a>
+  </div>
+</nav>
+<div class="blog-hero">
+  <div class="blog-hero-inner">
+    <div class="kicker">Insights</div>
+    <h1 class="section-title">The CoachOS <em>Blog</em></h1>
+    <p style="font-size:1.0625rem;color:var(--text2);font-weight:300;max-width:520px;line-height:1.8;">Practical thinking on running a coaching practice: business, tools, client relationships, and the craft of coaching itself.</p>
+  </div>
+</div>
+
+<div class="coming-soon-banner" style="margin-top:3rem;">
+  <h3>More articles coming soon</h3>
+  <p>We are writing guides and insights specifically for independent coaches. Want to contribute or suggest a topic? <a href="mailto:umutcan.duman@gmail.com">Get in touch</a>.</p>
+</div>
+
+<div class="blog-grid">
+  <div class="blog-card">
+    <div class="blog-tag">Practice Management</div>
+    <h2>The 7 tools coaches use before CoachOS (and why they stop)</h2>
+    <p>Most independent coaches piece together their practice from a patchwork of apps. Here is what that typically looks like, and what changes when it is all in one place.</p>
+    <div class="blog-meta">
+      <span>Coming soon</span>
+    </div>
+  </div>
+  <div class="blog-card">
+    <div class="blog-tag">Client Success</div>
+    <h2>How to structure a coaching package that clients actually complete</h2>
+    <p>Dropout rates are the silent problem in coaching. Session tracking, homework accountability, and progress visibility make a measurable difference.</p>
+    <div class="blog-meta">
+      <span>Coming soon</span>
+    </div>
+  </div>
+  <div class="blog-card">
+    <div class="blog-tag">Business</div>
+    <h2>Pricing your coaching practice in 2026: what the data says</h2>
+    <p>From Clarity Sessions to Deep Transformation packages, how to structure your offers, set prices, and communicate value without underselling.</p>
+    <div class="blog-meta">
+      <span>Coming soon</span>
+    </div>
+  </div>
+  <div class="blog-card">
+    <div class="blog-tag">Growth</div>
+    <h2>Referrals are your most powerful marketing channel. Here is how to activate them.</h2>
+    <p>Most coaches get referrals by accident. Building a systematic referral programme is simpler than you think and changes the trajectory of a practice.</p>
+    <div class="blog-meta">
+      <span>Coming soon</span>
+    </div>
+  </div>
+  <div class="blog-card">
+    <div class="blog-tag">GDPR</div>
+    <h2>What coaches need to know about storing client data legally in Europe</h2>
+    <p>Session notes, personal details, payment records, coaching involves sensitive data. A practical guide to GDPR for independent coaches.</p>
+    <div class="blog-meta">
+      <span>Coming soon</span>
+    </div>
+  </div>
+  <div class="blog-card">
+    <div class="blog-tag">Tools</div>
+    <h2>WhatsApp for coaches: boundaries, automation, and what not to send</h2>
+    <p>Most coaches use WhatsApp with clients. How to use it professionally, what automated reminders are appropriate, and where to draw the line.</p>
+    <div class="blog-meta">
+      <span>Coming soon</span>
+    </div>
+  </div>
+</div>
+
+<section style="padding:5rem 3rem;background:var(--surface);border-top:1px solid var(--border);text-align:center;">
+  <h2 class="section-title" style="max-width:440px;margin:0 auto 1rem;">Ready to simplify your <em>practice</em>?</h2>
+  <p style="font-size:1.0625rem;color:var(--text2);max-width:440px;margin:0 auto 2rem;font-weight:300;line-height:1.8;">Start your 14-day free trial. No complicated setup.</p>
+  <a href="https://coachos-app.vercel.app/signup" style="background:var(--accent);color:#fff;padding:0.875rem 2.25rem;border-radius:var(--r);font-family:'Geist',sans-serif;font-size:0.9375rem;font-weight:500;text-decoration:none;display:inline-block;">Start free trial →</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-mark">C</div>
+        <span class="logo-type">CoachOS</span>
+      </a>
+      <p>The complete operating system for independent life coaches. Website, CRM, tools, and promotion. All in one place.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Products</h5>
+      <a href="index.html#products">Coach Website</a>
+      <a href="index.html#products">CoachOS CRM</a>
+      <a href="index.html#products">Professional Coaching Tools</a>
+      <a href="index.html#products">Promotion Suite</a>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <a href="about.html">About</a>
+      <a href="blog.html">Blog</a>
+      <a href="mailto:umutcan.duman@gmail.com">Careers</a>
+      <a href="mailto:umutcan.duman@gmail.com">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h5>Legal</h5>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="cookies.html">Cookie Policy</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 CoachOS. Built for coaches, by people who care about great work.</p>
+    <div class="footer-legal">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="cookies.html">Cookies</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

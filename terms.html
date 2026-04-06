@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service, CoachOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#F8F7F5;--surface:#FFFFFF;--surface2:#FDFCFB;--surface3:#F0EDE8;
+  --border:rgba(0,0,0,0.055);--border2:rgba(0,0,0,0.10);
+  --text:#1C1A17;--text2:#72695F;--text3:#B8B0A6;
+  --accent:#4A7C68;--accent-lt:#EEF6F2;--accent-dim:#D5EBE1;--accent-dk:#3d6b58;
+  --r:8px;--rl:14px;--rxl:20px;
+}
+html{scroll-behavior:smooth;font-size:16px;}
+body{font-family:'Geist',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(248,247,245,0.93);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:60px;}
+.nav-logo{display:flex;align-items:center;gap:0.625rem;text-decoration:none;}
+.logo-mark{width:30px;height:30px;border-radius:var(--r);background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Instrument Serif',serif;font-size:1.125rem;font-style:italic;}
+.logo-type{font-family:'Instrument Serif',serif;font-size:1.25rem;color:var(--text);}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none;}
+.nav-links a{text-decoration:none;color:var(--text2);font-size:0.875rem;transition:color 0.15s;}
+.nav-links a:hover{color:var(--text);}
+.nav-right{display:flex;align-items:center;gap:0.75rem;}
+.btn-nav-ghost{background:none;border:1px solid var(--border2);color:var(--text2);padding:0.45rem 1.125rem;border-radius:var(--r);font-family:'Geist',sans-serif;font-size:0.8125rem;font-weight:500;cursor:pointer;transition:all 0.15s;text-decoration:none;display:inline-block;}
+.btn-nav-ghost:hover{background:var(--surface3);color:var(--text);}
+.btn-nav-cta{background:var(--accent);color:#fff;padding:0.45rem 1.125rem;border-radius:var(--r);font-family:'Geist',sans-serif;font-size:0.8125rem;font-weight:500;cursor:pointer;transition:background 0.15s;text-decoration:none;display:inline-block;border:none;}
+.btn-nav-cta:hover{background:var(--accent-dk);}
+/* Page layout */
+.page-wrap{max-width:800px;margin:0 auto;padding:8rem 2rem 5rem;}
+.page-hero{padding:7rem 3rem 3rem;background:var(--surface);border-bottom:1px solid var(--border);text-align:center;}
+.page-hero h1{font-family:'Instrument Serif',serif;font-size:clamp(2rem,4vw,3rem);font-weight:400;color:var(--text);margin-bottom:0.75rem;}
+.page-hero p{font-size:1.0625rem;color:var(--text2);font-weight:300;}
+.page-body{max-width:760px;margin:0 auto;padding:4rem 2rem 6rem;}
+.page-body h2{font-family:'Instrument Serif',serif;font-size:1.5rem;font-weight:400;color:var(--text);margin:2.5rem 0 1rem;}
+.page-body h3{font-size:1rem;font-weight:500;color:var(--text);margin:1.75rem 0 0.75rem;}
+.page-body p{font-size:0.9375rem;color:var(--text2);line-height:1.8;margin-bottom:1rem;font-weight:300;}
+.page-body ul,.page-body ol{padding-left:1.5rem;margin-bottom:1rem;}
+.page-body li{font-size:0.9375rem;color:var(--text2);line-height:1.8;margin-bottom:0.375rem;font-weight:300;}
+.page-body a{color:var(--accent);text-decoration:none;}
+.page-body a:hover{text-decoration:underline;}
+.page-body strong{color:var(--text);font-weight:500;}
+.page-meta{font-size:0.8125rem;color:var(--text3);margin-bottom:3rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
+.section-divider{height:1px;background:var(--border);margin:2.5rem 0;}
+/* Footer */
+footer{background:var(--surface);border-top:1px solid var(--border);padding:3.5rem 3rem 2rem;}
+.footer-grid{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem;}
+.footer-brand p{font-size:0.8125rem;color:var(--text2);line-height:1.7;margin-top:0.875rem;font-weight:300;max-width:240px;}
+.footer-col h5{font-size:0.7rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem;}
+.footer-col a{display:block;color:var(--text2);text-decoration:none;font-size:0.875rem;margin-bottom:0.625rem;transition:color 0.15s;font-weight:300;}
+.footer-col a:hover{color:var(--text);}
+.footer-bottom{max-width:1080px;margin:0 auto;border-top:1px solid var(--border);padding-top:1.75rem;display:flex;align-items:center;justify-content:space-between;}
+.footer-bottom p{font-size:0.8125rem;color:var(--text3);}
+.footer-legal{display:flex;gap:1.5rem;}
+.footer-legal a{font-size:0.8125rem;color:var(--text3);text-decoration:none;transition:color 0.15s;}
+.footer-legal a:hover{color:var(--text2);}
+@media(max-width:768px){nav{padding:0 1.5rem;}.nav-links{display:none;}.page-hero{padding:5rem 1.5rem 2rem;}.page-body{padding:2.5rem 1.5rem 4rem;}footer{padding:3rem 1.5rem 1.5rem;}.footer-grid{grid-template-columns:1fr 1fr;gap:2rem;}.footer-bottom{flex-direction:column;gap:1rem;text-align:center;}}
+</style>
+</head>
+<body>
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="logo-mark">C</div>
+    <span class="logo-type">CoachOS</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html#products">Products</a></li>
+    <li><a href="index.html#howitworks">How it works</a></li>
+    <li><a href="index.html#pricing">Pricing</a></li>
+    <li><a href="blog.html">Blog</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="https://coachos-app.vercel.app/login" class="btn-nav-ghost">Log in</a>
+    <a href="https://coachos-app.vercel.app/signup" class="btn-nav-cta">Start free →</a>
+  </div>
+</nav>
+<div class="page-hero">
+  <h1>Terms of Service</h1>
+  <p>The rules and conditions for using CoachOS</p>
+</div>
+<div class="page-body">
+  <p class="page-meta">Last updated: April 2026 &nbsp;·&nbsp; CoachOS (thecoachos.co)</p>
+
+  <p>Please read these terms carefully before using CoachOS. By creating an account or using any part of the platform, you agree to be bound by these terms.</p>
+
+  <h2>1. About CoachOS</h2>
+  <p>CoachOS is a software platform that provides tools for independent life coaches to manage their practice. It is operated by the CoachOS team and accessible at thecoachos.co and app.thecoachos.co.</p>
+
+  <h2>2. Eligibility</h2>
+  <p>You must be at least 18 years old to use CoachOS. By using the platform, you confirm that you are a professional coach or are evaluating CoachOS for professional use. The platform is intended for business use, not personal consumer use.</p>
+
+  <h2>3. Your account</h2>
+  <p>You are responsible for maintaining the confidentiality of your login credentials. You must notify us immediately at <a href="mailto:umutcan.duman@gmail.com">umutcan.duman@gmail.com</a> if you suspect unauthorised access to your account. You are responsible for all activity that occurs under your account.</p>
+
+  <h2>4. Subscription and payment</h2>
+  <p>CoachOS is a subscription service billed monthly or annually. By subscribing, you authorise us to charge your payment method on a recurring basis. Prices are listed in EUR and exclude any applicable taxes.</p>
+  <h3>Free trial</h3>
+  <p>We offer a 14-day free trial. Your payment method will be charged at the end of the trial unless you cancel before then.</p>
+  <h3>Cancellation</h3>
+  <p>You may cancel your subscription at any time from your account settings. Cancellation takes effect at the end of the current billing period. We do not offer refunds for partial billing periods.</p>
+  <h3>Price changes</h3>
+  <p>We may change our prices with 30 days notice. Continued use after a price change constitutes acceptance of the new price.</p>
+
+  <h2>5. Add-on modules</h2>
+  <p>Professional Coaching Tools (add-ons) are charged separately from the base subscription. Each add-on is billed monthly. You may activate or deactivate add-ons at any time. Changes take effect at the next billing cycle.</p>
+
+  <h2>6. Acceptable use</h2>
+  <p>You agree not to:</p>
+  <ul>
+    <li>Use CoachOS for any unlawful purpose</li>
+    <li>Share your account credentials with others</li>
+    <li>Attempt to access another user's data</li>
+    <li>Scrape, copy, or reverse-engineer the platform</li>
+    <li>Upload malicious code or attempt to compromise platform security</li>
+    <li>Use the platform to store data unrelated to your coaching practice</li>
+  </ul>
+
+  <h2>7. Your data and client data</h2>
+  <p>You retain ownership of all data you enter into CoachOS, including data about your clients. You grant us a limited licence to process this data solely to provide the service. You are responsible for ensuring you have a lawful basis to store and process your clients' personal data, and for complying with applicable data protection laws including GDPR.</p>
+
+  <h2>8. Intellectual property</h2>
+  <p>CoachOS, its logo, design, and software are owned by us and protected by intellectual property laws. You may not copy, modify, or distribute any part of the platform without our written consent. Your content remains yours.</p>
+
+  <h2>9. Service availability</h2>
+  <p>We aim for high availability but do not guarantee uninterrupted service. We may perform maintenance at any time, with notice where possible. We are not liable for losses resulting from downtime.</p>
+
+  <h2>10. Limitation of liability</h2>
+  <p>To the fullest extent permitted by law, CoachOS is provided "as is". We are not liable for indirect, incidental, or consequential damages arising from your use of the platform. Our total liability for any claim is limited to the amount you paid us in the 3 months preceding the claim.</p>
+
+  <h2>11. Termination</h2>
+  <p>We may suspend or terminate your account if you breach these terms, fail to pay, or if we discontinue the service. Upon termination, you may export your data for 30 days, after which it will be deleted.</p>
+
+  <h2>12. Governing law</h2>
+  <p>These terms are governed by the laws of the Netherlands. Any disputes will be subject to the exclusive jurisdiction of the courts of the Netherlands.</p>
+
+  <h2>13. Changes to these terms</h2>
+  <p>We may update these terms from time to time. We will notify you of significant changes by email with at least 14 days notice. Continued use after the notice period constitutes acceptance.</p>
+
+  <h2>14. Contact</h2>
+  <p>For questions about these terms, email <a href="mailto:umutcan.duman@gmail.com">umutcan.duman@gmail.com</a>.</p>
+</div>
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-mark">C</div>
+        <span class="logo-type">CoachOS</span>
+      </a>
+      <p>The complete operating system for independent life coaches. Website, CRM, tools, and promotion. All in one place.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Products</h5>
+      <a href="index.html#products">Coach Website</a>
+      <a href="index.html#products">CoachOS CRM</a>
+      <a href="index.html#products">Professional Coaching Tools</a>
+      <a href="index.html#products">Promotion Suite</a>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <a href="about.html">About</a>
+      <a href="blog.html">Blog</a>
+      <a href="mailto:umutcan.duman@gmail.com">Careers</a>
+      <a href="mailto:umutcan.duman@gmail.com">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h5>Legal</h5>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="cookies.html">Cookie Policy</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 CoachOS. Built for coaches, by people who care about great work.</p>
+    <div class="footer-legal">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="cookies.html">Cookies</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

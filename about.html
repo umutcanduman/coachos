@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About, CoachOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#F8F7F5;--surface:#FFFFFF;--surface2:#FDFCFB;--surface3:#F0EDE8;
+  --border:rgba(0,0,0,0.055);--border2:rgba(0,0,0,0.10);
+  --text:#1C1A17;--text2:#72695F;--text3:#B8B0A6;
+  --accent:#4A7C68;--accent-lt:#EEF6F2;--accent-dim:#D5EBE1;--accent-dk:#3d6b58;
+  --r:8px;--rl:14px;--rxl:20px;
+}
+html{scroll-behavior:smooth;font-size:16px;}
+body{font-family:'Geist',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(248,247,245,0.93);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:60px;}
+.nav-logo{display:flex;align-items:center;gap:0.625rem;text-decoration:none;}
+.logo-mark{width:30px;height:30px;border-radius:var(--r);background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Instrument Serif',serif;font-size:1.125rem;font-style:italic;}
+.logo-type{font-family:'Instrument Serif',serif;font-size:1.25rem;color:var(--text);}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none;}
+.nav-links a{text-decoration:none;color:var(--text2);font-size:0.875rem;transition:color 0.15s;}
+.nav-links a:hover{color:var(--text);}
+.nav-right{display:flex;align-items:center;gap:0.75rem;}
+.btn-nav-ghost{background:none;border:1px solid var(--border2);color:var(--text2);padding:0.45rem 1.125rem;border-radius:var(--r);font-family:'Geist',sans-serif;font-size:0.8125rem;font-weight:500;cursor:pointer;transition:all 0.15s;text-decoration:none;display:inline-block;}
+.btn-nav-ghost:hover{background:var(--surface3);color:var(--text);}
+.btn-nav-cta{background:var(--accent);color:#fff;padding:0.45rem 1.125rem;border-radius:var(--r);font-family:'Geist',sans-serif;font-size:0.8125rem;font-weight:500;cursor:pointer;transition:background 0.15s;text-decoration:none;display:inline-block;border:none;}
+.btn-nav-cta:hover{background:var(--accent-dk);}
+/* Page layout */
+.page-wrap{max-width:800px;margin:0 auto;padding:8rem 2rem 5rem;}
+.page-hero{padding:7rem 3rem 3rem;background:var(--surface);border-bottom:1px solid var(--border);text-align:center;}
+.page-hero h1{font-family:'Instrument Serif',serif;font-size:clamp(2rem,4vw,3rem);font-weight:400;color:var(--text);margin-bottom:0.75rem;}
+.page-hero p{font-size:1.0625rem;color:var(--text2);font-weight:300;}
+.page-body{max-width:760px;margin:0 auto;padding:4rem 2rem 6rem;}
+.page-body h2{font-family:'Instrument Serif',serif;font-size:1.5rem;font-weight:400;color:var(--text);margin:2.5rem 0 1rem;}
+.page-body h3{font-size:1rem;font-weight:500;color:var(--text);margin:1.75rem 0 0.75rem;}
+.page-body p{font-size:0.9375rem;color:var(--text2);line-height:1.8;margin-bottom:1rem;font-weight:300;}
+.page-body ul,.page-body ol{padding-left:1.5rem;margin-bottom:1rem;}
+.page-body li{font-size:0.9375rem;color:var(--text2);line-height:1.8;margin-bottom:0.375rem;font-weight:300;}
+.page-body a{color:var(--accent);text-decoration:none;}
+.page-body a:hover{text-decoration:underline;}
+.page-body strong{color:var(--text);font-weight:500;}
+.page-meta{font-size:0.8125rem;color:var(--text3);margin-bottom:3rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
+.section-divider{height:1px;background:var(--border);margin:2.5rem 0;}
+/* Footer */
+footer{background:var(--surface);border-top:1px solid var(--border);padding:3.5rem 3rem 2rem;}
+.footer-grid{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem;}
+.footer-brand p{font-size:0.8125rem;color:var(--text2);line-height:1.7;margin-top:0.875rem;font-weight:300;max-width:240px;}
+.footer-col h5{font-size:0.7rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem;}
+.footer-col a{display:block;color:var(--text2);text-decoration:none;font-size:0.875rem;margin-bottom:0.625rem;transition:color 0.15s;font-weight:300;}
+.footer-col a:hover{color:var(--text);}
+.footer-bottom{max-width:1080px;margin:0 auto;border-top:1px solid var(--border);padding-top:1.75rem;display:flex;align-items:center;justify-content:space-between;}
+.footer-bottom p{font-size:0.8125rem;color:var(--text3);}
+.footer-legal{display:flex;gap:1.5rem;}
+.footer-legal a{font-size:0.8125rem;color:var(--text3);text-decoration:none;transition:color 0.15s;}
+.footer-legal a:hover{color:var(--text2);}
+@media(max-width:768px){nav{padding:0 1.5rem;}.nav-links{display:none;}.page-hero{padding:5rem 1.5rem 2rem;}.page-body{padding:2.5rem 1.5rem 4rem;}footer{padding:3rem 1.5rem 1.5rem;}.footer-grid{grid-template-columns:1fr 1fr;gap:2rem;}.footer-bottom{flex-direction:column;gap:1rem;text-align:center;}}
+</style>
+<style>
+.about-hero{padding:9rem 3rem 5rem;background:var(--surface);border-bottom:1px solid var(--border);}
+.about-hero-inner{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;}
+.about-hero h1{font-family:'Instrument Serif',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:400;line-height:1.1;color:var(--text);margin-bottom:1.5rem;}
+.about-hero h1 em{font-style:italic;color:var(--accent);}
+.about-hero p{font-size:1.0625rem;color:var(--text2);font-weight:300;line-height:1.8;}
+.about-visual{background:var(--accent-lt);border:1px solid var(--accent-dim);border-radius:var(--rxl);padding:3rem;text-align:center;}
+.about-visual .big-num{font-family:'Instrument Serif',serif;font-size:4rem;color:var(--accent);line-height:1;}
+.about-visual p{font-size:0.875rem;color:var(--text2);margin-top:0.5rem;}
+.values-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin:3rem 0;}
+.value-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.75rem;}
+.value-card .icon{font-size:1.5rem;margin-bottom:1rem;}
+.value-card h3{font-family:'Instrument Serif',serif;font-size:1.25rem;font-weight:400;color:var(--text);margin-bottom:0.5rem;}
+.value-card p{font-size:0.875rem;color:var(--text2);line-height:1.7;font-weight:300;}
+.team-section{background:var(--bg);padding:6rem 3rem;}
+.team-inner{max-width:1080px;margin:0 auto;}
+.kicker{display:inline-flex;align-items:center;gap:0.5rem;font-size:0.72rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:1.25rem;}
+.kicker::before{content:'';width:18px;height:1.5px;background:var(--accent);}
+.section-title{font-family:'Instrument Serif',serif;font-size:clamp(2rem,3.5vw,2.875rem);font-weight:400;line-height:1.15;color:var(--text);margin-bottom:1.25rem;}
+.section-title em{font-style:italic;color:var(--accent);}
+.mission-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:6rem 3rem;}
+.mission-inner{max-width:760px;margin:0 auto;text-align:center;}
+.mission-quote{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.5rem;color:var(--text);line-height:1.6;margin-bottom:1.5rem;}
+@media(max-width:768px){.about-hero{padding:6rem 1.5rem 3rem;}.about-hero-inner{grid-template-columns:1fr;gap:2rem;}.values-grid{grid-template-columns:1fr;}.team-section,.mission-section{padding:4rem 1.5rem;}}
+</style>
+</head>
+<body>
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="logo-mark">C</div>
+    <span class="logo-type">CoachOS</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html#products">Products</a></li>
+    <li><a href="index.html#howitworks">How it works</a></li>
+    <li><a href="index.html#pricing">Pricing</a></li>
+    <li><a href="blog.html">Blog</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="https://coachos-app.vercel.app/login" class="btn-nav-ghost">Log in</a>
+    <a href="https://coachos-app.vercel.app/signup" class="btn-nav-cta">Start free →</a>
+  </div>
+</nav>
+<div class="about-hero">
+  <div class="about-hero-inner">
+    <div>
+      <div class="kicker">Our story</div>
+      <h1>Built because coaches deserved <em>better tools</em>.</h1>
+      <p>CoachOS started with a simple observation: talented coaches were spending more time on admin than on coaching. Spreadsheets, invoicing apps, booking links, WhatsApp threads, Notion pages. The work that actually matters was being buried under the work of running a practice.</p>
+      <br>
+      <p>We decided to build the infrastructure that coaches actually need. One place. Purpose-built. Designed around how coaches work, not how software companies think coaches should work.</p>
+    </div>
+    <div class="about-visual">
+      <div style="display:flex;flex-direction:column;gap:1.5rem;">
+        <div>
+          <div class="big-num">7+</div>
+          <p>Tools replaced by one</p>
+        </div>
+        <div style="height:1px;background:var(--accent-dim);"></div>
+        <div>
+          <div class="big-num">4h</div>
+          <p>Admin time saved per week</p>
+        </div>
+        <div style="height:1px;background:var(--accent-dim);"></div>
+        <div>
+          <div class="big-num">EU</div>
+          <p>Built and hosted in Europe</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mission-section">
+  <div class="mission-inner">
+    <div class="kicker" style="justify-content:center;">Our mission</div>
+    <p class="mission-quote">"Give coaches the infrastructure to focus on what they do best: changing people's lives."</p>
+    <p style="font-size:1rem;color:var(--text2);font-weight:300;line-height:1.8;">Every feature in CoachOS exists to reduce friction and increase the time you spend doing actual coaching. We measure our success by how little you have to think about admin.</p>
+  </div>
+</div>
+
+<div class="team-section">
+  <div class="team-inner">
+    <div class="kicker">What we believe</div>
+    <h2 class="section-title">Built on a few <em>core principles</em>.</h2>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="icon">🎯</div>
+        <h3>Coaches first</h3>
+        <p>Every decision starts with the coach's experience. Not the investor's pitch, not the feature list. What makes a coach's week better?</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">🔒</div>
+        <h3>Privacy by design</h3>
+        <p>Client data is sensitive. We take security seriously from the ground up, not as an afterthought. GDPR-compliant, EU-hosted, encrypted end to end.</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">⚡</div>
+        <h3>Simple over clever</h3>
+        <p>We could build a lot of things. We choose to build fewer things, better. Every feature has to earn its place by making coaches' lives simpler.</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">🌍</div>
+        <h3>Built for Europe</h3>
+        <p>CoachOS is designed with European coaches in mind: GDPR compliance, EUR pricing, multilanguage support, and EU data residency.</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">📈</div>
+        <h3>Grow with you</h3>
+        <p>Start with the basics, add what you need. CoachOS scales from your first client to a full coaching studio without changing tools.</p>
+      </div>
+      <div class="value-card">
+        <div class="icon">🤝</div>
+        <h3>Honest pricing</h3>
+        <p>No per-client fees. No feature gating designed to upsell you. No surprise charges. You know exactly what you're paying and why.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section style="padding:6rem 3rem;background:var(--surface);border-top:1px solid var(--border);text-align:center;">
+  <div class="kicker" style="justify-content:center;">Get in touch</div>
+  <h2 class="section-title" style="max-width:480px;margin:0 auto 1.25rem;">We'd love to hear from <em>coaches</em>.</h2>
+  <p style="font-size:1.0625rem;color:var(--text2);max-width:480px;margin:0 auto 2.5rem;font-weight:300;line-height:1.8;">Whether you have feedback, a feature idea, or just want to tell us how you use CoachOS, we read every message.</p>
+  <a href="mailto:umutcan.duman@gmail.com" style="background:var(--accent);color:#fff;padding:0.875rem 2.25rem;border-radius:var(--r);font-family:'Geist',sans-serif;font-size:0.9375rem;font-weight:500;text-decoration:none;display:inline-block;transition:background 0.15s;">Get in touch →</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-mark">C</div>
+        <span class="logo-type">CoachOS</span>
+      </a>
+      <p>The complete operating system for independent life coaches. Website, CRM, tools, and promotion. All in one place.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Products</h5>
+      <a href="index.html#products">Coach Website</a>
+      <a href="index.html#products">CoachOS CRM</a>
+      <a href="index.html#products">Professional Coaching Tools</a>
+      <a href="index.html#products">Promotion Suite</a>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <a href="about.html">About</a>
+      <a href="blog.html">Blog</a>
+      <a href="mailto:umutcan.duman@gmail.com">Careers</a>
+      <a href="mailto:umutcan.duman@gmail.com">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h5>Legal</h5>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="cookies.html">Cookie Policy</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 CoachOS. Built for coaches, by people who care about great work.</p>
+    <div class="footer-legal">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="cookies.html">Cookies</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

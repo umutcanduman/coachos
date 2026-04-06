@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export async function signup(formData: FormData) {
@@ -16,11 +14,19 @@ export async function signup(formData: FormData) {
     password,
     options: {
       data: { name },
+      emailRedirectTo: "https://coachos-app.vercel.app/auth/callback",
     },
   });
 
   if (authError) {
-    redirect("/signup?error=Could+not+create+account");
+    const msg = authError.message;
+    if (msg.includes("already registered") || msg.includes("already been registered")) {
+      return { error: "An account with this email already exists. Try signing in instead." };
+    }
+    if (msg.includes("at least 6 characters")) {
+      return { error: "Password must be at least 6 characters." };
+    }
+    return { error: msg };
   }
 
   // Create the coach profile linked to the auth user
@@ -29,11 +35,10 @@ export async function signup(formData: FormData) {
       .from("coaches")
       .insert({ user_id: authData.user.id, email, name });
 
-    if (profileError) {
-      redirect("/signup?error=Could+not+create+profile");
+    if (profileError && !profileError.message.includes("duplicate")) {
+      return { error: "Account created but profile setup failed. Please contact support." };
     }
   }
 
-  revalidatePath("/", "layout");
-  redirect("/dashboard");
+  return { success: true, email };
 }

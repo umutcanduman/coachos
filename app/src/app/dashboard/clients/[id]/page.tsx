@@ -21,7 +21,7 @@ export default async function ClientProfilePage({
     return (
       <>
         <Topbar title="Client Profile" />
-        <div className="flex-1 p-7">
+        <div className="flex-1 p-4 lg:p-7">
           <div className="rounded-card border border-border bg-surface py-16 text-center text-sm text-text-3">
             Session expired. Please refresh.
           </div>
@@ -132,7 +132,7 @@ export default async function ClientProfilePage({
   return (
     <>
       <Topbar title="Client Profile" />
-      <div className="flex-1 p-7">
+      <div className="flex-1 p-4 lg:p-7">
         {/* Back link */}
         <Link
           href="/dashboard/clients"
@@ -142,7 +142,7 @@ export default async function ClientProfilePage({
         </Link>
 
         {/* Profile Header */}
-        <div className="mb-5 flex items-center gap-6 rounded-card border border-border bg-surface p-6">
+        <div className="mb-5 flex flex-col items-start gap-4 rounded-card border border-border bg-surface p-4 sm:flex-row sm:items-center sm:gap-6 sm:p-6">
           <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-accent-dim text-[1.375rem] font-semibold text-accent">
             {initials}
           </div>
@@ -181,7 +181,7 @@ export default async function ClientProfilePage({
         </div>
 
         {/* Content grid */}
-        <div className="grid grid-cols-[280px_1fr] gap-5">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[280px_1fr]">
           {/* Sidebar */}
           <div className="flex flex-col gap-5">
             {/* Package card */}

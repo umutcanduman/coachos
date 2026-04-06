@@ -44,7 +44,7 @@ export default async function ProgressPage() {
     return (
       <>
         <Topbar title="Progress" />
-        <div className="flex-1 p-7">
+        <div className="flex-1 p-4 lg:p-7">
           <div className="rounded-card border border-border bg-surface py-16 text-center text-sm text-text-3">
             Session expired. Please refresh.
           </div>
@@ -91,7 +91,7 @@ export default async function ProgressPage() {
   return (
     <>
       <Topbar title="Progress" subtitle="Goal tracking across all clients" />
-      <div className="flex-1 p-7">
+      <div className="flex-1 p-4 lg:p-7">
         {/* Stat cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label="Total Goals" value={totalGoals} delta={`Across ${allClients.length} clients`} deltaType="neutral" />

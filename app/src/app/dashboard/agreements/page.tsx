@@ -36,7 +36,7 @@ export default async function AgreementsPage() {
     return (
       <>
         <Topbar title="Agreements" />
-        <div className="flex-1 p-7">
+        <div className="flex-1 p-4 lg:p-7">
           <div className="rounded-card border border-border bg-surface py-16 text-center text-sm text-text-3">
             Session expired. Please refresh.
           </div>
@@ -63,7 +63,7 @@ export default async function AgreementsPage() {
     return (
       <>
         <Topbar title="Agreements" />
-        <div className="flex-1 p-7">
+        <div className="flex-1 p-4 lg:p-7">
           <div className="rounded-card border border-border bg-surface py-16 text-center">
             <div className="mb-3 text-2xl opacity-40">📄</div>
             <p className="mb-2 text-sm font-medium text-text">Agreements module is not enabled</p>
@@ -111,7 +111,7 @@ export default async function AgreementsPage() {
   return (
     <>
       <Topbar title="Agreements" subtitle={`${agreements.length} agreements`} />
-      <div className="flex-1 p-7">
+      <div className="flex-1 p-4 lg:p-7">
         <div className="mb-5 flex items-center justify-between">
           <div />
           <AgreementActions clients={clients} />

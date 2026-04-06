@@ -33,7 +33,7 @@ export default async function PaymentsPage({
     return (
       <>
         <Topbar title="Payments" />
-        <div className="flex-1 p-7">
+        <div className="flex-1 p-4 lg:p-7">
           <div className="rounded-card border border-border bg-surface py-16 text-center text-sm text-text-3">
             Session expired. Please refresh.
           </div>
@@ -180,9 +180,9 @@ export default async function PaymentsPage({
   return (
     <>
       <Topbar title="Payments" subtitle={`Financial overview · ${currentMonthLabel}`} />
-      <div className="flex-1 p-7">
+      <div className="flex-1 p-4 lg:p-7">
         {/* ── KPI stat cards ── */}
-        <div className="mb-6 grid grid-cols-5 gap-4">
+        <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-5">
           <StatCard label="Revenue YTD" value={`€${revenueYTD.toLocaleString()}`} delta={`${currentYear} total`} deltaType="up" />
           <StatCard label={`Revenue (${now.toLocaleDateString("en-US", { month: "short" })})`} value={`€${revenueMonth.toLocaleString()}`} delta="This month" deltaType="up" />
           <StatCard label="Outstanding" value={`€${outstanding.toLocaleString()}`} delta={outstanding > 0 ? "Requires follow-up" : "All clear"} deltaType={outstanding > 0 ? "down" : "neutral"} />
@@ -191,15 +191,15 @@ export default async function PaymentsPage({
         </div>
 
         {/* ── Charts ── */}
-        <div className="mb-6 grid grid-cols-2 gap-5">
+        <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
           <MonthlyRevenueChart data={monthlyChartData} />
           <RevenueByPackageChart data={packageChartData} />
         </div>
 
         {/* ── Monthly Analysis + Insights ── */}
-        <div className="mb-6 grid grid-cols-[1fr_320px] gap-5">
+        <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px]">
           {/* Monthly Analysis Table */}
-          <div className="overflow-hidden rounded-card border border-border bg-surface">
+          <div className="overflow-hidden rounded-card border border-border bg-surface overflow-x-auto">
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
               <div>
                 <div className="text-sm font-medium text-text">Monthly Analysis</div>
@@ -207,7 +207,7 @@ export default async function PaymentsPage({
               </div>
             </div>
             <div className="flex flex-col">
-              <div className="grid grid-cols-[1.5fr_1fr_1fr_1fr] items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3">
+              <div className="grid min-w-[500px] grid-cols-[1.5fr_1fr_1fr_1fr] items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3">
                 <div>Month</div>
                 <div className="text-right">Revenue</div>
                 <div className="text-right">Transactions</div>
@@ -221,7 +221,7 @@ export default async function PaymentsPage({
                   return (
                     <div
                       key={row.month}
-                      className={`grid grid-cols-[1.5fr_1fr_1fr_1fr] items-center gap-4 border-b border-border px-5 py-3.5 last:border-b-0 ${
+                      className={`grid min-w-[500px] grid-cols-[1.5fr_1fr_1fr_1fr] items-center gap-4 border-b border-border px-5 py-3.5 last:border-b-0 ${
                         isCurrent ? "bg-accent-lt" : ""
                       }`}
                     >
@@ -302,8 +302,8 @@ export default async function PaymentsPage({
           <div className="border-b border-border px-5 py-3">
             <PaymentFilters activeFilter={filter} />
           </div>
-          <div className="flex flex-col">
-            <div className="grid grid-cols-[2fr_1.2fr_1fr_1fr_90px] items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3">
+          <div className="flex flex-col overflow-x-auto">
+            <div className="grid min-w-[650px] grid-cols-[2fr_1.2fr_1fr_1fr_90px] items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3">
               <div>Client &amp; Package</div>
               <div>Date</div>
               <div className="text-right">Amount</div>
@@ -332,7 +332,7 @@ export default async function PaymentsPage({
                 return (
                   <div
                     key={tx.id}
-                    className="grid grid-cols-[2fr_1.2fr_1fr_1fr_90px] items-center gap-4 border-b border-border px-5 py-3.5 transition-colors last:border-b-0 hover:bg-surface-2"
+                    className="grid min-w-[650px] grid-cols-[2fr_1.2fr_1fr_1fr_90px] items-center gap-4 border-b border-border px-5 py-3.5 transition-colors last:border-b-0 hover:bg-surface-2"
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-full bg-accent-dim text-xs font-semibold text-accent">{initials}</div>

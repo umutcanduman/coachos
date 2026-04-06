@@ -4,10 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
+import { useSidebar } from "@/components/SidebarContext";
 
 interface TopbarProps {
   title: string;
   subtitle?: string;
+  onMenuToggle?: () => void;
 }
 
 interface SearchResult {
@@ -17,8 +19,10 @@ interface SearchResult {
   status: string;
 }
 
-export default function Topbar({ title, subtitle }: TopbarProps) {
+export default function Topbar({ title, subtitle, onMenuToggle }: TopbarProps) {
   const router = useRouter();
+  const { toggle: sidebarToggle } = useSidebar();
+  const handleMenuToggle = onMenuToggle ?? sidebarToggle;
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -66,18 +70,32 @@ export default function Topbar({ title, subtitle }: TopbarProps) {
   }
 
   return (
-    <div className="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-bg px-7 py-4">
-      <div>
-        <h1 className="font-serif text-[1.375rem] font-normal text-text">{title}</h1>
-        {subtitle && <p className="mt-0.5 text-[0.8125rem] text-text-3">{subtitle}</p>}
-      </div>
+    <div className="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-bg px-4 py-3 lg:px-7 lg:py-4">
+      {/* Left side: hamburger (mobile) + title */}
       <div className="flex items-center gap-3">
-        <div ref={wrapperRef} className="relative">
+        <button
+          type="button"
+          onClick={handleMenuToggle}
+          aria-label="Toggle menu"
+          className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-xl text-text-2 transition-colors hover:bg-surface-2 hover:text-text lg:hidden"
+        >
+          &#9776;
+        </button>
+        <div>
+          <h1 className="font-serif text-[1.375rem] font-normal text-text">{title}</h1>
+          {subtitle && <p className="mt-0.5 text-[0.8125rem] text-text-3">{subtitle}</p>}
+        </div>
+      </div>
+
+      {/* Right side: search + action buttons */}
+      <div className="flex items-center gap-2 lg:gap-3">
+        {/* Search - hidden on mobile */}
+        <div ref={wrapperRef} className="relative hidden lg:block">
           <div className="flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3.5 py-[0.45rem]">
-            <span className="text-sm text-text-3">{searching ? "…" : "⌕"}</span>
+            <span className="text-sm text-text-3">{searching ? "..." : "\u2315"}</span>
             <input
               type="text"
-              placeholder="Search clients…"
+              placeholder="Search clients..."
               value={query}
               onChange={(e) => handleSearch(e.target.value)}
               onFocus={() => { if (results.length > 0) setShowResults(true); }}
@@ -115,17 +133,22 @@ export default function Topbar({ title, subtitle }: TopbarProps) {
             </div>
           )}
         </div>
+
+        {/* + Session - hidden on mobile */}
         <Link
           href="/dashboard/sessions"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-4 py-2 font-sans text-[0.8125rem] font-medium text-text-2 transition-all hover:border-border-2 hover:bg-surface-3 hover:text-text"
+          className="hidden min-h-[44px] items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-4 py-2 font-sans text-[0.8125rem] font-medium text-text-2 transition-all hover:border-border-2 hover:bg-surface-3 hover:text-text lg:inline-flex"
         >
           + Session
         </Link>
+
+        {/* + New Client - full text on desktop, just "+" on mobile */}
         <Link
           href="/dashboard/clients"
-          className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 font-sans text-[0.8125rem] font-medium text-white transition-all hover:bg-accent-hover"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-2 font-sans text-[0.8125rem] font-medium text-white transition-all hover:bg-accent-hover lg:px-4"
         >
-          + New Client
+          <span className="lg:hidden">+</span>
+          <span className="hidden lg:inline">+ New Client</span>
         </Link>
       </div>
     </div>

@@ -44,8 +44,8 @@ export default function NewAgreementModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-8 backdrop-blur-sm">
-      <div className="relative max-h-[90vh] w-full max-w-[560px] overflow-y-auto rounded-[14px] border border-border-2 bg-surface p-7 shadow-2xl">
+    <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-8">
+      <div className="relative max-h-[90vh] w-full overflow-y-auto rounded-t-[14px] border border-border-2 bg-surface p-5 shadow-2xl sm:max-w-[560px] sm:rounded-[14px] sm:p-7">
         <button
           onClick={onClose}
           className="absolute right-5 top-5 border-none bg-transparent text-[1.125rem] text-text-3 transition-colors hover:text-text"

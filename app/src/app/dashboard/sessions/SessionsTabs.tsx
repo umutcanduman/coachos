@@ -71,9 +71,9 @@ export default function SessionsTabs({ scheduled, toSchedule, past, showReminder
   const pastCols = schedCols;
 
   return (
-    <div className="flex-1 p-7">
+    <div className="flex-1 p-4 lg:p-7">
       <div className="mb-5 flex flex-wrap items-center gap-3">
-        <div className="flex gap-1 rounded-full border border-border bg-surface-2 p-1">
+        <div className="flex gap-1 overflow-x-auto rounded-full border border-border bg-surface-2 p-1">
           {tabs.map(t => (
             <button
               key={t.key}
@@ -98,14 +98,14 @@ export default function SessionsTabs({ scheduled, toSchedule, past, showReminder
 
       {/* Scheduled */}
       {activeTab === "scheduled" && (
-        <div className="overflow-hidden rounded-card border border-border bg-surface">
+        <div className="overflow-hidden overflow-x-auto rounded-card border border-border bg-surface">
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
             <div>
               <div className="text-sm font-medium text-text">Scheduled Sessions</div>
               <div className="mt-0.5 text-xs text-text-3">Confirmed dates & times</div>
             </div>
           </div>
-          <div className={`grid ${schedCols} items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3`}>
+          <div className={`grid min-w-[750px] ${schedCols} items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3`}>
             <div>Client</div><div>Package</div><div>Date</div><div>Time</div><div>Duration</div><div>Status</div><div></div>
             {showReminders && <div>Reminder</div>}
           </div>
@@ -114,7 +114,7 @@ export default function SessionsTabs({ scheduled, toSchedule, past, showReminder
           ) : scheduled.map(s => {
             const d = new Date(s.date);
             return (
-              <div key={s.id} className={`grid ${schedCols} items-center gap-4 border-b border-border px-5 py-3.5 last:border-b-0 hover:bg-surface-2`}>
+              <div key={s.id} className={`grid min-w-[750px] ${schedCols} items-center gap-4 border-b border-border px-5 py-3.5 last:border-b-0 hover:bg-surface-2`}>
                 <div className="flex items-center gap-3">
                   <div className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-full bg-accent-dim text-xs font-semibold text-accent">{initials(s.clientName)}</div>
                   <div><div className="text-sm font-medium text-text">{s.clientName}</div><div className="text-xs text-text-3">{s.type}</div></div>
@@ -213,11 +213,11 @@ export default function SessionsTabs({ scheduled, toSchedule, past, showReminder
 
       {/* Past */}
       {activeTab === "past" && (
-        <div className="overflow-hidden rounded-card border border-border bg-surface">
+        <div className="overflow-hidden overflow-x-auto rounded-card border border-border bg-surface">
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
             <div><div className="text-sm font-medium text-text">Past Sessions</div><div className="mt-0.5 text-xs text-text-3">All completed sessions</div></div>
           </div>
-          <div className={`grid ${pastCols} items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3`}>
+          <div className={`grid min-w-[750px] ${pastCols} items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3`}>
             <div>Client</div><div>Package</div><div>Date</div><div>Time</div><div>Duration</div><div>Status</div><div></div>
             {showReminders && <div>Reminder</div>}
           </div>
@@ -257,8 +257,8 @@ export default function SessionsTabs({ scheduled, toSchedule, past, showReminder
 
 function ModalWrapper({ onClose, title, subtitle, children }: { onClose: () => void; title: string; subtitle: string; children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-8 backdrop-blur-sm">
-      <div className="relative w-full max-w-[480px] rounded-[14px] border border-border-2 bg-surface p-7 shadow-2xl">
+    <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-8">
+      <div className="relative max-h-[90vh] w-full overflow-y-auto rounded-t-[14px] border border-border-2 bg-surface p-5 shadow-2xl sm:max-w-[480px] sm:rounded-[14px] sm:p-7">
         <button onClick={onClose} className="absolute right-5 top-5 border-none bg-transparent text-[1.125rem] text-text-3 transition-colors hover:text-text">✕</button>
         <h2 className="mb-1 font-serif text-2xl font-normal text-text">{title}</h2>
         <p className="mb-6 text-[0.8125rem] text-text-3">{subtitle}</p>
@@ -413,7 +413,7 @@ function PastSessionRow({ session: s, cols, showReminders, onEdit }: { session: 
 
   return (
     <div className="border-b border-border last:border-b-0">
-      <div className={`grid ${cols} items-center gap-4 px-5 py-3.5 hover:bg-surface-2`}>
+      <div className={`grid min-w-[750px] ${cols} items-center gap-4 px-5 py-3.5 hover:bg-surface-2`}>
         <div className="flex items-center gap-3">
           <div className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-full bg-surface-3 text-xs font-semibold text-text-3">{ini}</div>
           <div><div className="text-sm font-medium text-text">{s.clientName}</div><div className="text-xs text-text-3">{s.type}</div></div>

@@ -61,7 +61,7 @@ export default async function ProToolsPage() {
   return (
     <>
       <Topbar title="Professional Coaching Tools" />
-      <div className="flex-1 p-7">
+      <div className="flex-1 p-4 lg:p-7">
         {/* Hero */}
         <div className="mb-8 text-center">
           <h2 className="font-serif text-4xl text-text">Elevate your practice</h2>

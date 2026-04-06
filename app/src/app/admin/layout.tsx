@@ -14,7 +14,7 @@ export default async function AdminLayout({
   return (
     <div className="flex min-h-screen bg-bg">
       {/* Admin Sidebar */}
-      <nav className="fixed top-0 left-0 bottom-0 z-50 flex w-[240px] flex-col border-r border-border bg-surface">
+      <nav className="fixed top-0 left-0 bottom-0 z-50 hidden w-[240px] flex-col border-r border-border bg-surface lg:flex">
         {/* Logo */}
         <div className="flex items-center gap-2.5 border-b border-border px-5 py-5 pb-4">
           <div className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-lg bg-c-red text-sm font-semibold text-white">
@@ -40,7 +40,7 @@ export default async function AdminLayout({
         </div>
       </nav>
 
-      <div className="ml-[240px] flex flex-1 flex-col">{children}</div>
+      <div className="lg:ml-[240px] flex flex-1 flex-col">{children}</div>
     </div>
   );
 }

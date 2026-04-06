@@ -22,7 +22,7 @@ export default async function ClientsPage({
     return (
       <>
         <Topbar title="Clients" />
-        <div className="flex-1 p-7">
+        <div className="flex-1 p-4 lg:p-7">
           <div className="rounded-card border border-border bg-surface py-16 text-center text-sm text-text-3">
             Session expired. Please refresh.
           </div>
@@ -87,8 +87,8 @@ export default async function ClientsPage({
   return (
     <>
       <Topbar title="Clients" subtitle={`${clients.length} total clients`} />
-      <div className="flex-1 p-7">
-        <div className="mb-5 flex items-center gap-3">
+      <div className="flex-1 p-4 lg:p-7">
+        <div className="mb-5 flex flex-wrap items-center gap-3">
           <ClientFilters activeFilter={filter} />
           <div className="ml-auto">
             <ClientActions existingClients={clients.map((c) => ({ id: c.id, name: c.name }))} />
@@ -97,9 +97,9 @@ export default async function ClientsPage({
 
         {/* Client table */}
         <div className="overflow-hidden rounded-card border border-border bg-surface">
-          <div className="flex flex-col">
+          <div className="flex flex-col overflow-x-auto">
             {/* Header */}
-            <div className="grid grid-cols-[2.5fr_1.5fr_1.25fr_1.25fr_1fr_80px] items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3">
+            <div className="grid min-w-[700px] grid-cols-[2.5fr_1.5fr_1.25fr_1.25fr_1fr_80px] items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3">
               <div>Client</div>
               <div>Package</div>
               <div>Progress</div>
@@ -161,7 +161,7 @@ export default async function ClientsPage({
                   <Link
                     key={client.id}
                     href={`/dashboard/clients/${client.id}`}
-                    className="grid grid-cols-[2.5fr_1.5fr_1.25fr_1.25fr_1fr_80px] items-center gap-4 border-b border-border px-5 py-3.5 transition-colors last:border-b-0 hover:bg-surface-2"
+                    className="grid min-w-[700px] grid-cols-[2.5fr_1.5fr_1.25fr_1.25fr_1fr_80px] items-center gap-4 border-b border-border px-5 py-3.5 transition-colors last:border-b-0 hover:bg-surface-2"
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-full bg-accent-dim text-xs font-semibold text-accent">

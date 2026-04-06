@@ -83,7 +83,7 @@ export default async function AdminCoachDetailPage({
   );
 
   return (
-    <div className="flex-1 p-7">
+    <div className="flex-1 p-4 lg:p-7">
       <Link
         href="/admin/coaches"
         className="mb-4 inline-flex items-center gap-1 text-[0.8125rem] text-text-2 hover:text-text"

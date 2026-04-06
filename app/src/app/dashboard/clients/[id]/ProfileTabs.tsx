@@ -74,7 +74,7 @@ export default function ProfileTabs({
   return (
     <div>
       {/* Tabs */}
-      <div className="mb-5 flex gap-0 border-b border-border">
+      <div className="mb-5 flex gap-0 overflow-x-auto border-b border-border">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -261,8 +261,8 @@ function EmptyState({ icon, message }: { icon: string; message: string }) {
 
 function ModalWrapper({ onClose, title, subtitle, children }: { onClose: () => void; title: string; subtitle: string; children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-8 backdrop-blur-sm">
-      <div className="relative w-full max-w-[480px] rounded-[14px] border border-border-2 bg-surface p-7 shadow-2xl">
+    <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-8">
+      <div className="relative max-h-[90vh] w-full overflow-y-auto rounded-t-[14px] border border-border-2 bg-surface p-5 shadow-2xl sm:max-w-[480px] sm:rounded-[14px] sm:p-7">
         <button onClick={onClose} className="absolute right-5 top-5 border-none bg-transparent text-[1.125rem] text-text-3 transition-colors hover:text-text">✕</button>
         <h2 className="mb-1 font-serif text-2xl font-normal text-text">{title}</h2>
         <p className="mb-6 text-[0.8125rem] text-text-3">{subtitle}</p>

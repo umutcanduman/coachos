@@ -90,7 +90,7 @@ export default async function AdminOverviewPage() {
   );
 
   return (
-    <div className="flex-1 p-7">
+    <div className="flex-1 p-4 lg:p-7">
       <h1 className="font-serif text-3xl text-text">Admin Overview</h1>
       <p className="mt-1 text-[0.875rem] text-text-2">Platform metrics and recent activity.</p>
 

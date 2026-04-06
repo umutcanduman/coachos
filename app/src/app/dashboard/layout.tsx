@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import Sidebar from "@/components/Sidebar";
+import { SidebarProvider } from "@/components/SidebarContext";
+import SidebarWrapper from "@/components/SidebarWrapper";
 import { getEnabledModules } from "@/lib/modules";
 
 export const dynamic = "force-dynamic";
@@ -56,13 +57,15 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-bg">
-      <Sidebar
-        coachName={coachName}
-        coachEmail={coachEmail}
-        enabledModules={enabledModuleKeys}
-      />
-      <div className="ml-[260px] flex flex-1 flex-col">{children}</div>
-    </div>
+    <SidebarProvider>
+      <div className="flex min-h-screen bg-bg">
+        <SidebarWrapper
+          coachName={coachName}
+          coachEmail={coachEmail}
+          enabledModules={enabledModuleKeys}
+        />
+        <div className="flex flex-1 flex-col lg:ml-[260px]">{children}</div>
+      </div>
+    </SidebarProvider>
   );
 }

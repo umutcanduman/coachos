@@ -26,7 +26,7 @@ export default async function ReferralsPage() {
     return (
       <>
         <Topbar title="Referrals" />
-        <div className="flex-1 p-7">
+        <div className="flex-1 p-4 lg:p-7">
           <div className="rounded-card border border-border bg-surface py-16 text-center text-sm text-text-3">
             Session expired. Please refresh.
           </div>
@@ -106,7 +106,7 @@ export default async function ReferralsPage() {
   return (
     <>
       <Topbar title="Referrals" subtitle="Track referrals, conversions, and thank-you gifts" />
-      <div className="flex-1 p-7">
+      <div className="flex-1 p-4 lg:p-7">
         {/* Stat Cards */}
         <div className="mb-6 grid grid-cols-3 gap-4">
           <StatCard label="Total Referrals" value={totalReferrals} delta={`${totalReferrals} referrals received`} deltaType="neutral" />

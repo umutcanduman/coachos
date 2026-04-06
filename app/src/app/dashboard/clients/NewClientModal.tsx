@@ -127,8 +127,8 @@ export default function NewClientModal({ open, onClose, existingClients }: NewCl
 
   return (
     <>
-      <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-8 backdrop-blur-sm">
-        <div className="relative w-full max-w-[520px] rounded-[14px] border border-border-2 bg-surface p-7 shadow-2xl">
+      <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-8">
+        <div className="relative max-h-[90vh] w-full overflow-y-auto rounded-t-[14px] border border-border-2 bg-surface p-5 shadow-2xl sm:max-w-[520px] sm:rounded-[14px] sm:p-7">
           <button
             onClick={onClose}
             className="absolute right-5 top-5 border-none bg-transparent text-[1.125rem] text-text-3 transition-colors hover:text-text"
@@ -151,7 +151,7 @@ export default function NewClientModal({ open, onClose, existingClients }: NewCl
               <input name="name" type="text" required placeholder="Laura Martínez" className={inputClass} />
             </div>
 
-            <div className="mb-4 grid grid-cols-2 gap-4">
+            <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className={labelClass}>Email</label>
                 <input name="email" type="email" required placeholder="laura@email.com" className={inputClass} />
@@ -162,7 +162,7 @@ export default function NewClientModal({ open, onClose, existingClients }: NewCl
               </div>
             </div>
 
-            <div className="mb-4 grid grid-cols-2 gap-4">
+            <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className={labelClass}>Package</label>
                 <select name="package_type" className={inputClass}>
@@ -193,14 +193,14 @@ export default function NewClientModal({ open, onClose, existingClients }: NewCl
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-4 py-2 text-[0.8125rem] font-medium text-text-2 transition-all hover:bg-surface-3"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-4 py-2 text-[0.8125rem] font-medium text-text-2 transition-all hover:bg-surface-3"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isPending}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-[0.8125rem] font-medium text-white transition-all hover:bg-accent-hover disabled:opacity-50"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-[0.8125rem] font-medium text-white transition-all hover:bg-accent-hover disabled:opacity-50"
               >
                 {isPending ? "Adding…" : "Add Client"}
               </button>

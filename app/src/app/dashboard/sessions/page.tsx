@@ -15,7 +15,7 @@ export default async function SessionsPage() {
     return (
       <>
         <Topbar title="Sessions" />
-        <div className="flex-1 p-7">
+        <div className="flex-1 p-4 lg:p-7">
           <div className="rounded-card border border-border bg-surface py-16 text-center text-sm text-text-3">
             Session expired. Please refresh.
           </div>

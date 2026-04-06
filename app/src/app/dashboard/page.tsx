@@ -244,7 +244,7 @@ export default async function DashboardPage() {
   return (
     <>
       <Topbar title="Dashboard" subtitle={subtitle} />
-      <div className="flex-1 p-7">
+      <div className="flex-1 p-4 lg:p-7">
         {/* Stat cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
@@ -273,7 +273,7 @@ export default async function DashboardPage() {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_340px]">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_340px]">
           {/* Left column */}
           <div className="flex flex-col gap-5">
             {/* Upcoming Sessions */}
@@ -346,8 +346,8 @@ export default async function DashboardPage() {
                   All clients →
                 </Link>
               </div>
-              <div className="flex flex-col">
-                <div className="grid grid-cols-[2.5fr_1.5fr_1.25fr_1.25fr_1fr_80px] items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3">
+              <div className="flex flex-col overflow-x-auto">
+                <div className="grid min-w-[700px] grid-cols-[2.5fr_1.5fr_1.25fr_1.25fr_1fr_80px] items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3">
                   <div>Client</div>
                   <div>Package</div>
                   <div>Progress</div>
@@ -388,7 +388,7 @@ export default async function DashboardPage() {
                       <Link
                         key={client.id}
                         href={`/dashboard/clients/${client.id}`}
-                        className="grid grid-cols-[2.5fr_1.5fr_1.25fr_1.25fr_1fr_80px] items-center gap-4 border-b border-border px-5 py-3.5 transition-colors last:border-b-0 hover:bg-surface-2"
+                        className="grid min-w-[700px] grid-cols-[2.5fr_1.5fr_1.25fr_1.25fr_1fr_80px] items-center gap-4 border-b border-border px-5 py-3.5 transition-colors last:border-b-0 hover:bg-surface-2"
                       >
                         <div className="flex items-center gap-3">
                           <div className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-full bg-accent-dim text-xs font-semibold text-accent">

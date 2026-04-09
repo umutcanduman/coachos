@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createBrowserClient } from "@supabase/ssr";
 import Toast from "@/components/Toast";
+import { setSessionStatus } from "./sessions/actions";
 
 interface Props {
   sessionId: string;
@@ -18,21 +18,15 @@ export default function DashboardSessionActions({ sessionId }: Props) {
   async function handleComplete() {
     setLoading(true);
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
-      const { error } = await supabase
-        .from("sessions")
-        .update({ status: "completed" })
-        .eq("id", sessionId);
-      if (error) {
+      const result = await setSessionStatus(sessionId, "completed");
+      if (!result.success) {
         setToast({ message: "Failed to update", type: "error" });
       } else {
         setToast({ message: "Session marked complete", type: "success" });
         router.refresh();
       }
-    } catch {
+    } catch (e) {
+      console.error("setSessionStatus(complete) failed", e);
       setToast({ message: "Something went wrong", type: "error" });
     }
     setLoading(false);
@@ -42,21 +36,15 @@ export default function DashboardSessionActions({ sessionId }: Props) {
   async function handleCancel() {
     setLoading(true);
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
-      const { error } = await supabase
-        .from("sessions")
-        .update({ status: "cancelled" })
-        .eq("id", sessionId);
-      if (error) {
+      const result = await setSessionStatus(sessionId, "cancelled");
+      if (!result.success) {
         setToast({ message: "Failed to cancel", type: "error" });
       } else {
         setToast({ message: "Session cancelled", type: "success" });
         router.refresh();
       }
-    } catch {
+    } catch (e) {
+      console.error("setSessionStatus(cancel) failed", e);
       setToast({ message: "Something went wrong", type: "error" });
     }
     setLoading(false);

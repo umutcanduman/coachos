@@ -99,6 +99,28 @@ export async function editSession(sessionId: string, formData: FormData) {
   }
 }
 
+export async function setSessionStatus(sessionId: string, status: "completed" | "cancelled" | "scheduled") {
+  const coachId = await getCoachId();
+  if (!coachId) return { success: false, error: "Not authenticated" };
+
+  if (!sessionId) return { success: false, error: "Session id required" };
+
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("sessions")
+      .update({ status })
+      .eq("id", sessionId)
+      .eq("coach_id", coachId);
+    if (error) return { success: false, error: error.message };
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/sessions");
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: String(e) };
+  }
+}
+
 export async function scheduleSession(clientId: string, formData: FormData) {
   const coachId = await getCoachId();
   if (!coachId) return { success: false, error: "Not authenticated" };

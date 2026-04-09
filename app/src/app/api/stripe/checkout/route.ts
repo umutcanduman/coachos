@@ -47,6 +47,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Prevent duplicate purchases for an already-active module.
+    const { data: existingModule } = await supabase
+      .from("coach_modules")
+      .select("payment_status, is_enabled")
+      .eq("coach_id", coach.id)
+      .eq("module_key", moduleKey)
+      .maybeSingle();
+    if (existingModule?.payment_status === "paid" && existingModule.is_enabled) {
+      return NextResponse.json(
+        { error: "Module already active" },
+        { status: 409 }
+      );
+    }
+
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
     const session = await getStripe().checkout.sessions.create({

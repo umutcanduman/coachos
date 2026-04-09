@@ -55,10 +55,26 @@ export default function Topbar({ title, subtitle, onMenuToggle }: TopbarProps) {
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
         );
+        // Resolve current coach to scope the search at the application layer
+        // (RLS is the primary safeguard; this is defense in depth).
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) { setResults([]); setSearching(false); return; }
+        const { data: coach } = await supabase
+          .from("coaches")
+          .select("id")
+          .eq("user_id", user.id)
+          .single();
+        if (!coach?.id) { setResults([]); setSearching(false); return; }
+        // Sanitize input — strip PostgREST filter metacharacters to prevent
+        // injection of additional .or() clauses via , ( ) * %
+        const safe = value.replace(/[,()*%]/g, "").trim();
+        if (!safe) { setResults([]); setSearching(false); return; }
+        const pattern = `%${safe}%`;
         const { data } = await supabase
           .from("clients")
           .select("id, name, email, status")
-          .or(`name.ilike.%${value}%,email.ilike.%${value}%,phone.ilike.%${value}%`)
+          .eq("coach_id", coach.id)
+          .or(`name.ilike.${pattern},email.ilike.${pattern},phone.ilike.${pattern}`)
           .limit(6);
         setResults((data ?? []) as SearchResult[]);
         setShowResults(true);

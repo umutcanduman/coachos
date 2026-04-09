@@ -159,7 +159,8 @@ export async function updateGoalProgress(goalId: string, clientId: string, progr
     const { error } = await supabase
       .from("goals")
       .update({ progress: clampedProgress, status })
-      .eq("id", goalId);
+      .eq("id", goalId)
+      .eq("client_id", clientId);
     if (error) return { success: false, error: error.message };
     revalidatePath(`/dashboard/clients/${clientId}`);
     revalidatePath("/dashboard/progress");
@@ -173,12 +174,17 @@ export async function updateSessionNotes(sessionId: string, clientId: string, no
   const coachId = await getCoachId();
   if (!coachId) return { success: false, error: "Not authenticated" };
 
+  if (!(await verifyClientOwnership(clientId, coachId))) {
+    return { success: false, error: "Client not found" };
+  }
+
   try {
     const supabase = await createClient();
     const { error } = await supabase
       .from("sessions")
       .update({ notes: notes.trim() || null })
       .eq("id", sessionId)
+      .eq("client_id", clientId)
       .eq("coach_id", coachId);
     if (error) return { success: false, error: error.message };
     revalidatePath(`/dashboard/clients/${clientId}`);

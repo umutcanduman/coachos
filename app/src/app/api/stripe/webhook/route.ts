@@ -49,6 +49,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
+    // Idempotency: if this session has already been processed, exit early.
+    // Stripe retries webhooks on transient failures and we must not double
+    // activate / double credit a module.
+    const { data: existingPayment } = await supabase
+      .from("module_payments")
+      .select("status")
+      .eq("stripe_session_id", session.id)
+      .maybeSingle();
+    if (existingPayment?.status === "paid") {
+      return NextResponse.json({ received: true, idempotent: true });
+    }
+
     // Update payment record
     await supabase
       .from("module_payments")

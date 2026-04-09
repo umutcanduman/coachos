@@ -102,7 +102,12 @@ export default function NewClientModal({ open, onClose, existingClients }: NewCl
           .from("clients")
           .select("name, email")
           .eq("id", referredBy)
+          .eq("coach_id", coach.id)
           .single();
+        if (!referrerData) {
+          // Referrer doesn't belong to this coach — skip referral creation
+          throw new Error("Invalid referrer");
+        }
         await supabase.from("referrals").insert({
           referrer_id: referredBy,
           referred_client_id: newClient.id,

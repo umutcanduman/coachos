@@ -33,6 +33,7 @@ export interface LifecycleClientData {
   proposal_package: string | null;
   proposal_price: number | null;
   proposal_status: string | null;
+  next_follow_up_date: string | null;
   alumni_since: string | null;
   reengagement_date: string | null;
   exit_reason: string | null;
@@ -259,6 +260,15 @@ function LeadPanel({ client, onSaved }: { client: LifecycleClientData; onSaved: 
             step="0.01"
             name="proposal_price"
             defaultValue={client.proposal_price ?? ""}
+            className={inputClass}
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <label className={labelClass}>Next follow-up date</label>
+          <input
+            type="date"
+            name="next_follow_up_date"
+            defaultValue={client.next_follow_up_date ?? ""}
             className={inputClass}
           />
         </div>

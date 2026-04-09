@@ -72,6 +72,7 @@ export default async function ClientProfilePage({
     proposal_package: string | null;
     proposal_price: number | null;
     proposal_status: string | null;
+    next_follow_up_date: string | null;
     alumni_since: string | null;
     reengagement_date: string | null;
     exit_reason: string | null;
@@ -87,6 +88,7 @@ export default async function ClientProfilePage({
         lifecycle_stage, source, lead_date,
         discovery_call_date, discovery_call_outcome,
         proposal_sent_date, proposal_package, proposal_price, proposal_status,
+        next_follow_up_date,
         alumni_since, reengagement_date, exit_reason,
         packages ( id, total_sessions, used_sessions, price, paid_amount, status, start_date, end_date )
       `)
@@ -118,6 +120,7 @@ export default async function ClientProfilePage({
           proposal_package: null,
           proposal_price: null,
           proposal_status: null,
+          next_follow_up_date: null,
           alumni_since: null,
           reengagement_date: null,
           exit_reason: null,
@@ -166,6 +169,7 @@ export default async function ClientProfilePage({
     proposal_package: client.proposal_package,
     proposal_price: client.proposal_price !== null ? Number(client.proposal_price) : null,
     proposal_status: client.proposal_status,
+    next_follow_up_date: client.next_follow_up_date,
     alumni_since: client.alumni_since,
     reengagement_date: client.reengagement_date,
     exit_reason: client.exit_reason,

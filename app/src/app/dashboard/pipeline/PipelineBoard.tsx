@@ -90,6 +90,18 @@ export default function PipelineBoard({ cardsByStage, totalsByStage }: Props) {
     startTransition(() => router.refresh());
   }
 
+  // Dropdown fallback for environments without HTML5 drag/drop (mobile/touch).
+  async function handleStageSelect(cardId: string, fromStage: LifecycleStage, toStage: string) {
+    if (toStage === fromStage) return;
+    const result = await moveClientStage(cardId, toStage);
+    if (!result.success) {
+      setToast({ message: result.error ?? "Failed to move", type: "error" });
+      return;
+    }
+    setToast({ message: `Moved to ${STAGE_LABELS[toStage as LifecycleStage] ?? toStage}`, type: "success" });
+    startTransition(() => router.refresh());
+  }
+
   return (
     <>
       <div className="flex gap-4 overflow-x-auto pb-4">
@@ -197,6 +209,20 @@ export default function PipelineBoard({ cardsByStage, totalsByStage }: Props) {
                         >
                           {QUICK_LABEL[stage]}
                         </button>
+
+                        {/* Stage selector fallback — works on mobile and a11y */}
+                        <select
+                          aria-label={`Move ${card.name} to a different stage`}
+                          value={stage}
+                          onChange={(e) => handleStageSelect(card.id, stage, e.target.value)}
+                          className="mt-1.5 w-full cursor-pointer rounded-md border border-border bg-surface px-2 py-1 text-[0.65rem] text-text-2 outline-none transition-colors hover:border-border-2"
+                        >
+                          {LIFECYCLE_STAGES.map((s) => (
+                            <option key={s} value={s}>
+                              Move to: {STAGE_LABELS[s]}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     );
                   })

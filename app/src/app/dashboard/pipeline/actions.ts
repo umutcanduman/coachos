@@ -324,6 +324,7 @@ export async function updateLeadFields(clientId: string, formData: FormData) {
     return { success: false, error: "Invalid proposal price" };
   }
   const proposalStatus = (formData.get("proposal_status") as string) || null;
+  const nextFollowUp = (formData.get("next_follow_up_date") as string) || null;
 
   const update: Record<string, unknown> = {
     discovery_call_date: discoveryDate,
@@ -332,6 +333,7 @@ export async function updateLeadFields(clientId: string, formData: FormData) {
     proposal_package: proposalPackage,
     proposal_price: proposalPrice,
     proposal_status: proposalStatus,
+    next_follow_up_date: nextFollowUp,
   };
 
   try {

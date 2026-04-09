@@ -56,6 +56,22 @@ export default async function DashboardLayout({
     }
   }
 
+  // Pipeline badge: total leads + proposals
+  let pipelineBadgeCount = 0;
+  if (coachId) {
+    try {
+      const supabase = await createClient();
+      const { count } = await supabase
+        .from("clients")
+        .select("id", { count: "exact", head: true })
+        .eq("coach_id", coachId)
+        .in("lifecycle_stage", ["lead", "discovery", "proposal"]);
+      pipelineBadgeCount = count ?? 0;
+    } catch {
+      // lifecycle_stage column may not exist yet (pre-migration)
+    }
+  }
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen bg-bg">
@@ -63,6 +79,7 @@ export default async function DashboardLayout({
           coachName={coachName}
           coachEmail={coachEmail}
           enabledModules={enabledModuleKeys}
+          pipelineBadgeCount={pipelineBadgeCount}
         />
         <div className="flex flex-1 flex-col lg:ml-[260px]">{children}</div>
       </div>

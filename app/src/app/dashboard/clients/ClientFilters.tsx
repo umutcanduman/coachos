@@ -3,15 +3,16 @@
 import Link from "next/link";
 
 const filters = [
-  { label: "All", value: "all" },
-  { label: "Active", value: "active" },
-  { label: "Follow-up", value: "follow-up" },
-  { label: "Completed", value: "completed" },
+  { label: "All",        value: "all" },
+  { label: "Leads",      value: "leads" },
+  { label: "Active",     value: "active" },
+  { label: "Completing", value: "completing" },
+  { label: "Alumni",     value: "alumni" },
 ];
 
 export default function ClientFilters({ activeFilter }: { activeFilter: string }) {
   return (
-    <div className="mb-5 flex gap-1 rounded-full border border-border bg-surface-2 p-1">
+    <div className="flex flex-wrap gap-1 rounded-full border border-border bg-surface-2 p-1">
       {filters.map((f) => (
         <Link
           key={f.value}

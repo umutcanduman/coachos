@@ -4,6 +4,13 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import Toast from "@/components/Toast";
+import {
+  LIFECYCLE_STAGES,
+  STAGE_LABELS,
+  SOURCE_OPTIONS,
+  SOURCE_LABELS,
+  isLifecycleStage,
+} from "@/lib/lifecycle";
 
 interface ClientOption {
   id: string;
@@ -24,8 +31,12 @@ export default function NewClientModal({ open, onClose, existingClients }: NewCl
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [stage, setStage] = useState<string>("lead");
 
   if (!open) return null;
+
+  const isLeadLike = stage === "lead" || stage === "discovery" || stage === "proposal";
+  const isActiveLike = stage === "onboarding" || stage === "active";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,6 +50,10 @@ export default function NewClientModal({ open, onClose, existingClients }: NewCl
     const packageType = formData.get("package_type") as string;
     const location = (formData.get("location") as string).trim();
     const referredBy = formData.get("referred_by") as string;
+    const lifecycleStageRaw = (formData.get("lifecycle_stage") as string) || "lead";
+    const lifecycleStage = isLifecycleStage(lifecycleStageRaw) ? lifecycleStageRaw : "lead";
+    const source = ((formData.get("source") as string) || "").trim() || null;
+    const leadDate = (formData.get("lead_date") as string) || null;
 
     if (!name || !email) {
       setError("Name and email are required.");
@@ -85,6 +100,9 @@ export default function NewClientModal({ open, onClose, existingClients }: NewCl
         location: location || null,
         package_type: packageType || null,
         status: "active",
+        lifecycle_stage: lifecycleStage,
+        source,
+        lead_date: leadDate,
         referred_by: referredBy || null,
       })
       .select("id")
@@ -169,20 +187,66 @@ export default function NewClientModal({ open, onClose, existingClients }: NewCl
 
             <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className={labelClass}>Package</label>
-                <select name="package_type" className={inputClass}>
-                  <option value="">Select package</option>
-                  <option value="Growth Journey">Growth Journey</option>
-                  <option value="Deep Transformation">Deep Transformation</option>
-                  <option value="Clarity Session">Clarity Session</option>
-                  <option value="Single Session">Single Session</option>
+                <label className={labelClass}>Lifecycle stage</label>
+                <select
+                  name="lifecycle_stage"
+                  className={inputClass}
+                  value={stage}
+                  onChange={(e) => setStage(e.target.value)}
+                >
+                  {LIFECYCLE_STAGES.map((s) => (
+                    <option key={s} value={s}>{STAGE_LABELS[s]}</option>
+                  ))}
                 </select>
               </div>
               <div>
+                <label className={labelClass}>Source</label>
+                <select name="source" className={inputClass} defaultValue="">
+                  <option value="">Select source</option>
+                  {SOURCE_OPTIONS.map((s) => (
+                    <option key={s} value={s}>{SOURCE_LABELS[s]}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {isLeadLike && (
+              <div className="mb-4">
+                <label className={labelClass}>Lead date</label>
+                <input
+                  name="lead_date"
+                  type="date"
+                  defaultValue={new Date().toISOString().slice(0, 10)}
+                  className={inputClass}
+                />
+              </div>
+            )}
+
+            {isActiveLike && (
+              <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>Package</label>
+                  <select name="package_type" className={inputClass}>
+                    <option value="">Select package</option>
+                    <option value="Growth Journey">Growth Journey</option>
+                    <option value="Deep Transformation">Deep Transformation</option>
+                    <option value="Clarity Session">Clarity Session</option>
+                    <option value="Single Session">Single Session</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={labelClass}>Location</label>
+                  <input name="location" type="text" placeholder="Rotterdam" className={inputClass} />
+                </div>
+              </div>
+            )}
+
+            {!isActiveLike && (
+              <div className="mb-4">
                 <label className={labelClass}>Location</label>
                 <input name="location" type="text" placeholder="Rotterdam" className={inputClass} />
               </div>
-            </div>
+            )}
 
             <div className="mb-4">
               <label className={labelClass}>Referred by</label>

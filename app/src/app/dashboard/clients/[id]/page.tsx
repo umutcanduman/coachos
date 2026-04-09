@@ -4,6 +4,17 @@ import Link from "next/link";
 import Topbar from "@/components/Topbar";
 import ProfileTabs from "./ProfileTabs";
 import ProfileActions from "./ProfileActions";
+import LifecyclePanels, {
+  type LifecycleClientData,
+  type OnboardingChecklistData,
+  type OffboardingChecklistData,
+} from "./LifecyclePanels";
+import {
+  STAGE_LABELS,
+  STAGE_BADGE_CLASS,
+  isLifecycleStage,
+  type LifecycleStage,
+} from "@/lib/lifecycle";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +54,7 @@ export default async function ClientProfilePage({
   if (!coachId) notFound();
 
   // Fetch client with related data
-  let client: {
+  type ClientFull = {
     id: string;
     name: string;
     email: string;
@@ -52,23 +63,113 @@ export default async function ClientProfilePage({
     package_type: string | null;
     status: string;
     created_at: string;
+    lifecycle_stage: string | null;
+    source: string | null;
+    lead_date: string | null;
+    discovery_call_date: string | null;
+    discovery_call_outcome: string | null;
+    proposal_sent_date: string | null;
+    proposal_package: string | null;
+    proposal_price: number | null;
+    proposal_status: string | null;
+    alumni_since: string | null;
+    reengagement_date: string | null;
+    exit_reason: string | null;
     packages: { id: string; total_sessions: number; used_sessions: number; price: number; paid_amount: number; status: string; start_date: string | null; end_date: string | null }[];
-  } | null = null;
+  };
+  let client: ClientFull | null = null;
 
   try {
     const { data } = await supabase
       .from("clients")
       .select(`
         id, name, email, phone, location, package_type, status, created_at,
+        lifecycle_stage, source, lead_date,
+        discovery_call_date, discovery_call_outcome,
+        proposal_sent_date, proposal_package, proposal_price, proposal_status,
+        alumni_since, reengagement_date, exit_reason,
         packages ( id, total_sessions, used_sessions, price, paid_amount, status, start_date, end_date )
       `)
       .eq("id", params.id)
       .eq("coach_id", coachId)
       .single();
-    client = data;
-  } catch { /* client query may fail */ }
+    client = data as ClientFull | null;
+  } catch {
+    // Lifecycle columns may not exist yet (pre-migration). Fall back to legacy fetch.
+    try {
+      const { data } = await supabase
+        .from("clients")
+        .select(`
+          id, name, email, phone, location, package_type, status, created_at,
+          packages ( id, total_sessions, used_sessions, price, paid_amount, status, start_date, end_date )
+        `)
+        .eq("id", params.id)
+        .eq("coach_id", coachId)
+        .single();
+      if (data) {
+        client = {
+          ...data,
+          lifecycle_stage: null,
+          source: null,
+          lead_date: null,
+          discovery_call_date: null,
+          discovery_call_outcome: null,
+          proposal_sent_date: null,
+          proposal_package: null,
+          proposal_price: null,
+          proposal_status: null,
+          alumni_since: null,
+          reengagement_date: null,
+          exit_reason: null,
+        } as ClientFull;
+      }
+    } catch { /* still fails — let notFound handle */ }
+  }
 
   if (!client) notFound();
+
+  const stage: LifecycleStage = isLifecycleStage(client.lifecycle_stage)
+    ? client.lifecycle_stage
+    : "active";
+
+  // Lifecycle checklists — both optional, both stage-gated below
+  let onboardingChecklist: OnboardingChecklistData | null = null;
+  let offboardingChecklist: OffboardingChecklistData | null = null;
+  try {
+    const { data } = await supabase
+      .from("onboarding_checklists")
+      .select("welcome_email_sent, agreement_sent, goals_set, first_session_scheduled, intake_homework_assigned, completed_at")
+      .eq("client_id", client.id)
+      .eq("coach_id", coachId)
+      .maybeSingle();
+    onboardingChecklist = (data as OnboardingChecklistData | null) ?? null;
+  } catch { /* table may not exist yet */ }
+
+  try {
+    const { data } = await supabase
+      .from("offboarding_checklists")
+      .select("results_summary_written, testimonial_requested, referral_asked, alumni_status_set, farewell_sent, results_summary, completed_at")
+      .eq("client_id", client.id)
+      .eq("coach_id", coachId)
+      .maybeSingle();
+    offboardingChecklist = (data as OffboardingChecklistData | null) ?? null;
+  } catch { /* table may not exist yet */ }
+
+  const lifecycleClient: LifecycleClientData = {
+    id: client.id,
+    lifecycle_stage: stage,
+    source: client.source,
+    lead_date: client.lead_date,
+    discovery_call_date: client.discovery_call_date,
+    discovery_call_outcome: client.discovery_call_outcome,
+    proposal_sent_date: client.proposal_sent_date,
+    proposal_package: client.proposal_package,
+    proposal_price: client.proposal_price !== null ? Number(client.proposal_price) : null,
+    proposal_status: client.proposal_status,
+    alumni_since: client.alumni_since,
+    reengagement_date: client.reengagement_date,
+    exit_reason: client.exit_reason,
+  };
 
   // Fetch sessions, homework, payments, goals — each in try/catch
   let sessions: { id: string; date: string; duration: number; type: string; status: string; notes: string | null }[] = [];
@@ -154,8 +255,8 @@ export default async function ClientProfilePage({
               {client.location && ` · ${client.location}`}
             </p>
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex rounded-full bg-accent-lt px-2.5 py-1 text-[0.7rem] font-medium text-accent">
-                {client.status}
+              <span className={`inline-flex rounded-full px-2.5 py-1 text-[0.7rem] font-medium ${STAGE_BADGE_CLASS[stage]}`}>
+                {STAGE_LABELS[stage]}
               </span>
               {client.package_type && (
                 <span className="inline-flex rounded-full bg-c-blue-dim px-2.5 py-1 text-[0.7rem] font-medium text-c-blue">
@@ -178,6 +279,15 @@ export default async function ClientProfilePage({
             package_type: client.package_type,
             status: client.status,
           }} />
+        </div>
+
+        {/* Lifecycle panels */}
+        <div className="mb-5">
+          <LifecyclePanels
+            client={lifecycleClient}
+            onboarding={onboardingChecklist}
+            offboarding={offboardingChecklist}
+          />
         </div>
 
         {/* Content grid */}

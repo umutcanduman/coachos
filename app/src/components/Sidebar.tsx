@@ -4,11 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/dashboard/actions";
 
-const mainNav = [
+interface NavItem {
+  label: string;
+  icon: string;
+  href: string;
+  badgeKey?: "pipeline";
+}
+
+const mainNav: NavItem[] = [
   { label: "Dashboard", icon: "◈", href: "/dashboard" },
-  { label: "Clients", icon: "◉", href: "/dashboard/clients" },
-  { label: "Sessions", icon: "◷", href: "/dashboard/sessions" },
-  { label: "Payments", icon: "◎", href: "/dashboard/payments" },
+  { label: "Pipeline",  icon: "▦", href: "/dashboard/pipeline", badgeKey: "pipeline" },
+  { label: "Clients",   icon: "◉", href: "/dashboard/clients" },
+  { label: "Sessions",  icon: "◷", href: "/dashboard/sessions" },
+  { label: "Payments",  icon: "◎", href: "/dashboard/payments" },
   { label: "Referrals", icon: "◌", href: "/dashboard/referrals" },
 ];
 
@@ -22,6 +30,7 @@ interface SidebarProps {
   coachName: string;
   coachEmail: string;
   enabledModules?: string[];
+  pipelineBadgeCount?: number;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -30,6 +39,7 @@ export default function Sidebar({
   coachName,
   coachEmail,
   enabledModules = [],
+  pipelineBadgeCount = 0,
   isOpen,
   onClose,
 }: SidebarProps) {
@@ -49,7 +59,7 @@ export default function Sidebar({
   }
 
   // Build dynamic module nav items that appear under Main
-  const moduleNavItems: { label: string; icon: string; href: string }[] = [];
+  const moduleNavItems: NavItem[] = [];
   if (enabledSet.has("agreements")) {
     moduleNavItems.push({ label: "Agreements", icon: "📄", href: "/dashboard/agreements" });
   }
@@ -110,21 +120,32 @@ export default function Sidebar({
           <div className="mb-1 px-2 text-[0.65rem] font-medium uppercase tracking-[0.12em] text-text-3">
             Main
           </div>
-          {[...mainNav, ...moduleNavItems].map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onClose}
-              className={`flex min-h-[44px] items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors lg:min-h-0 ${
-                isActive(item.href)
-                  ? "bg-accent-lt font-medium text-accent"
-                  : "text-text-2 hover:bg-surface-2 hover:text-text"
-              }`}
-            >
-              <span className="w-4 flex-shrink-0 text-center">{item.icon}</span>
-              <span className="truncate">{item.label}</span>
-            </Link>
-          ))}
+          {[...mainNav, ...moduleNavItems].map((item) => {
+            const badge =
+              item.badgeKey === "pipeline" && pipelineBadgeCount > 0
+                ? pipelineBadgeCount
+                : null;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onClose}
+                className={`flex min-h-[44px] items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors lg:min-h-0 ${
+                  isActive(item.href)
+                    ? "bg-accent-lt font-medium text-accent"
+                    : "text-text-2 hover:bg-surface-2 hover:text-text"
+                }`}
+              >
+                <span className="w-4 flex-shrink-0 text-center">{item.icon}</span>
+                <span className="truncate flex-1">{item.label}</span>
+                {badge !== null && (
+                  <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent px-1.5 text-[0.65rem] font-semibold text-white">
+                    {badge}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Tools nav */}

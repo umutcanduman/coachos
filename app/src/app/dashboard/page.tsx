@@ -5,6 +5,13 @@ import StatCard from "@/components/StatCard";
 import RevenueChart from "@/components/RevenueChart";
 import DashboardSessionActions from "./DashboardSessionActions";
 import NoteIndicator from "./NoteIndicator";
+import {
+  LIFECYCLE_STAGES,
+  STAGE_LABELS,
+  STAGE_BADGE_CLASS,
+  isLifecycleStage,
+  type LifecycleStage,
+} from "@/lib/lifecycle";
 
 export const dynamic = "force-dynamic";
 
@@ -74,6 +81,7 @@ async function getDashboardData() {
       monthlyRevenue: [] as { month: string; revenue: number }[],
       allClients: [] as ClientWithRelations[],
       referrals: [] as Referral[],
+      stageCounts: {} as Record<LifecycleStage, number>,
     };
   }
 
@@ -85,6 +93,10 @@ async function getDashboardData() {
   let monthlyRevenue: { month: string; revenue: number }[] = [];
   let allClients: ClientWithRelations[] = [];
   let referrals: Referral[] = [];
+  const stageCounts: Record<LifecycleStage, number> = {
+    lead: 0, discovery: 0, proposal: 0, onboarding: 0,
+    active: 0, completing: 0, offboarding: 0, alumni: 0,
+  };
 
   try {
     const { count } = await supabase
@@ -94,6 +106,17 @@ async function getDashboardData() {
       .eq("status", "active");
     activeClients = count ?? 0;
   } catch { /* clients table may not exist */ }
+
+  try {
+    const { data } = await supabase
+      .from("clients")
+      .select("lifecycle_stage")
+      .eq("coach_id", coachId);
+    for (const row of data ?? []) {
+      const s = (row as { lifecycle_stage: string | null }).lifecycle_stage;
+      if (isLifecycleStage(s)) stageCounts[s] += 1;
+    }
+  } catch { /* lifecycle_stage column may not exist yet */ }
 
   try {
     const { data } = await supabase
@@ -194,6 +217,7 @@ async function getDashboardData() {
     monthlyRevenue,
     allClients,
     referrals,
+    stageCounts,
   };
 }
 
@@ -201,6 +225,10 @@ export default async function DashboardPage() {
   const data = await getDashboardData();
 
   // data is null only if auth completely failed — layout already handles redirect
+  const emptyStages: Record<LifecycleStage, number> = {
+    lead: 0, discovery: 0, proposal: 0, onboarding: 0,
+    active: 0, completing: 0, offboarding: 0, alumni: 0,
+  };
   const {
     activeClients = 0,
     upcomingSessions = [],
@@ -209,7 +237,14 @@ export default async function DashboardPage() {
     monthlyRevenue = [],
     allClients = [],
     referrals = [],
+    stageCounts = emptyStages,
   } = data ?? {};
+  const stageCountsResolved: Record<LifecycleStage, number> = { ...emptyStages, ...stageCounts };
+  const totalLeads =
+    stageCountsResolved.lead + stageCountsResolved.discovery + stageCountsResolved.proposal;
+  const totalCompleting =
+    stageCountsResolved.completing + stageCountsResolved.offboarding;
+  const hasPipelineData = LIFECYCLE_STAGES.some((s) => stageCountsResolved[s] > 0);
 
   const today = new Date();
   const subtitle = today.toLocaleDateString("en-US", {
@@ -271,6 +306,43 @@ export default async function DashboardPage() {
             delta={openHomework > 0 ? "Needs attention" : "All clear"}
             deltaType={openHomework > 3 ? "down" : "neutral"}
           />
+        </div>
+
+        {/* Pipeline summary */}
+        <div className="mb-6 overflow-hidden rounded-card border border-border bg-surface">
+          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+            <div>
+              <div className="text-sm font-medium text-text">Pipeline</div>
+              <div className="mt-0.5 text-xs text-text-3">
+                {hasPipelineData
+                  ? `${totalLeads} in lead/proposal · ${totalCompleting} completing`
+                  : "No pipeline data yet"}
+              </div>
+            </div>
+            <Link href="/dashboard/pipeline" className="text-xs text-accent hover:underline">
+              View pipeline →
+            </Link>
+          </div>
+          {hasPipelineData ? (
+            <div className="grid grid-cols-2 gap-3 px-5 py-4 sm:grid-cols-4 lg:grid-cols-8">
+              {LIFECYCLE_STAGES.map((s) => (
+                <Link
+                  key={s}
+                  href="/dashboard/pipeline"
+                  className="flex flex-col items-start rounded-lg border border-border bg-surface-2 p-3 transition-colors hover:border-border-2 hover:bg-surface-3"
+                >
+                  <span className={`mb-1.5 inline-flex rounded-full px-2 py-0.5 text-[0.65rem] font-medium ${STAGE_BADGE_CLASS[s]}`}>
+                    {STAGE_LABELS[s]}
+                  </span>
+                  <span className="font-serif text-xl text-text">{stageCountsResolved[s]}</span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="px-5 py-8 text-center text-xs text-text-3">
+              Add a lead in the Pipeline view to start tracking the lifecycle.
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_340px]">

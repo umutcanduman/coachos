@@ -3,6 +3,12 @@ import Link from "next/link";
 import Topbar from "@/components/Topbar";
 import ClientFilters from "./ClientFilters";
 import ClientActions from "./ClientActions";
+import {
+  STAGE_LABELS,
+  STAGE_BADGE_CLASS,
+  isLifecycleStage,
+  type LifecycleStage,
+} from "@/lib/lifecycle";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +57,8 @@ export default async function ClientsPage({
     status: string;
     package_type: string | null;
     created_at: string;
+    lifecycle_stage: string | null;
+    source: string | null;
     packages: { total_sessions: number; used_sessions: number; price: number; paid_amount: number; status: string }[];
     payments: { amount: number; status: string }[];
     sessions: { date: string; status: string }[];
@@ -64,6 +72,7 @@ export default async function ClientsPage({
         .from("clients")
         .select(`
           id, name, email, phone, status, package_type, created_at,
+          lifecycle_stage, source,
           packages ( total_sessions, used_sessions, price, paid_amount, status ),
           payments ( amount, status ),
           sessions ( date, status )
@@ -71,12 +80,14 @@ export default async function ClientsPage({
         .eq("coach_id", coachId)
         .order("created_at", { ascending: false });
 
-      if (filter === "active") {
-        query = query.eq("status", "active");
-      } else if (filter === "follow-up") {
-        query = query.eq("status", "follow-up");
-      } else if (filter === "completed") {
-        query = query.eq("status", "completed");
+      if (filter === "leads") {
+        query = query.in("lifecycle_stage", ["lead", "discovery", "proposal"]);
+      } else if (filter === "active") {
+        query = query.in("lifecycle_stage", ["onboarding", "active"]);
+      } else if (filter === "completing") {
+        query = query.in("lifecycle_stage", ["completing", "offboarding"]);
+      } else if (filter === "alumni") {
+        query = query.eq("lifecycle_stage", "alumni");
       }
 
       const { data } = await query;
@@ -99,13 +110,14 @@ export default async function ClientsPage({
         <div className="overflow-hidden rounded-card border border-border bg-surface">
           <div className="flex flex-col overflow-x-auto">
             {/* Header */}
-            <div className="grid min-w-[700px] grid-cols-[2.5fr_1.5fr_1.25fr_1.25fr_1fr_80px] items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3">
+            <div className="grid min-w-[820px] grid-cols-[2.2fr_1.2fr_0.9fr_1.1fr_1.1fr_0.9fr_110px] items-center gap-4 px-5 py-2.5 text-[0.7rem] font-medium uppercase tracking-[0.1em] text-text-3">
               <div>Client</div>
               <div>Package</div>
+              <div>Source</div>
               <div>Progress</div>
               <div>Payment</div>
               <div>Next session</div>
-              <div>Status</div>
+              <div>Stage</div>
             </div>
 
             {clients.length === 0 ? (
@@ -151,17 +163,15 @@ export default async function ClientsPage({
                 const progressColor =
                   progress > 60 ? "bg-accent" : progress > 30 ? "bg-c-amber" : "bg-c-red";
 
-                const statusStyles: Record<string, string> = {
-                  active: "bg-accent-lt text-accent",
-                  "follow-up": "bg-c-amber-dim text-c-amber",
-                  completed: "bg-c-teal-dim text-c-teal",
-                };
+                const stage: LifecycleStage = isLifecycleStage(client.lifecycle_stage)
+                  ? client.lifecycle_stage
+                  : "active";
 
                 return (
                   <Link
                     key={client.id}
                     href={`/dashboard/clients/${client.id}`}
-                    className="grid min-w-[700px] grid-cols-[2.5fr_1.5fr_1.25fr_1.25fr_1fr_80px] items-center gap-4 border-b border-border px-5 py-3.5 transition-colors last:border-b-0 hover:bg-surface-2"
+                    className="grid min-w-[820px] grid-cols-[2.2fr_1.2fr_0.9fr_1.1fr_1.1fr_0.9fr_110px] items-center gap-4 border-b border-border px-5 py-3.5 transition-colors last:border-b-0 hover:bg-surface-2"
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-full bg-accent-dim text-xs font-semibold text-accent">
@@ -176,6 +186,9 @@ export default async function ClientsPage({
                       <span className="inline-flex rounded-full bg-accent-lt px-2.5 py-1 text-[0.7rem] font-medium text-accent">
                         {client.package_type ?? "—"}
                       </span>
+                    </div>
+                    <div className="text-[0.72rem] capitalize text-text-3">
+                      {client.source ?? "—"}
                     </div>
                     <div className="min-w-[80px]">
                       <div className="h-[5px] overflow-hidden rounded-full bg-surface-3">
@@ -213,11 +226,9 @@ export default async function ClientsPage({
                     </div>
                     <div>
                       <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-[0.7rem] font-medium capitalize ${
-                          statusStyles[client.status] ?? "bg-surface-3 text-text-3"
-                        }`}
+                        className={`inline-flex rounded-full px-2.5 py-1 text-[0.7rem] font-medium ${STAGE_BADGE_CLASS[stage]}`}
                       >
-                        {client.status}
+                        {STAGE_LABELS[stage]}
                       </span>
                     </div>
                   </Link>

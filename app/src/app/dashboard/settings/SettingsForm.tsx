@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { updateProfile, updatePractice, updateNotifications, sendPasswordReset, deleteAccount } from "./actions";
+import { updateCoachSettings } from "@/app/dashboard/today-actions";
 import Toast from "@/components/Toast";
 
 interface CoachSettings {
@@ -26,7 +27,12 @@ const labelClass = "mb-1.5 block text-xs font-medium uppercase tracking-[0.06em]
 const btnClass = "inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-[0.8125rem] font-medium text-white transition-all hover:bg-accent-hover disabled:opacity-50";
 const sectionClass = "rounded-card border border-border bg-surface p-6";
 
-export default function SettingsForm({ coach }: { coach: CoachSettings }) {
+interface CapacitySettings {
+  max_client_capacity: number;
+  target_monthly_revenue: number | null;
+}
+
+export default function SettingsForm({ coach, capacitySettings }: { coach: CoachSettings; capacitySettings?: CapacitySettings }) {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [saving, setSaving] = useState<string | null>(null);
 
@@ -153,6 +159,33 @@ export default function SettingsForm({ coach }: { coach: CoachSettings }) {
           </div>
           <button type="submit" disabled={saving === "practice"} className={btnClass}>
             {saving === "practice" ? "Saving…" : "Save Practice Settings"}
+          </button>
+        </form>
+      </div>
+
+      {/* Capacity Planning */}
+      <div className={sectionClass}>
+        <h2 className="mb-1 text-[0.9375rem] font-semibold text-text">Capacity & Goals</h2>
+        <p className="mb-5 text-[0.8125rem] text-text-3">Set your practice capacity for the acquisition page</p>
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          setSaving("capacity");
+          const r = await updateCoachSettings(new FormData(e.currentTarget));
+          setToast({ message: r.success ? "Capacity settings saved" : (r.error ?? "Failed"), type: r.success ? "success" : "error" });
+          setSaving(null);
+        }}>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-5">
+            <div>
+              <label className={labelClass}>Max client capacity</label>
+              <input name="max_client_capacity" type="number" min={1} max={100} defaultValue={capacitySettings?.max_client_capacity ?? 10} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Target monthly revenue (€)</label>
+              <input name="target_monthly_revenue" type="number" min={0} step="0.01" defaultValue={capacitySettings?.target_monthly_revenue ?? ""} placeholder="e.g. 5000" className={inputClass} />
+            </div>
+          </div>
+          <button type="submit" disabled={saving === "capacity"} className={btnClass}>
+            {saving === "capacity" ? "Saving…" : "Save capacity settings"}
           </button>
         </form>
       </div>

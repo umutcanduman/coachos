@@ -41,7 +41,7 @@ export default async function SettingsPage() {
   try {
     const { data } = await supabase
       .from("coaches")
-      .select("name, email, phone, bio, timezone, photo_url, practice_name, website_url, default_session_duration, default_session_type, currency, notify_session_reminders, notify_homework_completed, notify_weekly_summary")
+      .select("id, name, email, phone, bio, timezone, photo_url, practice_name, website_url, default_session_duration, default_session_type, currency, notify_session_reminders, notify_homework_completed, notify_weekly_summary")
       .eq("user_id", user.id)
       .single();
     if (data) {
@@ -49,12 +49,30 @@ export default async function SettingsPage() {
     }
   } catch { /* coach table may not have these columns yet */ }
 
+  // Fetch capacity settings
+  let capacitySettings = { max_client_capacity: 10, target_monthly_revenue: null as number | null };
+  if (coach.name) {
+    try {
+      const { data: cs } = await supabase
+        .from("coach_settings")
+        .select("max_client_capacity, target_monthly_revenue")
+        .eq("coach_id", (coach as Record<string, unknown>).id ?? "")
+        .maybeSingle();
+      if (cs) {
+        capacitySettings = {
+          max_client_capacity: cs.max_client_capacity ?? 10,
+          target_monthly_revenue: cs.target_monthly_revenue ? Number(cs.target_monthly_revenue) : null,
+        };
+      }
+    } catch { /* coach_settings table may not exist yet */ }
+  }
+
   return (
     <>
       <Topbar title="Settings" />
       <div className="flex-1 p-4 lg:p-7">
         <div className="mx-auto max-w-2xl">
-          <SettingsForm coach={coach} />
+          <SettingsForm coach={coach} capacitySettings={capacitySettings} />
         </div>
       </div>
     </>

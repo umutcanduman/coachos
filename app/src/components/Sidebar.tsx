@@ -12,18 +12,21 @@ interface NavItem {
 }
 
 const mainNav: NavItem[] = [
-  { label: "Dashboard", icon: "◈", href: "/dashboard" },
-  { label: "Pipeline",  icon: "▦", href: "/dashboard/pipeline", badgeKey: "pipeline" },
-  { label: "Clients",   icon: "◉", href: "/dashboard/clients" },
-  { label: "Sessions",  icon: "◷", href: "/dashboard/sessions" },
-  { label: "Payments",  icon: "◎", href: "/dashboard/payments" },
-  { label: "Referrals", icon: "◌", href: "/dashboard/referrals" },
+  { label: "Today",       icon: "◈", href: "/dashboard" },
+  { label: "Pipeline",    icon: "▦", href: "/dashboard/pipeline", badgeKey: "pipeline" },
+  { label: "Acquisition", icon: "◇", href: "/dashboard/acquisition" },
+  { label: "Clients",     icon: "◉", href: "/dashboard/clients" },
+  { label: "Sessions",    icon: "◷", href: "/dashboard/sessions" },
+  { label: "Tools",       icon: "◑", href: "/dashboard/tools" },
+  { label: "Payments",    icon: "◎", href: "/dashboard/payments" },
+  { label: "Invoices",    icon: "▢", href: "/dashboard/invoices" },
+  { label: "Referrals",   icon: "◌", href: "/dashboard/referrals" },
 ];
 
 const toolsNav = [
-  { label: "Progress", icon: "◑", href: "/dashboard/progress" },
-  { label: "Pro Tools", icon: "⊕", href: "/dashboard/pro-tools" },
-  { label: "Settings", icon: "◧", href: "/dashboard/settings" },
+  { label: "Progress",  icon: "◑", href: "/dashboard/progress" },
+  { label: "Pro Tools",  icon: "⊕", href: "/dashboard/pro-tools" },
+  { label: "Settings",  icon: "◧", href: "/dashboard/settings" },
 ];
 
 interface SidebarProps {

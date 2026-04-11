@@ -3,11 +3,10 @@
 import Link from "next/link";
 
 const filters = [
-  { label: "All",        value: "all" },
-  { label: "Leads",      value: "leads" },
-  { label: "Active",     value: "active" },
-  { label: "Completing", value: "completing" },
-  { label: "Alumni",     value: "alumni" },
+  { label: "All",    value: "all" },
+  { label: "Leads",  value: "leads" },
+  { label: "Active", value: "active" },
+  { label: "Alumni", value: "alumni" },
 ];
 
 export default function ClientFilters({ activeFilter }: { activeFilter: string }) {

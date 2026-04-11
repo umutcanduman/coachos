@@ -19,14 +19,11 @@ interface Props {
 }
 
 const QUICK_LABEL: Record<LifecycleStage, string> = {
-  lead:        "Schedule Discovery",
-  discovery:   "Send Proposal",
-  proposal:    "Mark Accepted",
-  onboarding:  "View Checklist",
-  active:      "View Profile",
-  completing:  "Start Offboarding",
-  offboarding: "View Checklist",
-  alumni:      "Re-engage",
+  lead:      "Schedule Discovery",
+  discovery: "Send Proposal",
+  proposal:  "Mark Accepted",
+  active:    "View Profile",
+  alumni:    "Re-engage",
 };
 
 export default function PipelineBoard({

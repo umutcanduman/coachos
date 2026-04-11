@@ -37,14 +37,8 @@ function nextActionFor(c: RawClient): string | null {
       return c.proposal_sent_date
         ? `Sent ${new Date(c.proposal_sent_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
         : "Send proposal";
-    case "onboarding":
-      return "Finish onboarding";
     case "active":
       return "Continue sessions";
-    case "completing":
-      return "Wrap up sessions";
-    case "offboarding":
-      return "Finish offboarding";
     case "alumni":
       return c.reengagement_date
         ? `Re-engage ${new Date(c.reengagement_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
@@ -122,7 +116,7 @@ export default async function PipelinePage() {
     inProposalCount: 0,
     inProposalValue: 0,
     activeCount: 0,
-    completingCount: 0,
+    alumniCount: 0,
   };
 
   if (coachId) {
@@ -180,8 +174,8 @@ export default async function PipelinePage() {
         .from("clients")
         .select("id", { count: "exact", head: true })
         .eq("coach_id", coachId)
-        .in("lifecycle_stage", ["completing", "offboarding"]);
-      summary.completingCount = count ?? 0;
+        .eq("lifecycle_stage", "alumni");
+      summary.alumniCount = count ?? 0;
     } catch { /* lifecycle column may not exist yet */ }
   }
 

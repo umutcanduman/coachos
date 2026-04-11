@@ -6,7 +6,7 @@ export default function PipelineLoading() {
       <Topbar title="Pipeline" subtitle="Loading…" />
       <div className="flex-1 p-4 lg:p-7">
         <div className="flex gap-4 overflow-x-auto pb-4">
-          {Array.from({ length: 8 }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
               className="flex w-[280px] flex-shrink-0 flex-col rounded-card border border-border bg-surface"

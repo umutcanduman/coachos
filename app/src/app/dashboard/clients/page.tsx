@@ -83,9 +83,7 @@ export default async function ClientsPage({
       if (filter === "leads") {
         query = query.in("lifecycle_stage", ["lead", "discovery", "proposal"]);
       } else if (filter === "active") {
-        query = query.in("lifecycle_stage", ["onboarding", "active"]);
-      } else if (filter === "completing") {
-        query = query.in("lifecycle_stage", ["completing", "offboarding"]);
+        query = query.eq("lifecycle_stage", "active");
       } else if (filter === "alumni") {
         query = query.eq("lifecycle_stage", "alumni");
       }

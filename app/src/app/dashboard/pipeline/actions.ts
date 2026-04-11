@@ -391,21 +391,13 @@ export async function convertLeadToActive(clientId: string, formData: FormData) 
     const { error: clErr } = await supabase
       .from("clients")
       .update({
-        lifecycle_stage: "onboarding",
+        lifecycle_stage: "active",
         package_type: packageType,
         status: "active",
       })
       .eq("id", clientId)
       .eq("coach_id", coachId);
     if (clErr) return { success: false, error: clErr.message };
-
-    // Seed an empty checklist row
-    await supabase
-      .from("onboarding_checklists")
-      .upsert(
-        { client_id: clientId, coach_id: coachId },
-        { onConflict: "client_id" }
-      );
 
     revalidatePath(`/dashboard/clients/${clientId}`);
     revalidatePath("/dashboard/pipeline");
@@ -428,7 +420,7 @@ export async function quickAdvance(
   if (fromStage === "lead") return moveClientStage(clientId, "discovery");
   // Discovery → Proposal
   if (fromStage === "discovery") return moveClientStage(clientId, "proposal");
-  // Proposal → Onboarding (mark accepted) — also stamp accepted status
+  // Proposal → Active (mark accepted)
   if (fromStage === "proposal") {
     const coachId = await getCoachId();
     if (!coachId) return { success: false, error: "Not authenticated" };
@@ -440,7 +432,7 @@ export async function quickAdvance(
       const { error } = await supabase
         .from("clients")
         .update({
-          lifecycle_stage: "onboarding",
+          lifecycle_stage: "active",
           proposal_status: "accepted",
         })
         .eq("id", clientId)
@@ -454,8 +446,6 @@ export async function quickAdvance(
       return { success: false, error: "Something went wrong" };
     }
   }
-  // Completing → Offboarding
-  if (fromStage === "completing") return moveClientStage(clientId, "offboarding");
   // Alumni → Lead (re-engage)
   if (fromStage === "alumni") return reengageClient(clientId);
 

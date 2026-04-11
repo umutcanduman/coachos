@@ -17,5 +17,5 @@ export interface PipelineSummary {
   inProposalCount: number;
   inProposalValue: number;
   activeCount: number;
-  completingCount: number;
+  alumniCount: number;
 }

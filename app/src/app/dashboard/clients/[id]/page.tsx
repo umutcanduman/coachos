@@ -6,8 +6,6 @@ import ProfileTabs from "./ProfileTabs";
 import ProfileActions from "./ProfileActions";
 import LifecyclePanels, {
   type LifecycleClientData,
-  type OnboardingChecklistData,
-  type OffboardingChecklistData,
 } from "./LifecyclePanels";
 import {
   STAGE_LABELS,
@@ -134,29 +132,6 @@ export default async function ClientProfilePage({
   const stage: LifecycleStage = isLifecycleStage(client.lifecycle_stage)
     ? client.lifecycle_stage
     : "active";
-
-  // Lifecycle checklists — both optional, both stage-gated below
-  let onboardingChecklist: OnboardingChecklistData | null = null;
-  let offboardingChecklist: OffboardingChecklistData | null = null;
-  try {
-    const { data } = await supabase
-      .from("onboarding_checklists")
-      .select("welcome_email_sent, agreement_sent, goals_set, first_session_scheduled, intake_homework_assigned, completed_at")
-      .eq("client_id", client.id)
-      .eq("coach_id", coachId)
-      .maybeSingle();
-    onboardingChecklist = (data as OnboardingChecklistData | null) ?? null;
-  } catch { /* table may not exist yet */ }
-
-  try {
-    const { data } = await supabase
-      .from("offboarding_checklists")
-      .select("results_summary_written, testimonial_requested, referral_asked, alumni_status_set, farewell_sent, results_summary, completed_at")
-      .eq("client_id", client.id)
-      .eq("coach_id", coachId)
-      .maybeSingle();
-    offboardingChecklist = (data as OffboardingChecklistData | null) ?? null;
-  } catch { /* table may not exist yet */ }
 
   const lifecycleClient: LifecycleClientData = {
     id: client.id,
@@ -287,11 +262,7 @@ export default async function ClientProfilePage({
 
         {/* Lifecycle panels */}
         <div className="mb-5">
-          <LifecyclePanels
-            client={lifecycleClient}
-            onboarding={onboardingChecklist}
-            offboarding={offboardingChecklist}
-          />
+          <LifecyclePanels client={lifecycleClient} />
         </div>
 
         {/* Content grid */}

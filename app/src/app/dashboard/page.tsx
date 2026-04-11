@@ -94,8 +94,8 @@ async function getDashboardData() {
   let allClients: ClientWithRelations[] = [];
   let referrals: Referral[] = [];
   const stageCounts: Record<LifecycleStage, number> = {
-    lead: 0, discovery: 0, proposal: 0, onboarding: 0,
-    active: 0, completing: 0, offboarding: 0, alumni: 0,
+    lead: 0, discovery: 0, proposal: 0,
+    active: 0, alumni: 0,
   };
 
   try {
@@ -226,8 +226,8 @@ export default async function DashboardPage() {
 
   // data is null only if auth completely failed — layout already handles redirect
   const emptyStages: Record<LifecycleStage, number> = {
-    lead: 0, discovery: 0, proposal: 0, onboarding: 0,
-    active: 0, completing: 0, offboarding: 0, alumni: 0,
+    lead: 0, discovery: 0, proposal: 0,
+    active: 0, alumni: 0,
   };
   const {
     activeClients = 0,
@@ -242,8 +242,6 @@ export default async function DashboardPage() {
   const stageCountsResolved: Record<LifecycleStage, number> = { ...emptyStages, ...stageCounts };
   const totalLeads =
     stageCountsResolved.lead + stageCountsResolved.discovery + stageCountsResolved.proposal;
-  const totalCompleting =
-    stageCountsResolved.completing + stageCountsResolved.offboarding;
   const hasPipelineData = LIFECYCLE_STAGES.some((s) => stageCountsResolved[s] > 0);
 
   const today = new Date();
@@ -315,7 +313,7 @@ export default async function DashboardPage() {
               <div className="text-sm font-medium text-text">Pipeline</div>
               <div className="mt-0.5 text-xs text-text-3">
                 {hasPipelineData
-                  ? `${totalLeads} in lead/proposal · ${totalCompleting} completing`
+                  ? `${totalLeads} in lead/proposal · ${stageCountsResolved.active} active`
                   : "No pipeline data yet"}
               </div>
             </div>

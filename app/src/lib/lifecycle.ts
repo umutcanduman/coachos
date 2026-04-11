@@ -4,10 +4,7 @@ export const LIFECYCLE_STAGES = [
   "lead",
   "discovery",
   "proposal",
-  "onboarding",
   "active",
-  "completing",
-  "offboarding",
   "alumni",
 ] as const;
 
@@ -17,23 +14,17 @@ export const STAGE_LABELS: Record<LifecycleStage, string> = {
   lead: "Lead",
   discovery: "Discovery",
   proposal: "Proposal",
-  onboarding: "Onboarding",
   active: "Active",
-  completing: "Completing",
-  offboarding: "Offboarding",
   alumni: "Alumni",
 };
 
 // Tailwind utility classes for badges; uses existing palette tokens.
 export const STAGE_BADGE_CLASS: Record<LifecycleStage, string> = {
-  lead:        "bg-c-blue-dim text-c-blue",
-  discovery:   "bg-c-purple-dim text-c-purple",
-  proposal:    "bg-c-amber-dim text-c-amber",
-  onboarding:  "bg-c-teal-dim text-c-teal",
-  active:      "bg-accent-lt text-accent",
-  completing:  "bg-c-amber-dim text-c-amber",
-  offboarding: "bg-c-red-dim text-c-red",
-  alumni:      "bg-surface-3 text-text-3",
+  lead:      "bg-c-blue-dim text-c-blue",
+  discovery: "bg-c-purple-dim text-c-purple",
+  proposal:  "bg-c-amber-dim text-c-amber",
+  active:    "bg-accent-lt text-accent",
+  alumni:    "bg-surface-3 text-text-3",
 };
 
 export const SOURCE_OPTIONS = [

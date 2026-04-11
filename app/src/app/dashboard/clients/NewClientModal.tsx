@@ -36,7 +36,7 @@ export default function NewClientModal({ open, onClose, existingClients }: NewCl
   if (!open) return null;
 
   const isLeadLike = stage === "lead" || stage === "discovery" || stage === "proposal";
-  const isActiveLike = stage === "onboarding" || stage === "active";
+  const isActiveLike = stage === "active";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

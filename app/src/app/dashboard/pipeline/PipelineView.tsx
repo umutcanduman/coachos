@@ -46,8 +46,8 @@ export default function PipelineView({ cards, summary, existingClients }: Props)
 
   const cardsByStage = useMemo(() => {
     const buckets: Record<LifecycleStage, PipelineCard[]> = {
-      lead: [], discovery: [], proposal: [], onboarding: [],
-      active: [], completing: [], offboarding: [], alumni: [],
+      lead: [], discovery: [], proposal: [],
+      active: [], alumni: [],
     };
     for (const c of filtered) buckets[c.lifecycle_stage].push(c);
     return buckets;
@@ -55,8 +55,8 @@ export default function PipelineView({ cards, summary, existingClients }: Props)
 
   const totalsByStage = useMemo(() => {
     const totals: Record<LifecycleStage, number> = {
-      lead: 0, discovery: 0, proposal: 0, onboarding: 0,
-      active: 0, completing: 0, offboarding: 0, alumni: 0,
+      lead: 0, discovery: 0, proposal: 0,
+      active: 0, alumni: 0,
     };
     for (const c of filtered) {
       if (c.lifecycle_stage === "proposal" && c.proposal_price) {
@@ -85,11 +85,7 @@ export default function PipelineView({ cards, summary, existingClients }: Props)
   }
 
   async function handleQuickAction(card: PipelineCard) {
-    if (
-      card.lifecycle_stage === "onboarding" ||
-      card.lifecycle_stage === "active" ||
-      card.lifecycle_stage === "offboarding"
-    ) {
+    if (card.lifecycle_stage === "active") {
       router.push(`/dashboard/clients/${card.id}`);
       return;
     }
@@ -252,7 +248,7 @@ function SummaryBar({ summary }: { summary: PipelineSummary }) {
       sub: summary.inProposalValue > 0 ? `€${summary.inProposalValue.toLocaleString()}` : null,
     },
     { label: "Active clients", value: String(summary.activeCount) },
-    { label: "Completing", value: String(summary.completingCount) },
+    { label: "Alumni", value: String(summary.alumniCount) },
   ];
   return (
     <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">

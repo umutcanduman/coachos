@@ -290,7 +290,7 @@ function ConvertLeadModal({
           className="absolute right-5 top-5 text-text-3 hover:text-text"
         >✕</button>
         <h2 className="mb-1 font-serif text-2xl text-text">Convert to active client</h2>
-        <p className="mb-5 text-[0.8125rem] text-text-3">Creates a package and moves the client into onboarding.</p>
+        <p className="mb-5 text-[0.8125rem] text-text-3">Creates a package and moves the client to active.</p>
         {error && (
           <div className="mb-4 rounded-lg border border-[rgba(184,50,50,0.15)] bg-c-red-dim px-4 py-3 text-[0.8125rem] text-c-red">{error}</div>
         )}

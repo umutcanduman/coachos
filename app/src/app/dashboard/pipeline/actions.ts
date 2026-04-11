@@ -112,214 +112,6 @@ export async function moveClientStage(clientId: string, stage: string) {
   }
 }
 
-type OnboardingField =
-  | "welcome_email_sent"
-  | "agreement_sent"
-  | "goals_set"
-  | "first_session_scheduled"
-  | "intake_homework_assigned";
-
-const ONBOARDING_FIELDS: OnboardingField[] = [
-  "welcome_email_sent",
-  "agreement_sent",
-  "goals_set",
-  "first_session_scheduled",
-  "intake_homework_assigned",
-];
-
-export async function toggleOnboardingItem(
-  clientId: string,
-  field: string,
-  value: boolean
-) {
-  const coachId = await getCoachId();
-  if (!coachId) return { success: false, error: "Not authenticated" };
-  if (!(ONBOARDING_FIELDS as string[]).includes(field)) {
-    return { success: false, error: "Invalid field" };
-  }
-  if (!(await verifyClientOwnership(clientId, coachId))) {
-    return { success: false, error: "Client not found" };
-  }
-
-  try {
-    const supabase = await createClient();
-    const update: Record<string, unknown> = {
-      [field]: value,
-      updated_at: new Date().toISOString(),
-    };
-    const { error } = await supabase
-      .from("onboarding_checklists")
-      .upsert(
-        {
-          client_id: clientId,
-          coach_id: coachId,
-          ...update,
-        },
-        { onConflict: "client_id" }
-      );
-    if (error) return { success: false, error: error.message };
-    revalidatePath(`/dashboard/clients/${clientId}`);
-    return { success: true };
-  } catch (e) {
-    console.error("toggleOnboardingItem failed", e);
-    return { success: false, error: "Something went wrong" };
-  }
-}
-
-export async function completeOnboarding(clientId: string) {
-  const coachId = await getCoachId();
-  if (!coachId) return { success: false, error: "Not authenticated" };
-  if (!(await verifyClientOwnership(clientId, coachId))) {
-    return { success: false, error: "Client not found" };
-  }
-
-  try {
-    const supabase = await createClient();
-    const now = new Date().toISOString();
-    const { error: clErr } = await supabase
-      .from("onboarding_checklists")
-      .update({ completed_at: now, updated_at: now })
-      .eq("client_id", clientId)
-      .eq("coach_id", coachId);
-    if (clErr) return { success: false, error: clErr.message };
-
-    const { error: stageErr } = await supabase
-      .from("clients")
-      .update({
-        lifecycle_stage: "active",
-        onboarding_completed_at: now,
-      })
-      .eq("id", clientId)
-      .eq("coach_id", coachId);
-    if (stageErr) return { success: false, error: stageErr.message };
-
-    revalidatePath(`/dashboard/clients/${clientId}`);
-    revalidatePath("/dashboard/pipeline");
-    return { success: true };
-  } catch (e) {
-    console.error("completeOnboarding failed", e);
-    return { success: false, error: "Something went wrong" };
-  }
-}
-
-type OffboardingField =
-  | "results_summary_written"
-  | "testimonial_requested"
-  | "referral_asked"
-  | "alumni_status_set"
-  | "farewell_sent";
-
-const OFFBOARDING_FIELDS: OffboardingField[] = [
-  "results_summary_written",
-  "testimonial_requested",
-  "referral_asked",
-  "alumni_status_set",
-  "farewell_sent",
-];
-
-export async function toggleOffboardingItem(
-  clientId: string,
-  field: string,
-  value: boolean
-) {
-  const coachId = await getCoachId();
-  if (!coachId) return { success: false, error: "Not authenticated" };
-  if (!(OFFBOARDING_FIELDS as string[]).includes(field)) {
-    return { success: false, error: "Invalid field" };
-  }
-  if (!(await verifyClientOwnership(clientId, coachId))) {
-    return { success: false, error: "Client not found" };
-  }
-
-  try {
-    const supabase = await createClient();
-    const { error } = await supabase
-      .from("offboarding_checklists")
-      .upsert(
-        {
-          client_id: clientId,
-          coach_id: coachId,
-          [field]: value,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "client_id" }
-      );
-    if (error) return { success: false, error: error.message };
-    revalidatePath(`/dashboard/clients/${clientId}`);
-    return { success: true };
-  } catch (e) {
-    console.error("toggleOffboardingItem failed", e);
-    return { success: false, error: "Something went wrong" };
-  }
-}
-
-export async function saveResultsSummary(clientId: string, summary: string) {
-  const coachId = await getCoachId();
-  if (!coachId) return { success: false, error: "Not authenticated" };
-  if (!(await verifyClientOwnership(clientId, coachId))) {
-    return { success: false, error: "Client not found" };
-  }
-  const trimmed = (summary ?? "").slice(0, 5000);
-  try {
-    const supabase = await createClient();
-    const { error } = await supabase
-      .from("offboarding_checklists")
-      .upsert(
-        {
-          client_id: clientId,
-          coach_id: coachId,
-          results_summary: trimmed,
-          results_summary_written: trimmed.trim().length > 0,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "client_id" }
-      );
-    if (error) return { success: false, error: error.message };
-    revalidatePath(`/dashboard/clients/${clientId}`);
-    return { success: true };
-  } catch (e) {
-    console.error("saveResultsSummary failed", e);
-    return { success: false, error: "Something went wrong" };
-  }
-}
-
-export async function completeOffboarding(clientId: string, exitReason: string) {
-  const coachId = await getCoachId();
-  if (!coachId) return { success: false, error: "Not authenticated" };
-  if (!(await verifyClientOwnership(clientId, coachId))) {
-    return { success: false, error: "Client not found" };
-  }
-
-  try {
-    const supabase = await createClient();
-    const now = new Date().toISOString();
-    await supabase
-      .from("offboarding_checklists")
-      .update({ completed_at: now, updated_at: now })
-      .eq("client_id", clientId)
-      .eq("coach_id", coachId);
-
-    const { error } = await supabase
-      .from("clients")
-      .update({
-        lifecycle_stage: "alumni",
-        offboarding_completed_at: now,
-        alumni_since: now.slice(0, 10),
-        exit_reason: (exitReason ?? "").slice(0, 500) || null,
-      })
-      .eq("id", clientId)
-      .eq("coach_id", coachId);
-    if (error) return { success: false, error: error.message };
-
-    revalidatePath(`/dashboard/clients/${clientId}`);
-    revalidatePath("/dashboard/pipeline");
-    return { success: true };
-  } catch (e) {
-    console.error("completeOffboarding failed", e);
-    return { success: false, error: "Something went wrong" };
-  }
-}
-
 export async function reengageClient(clientId: string) {
   // Move alumni back to lead and stamp the reengagement_date.
   const coachId = await getCoachId();
@@ -504,6 +296,14 @@ export async function quickAdvance(
     }
     try {
       const supabase = await createClient();
+      const { data: current } = await supabase
+        .from("clients")
+        .select("name")
+        .eq("id", clientId)
+        .eq("coach_id", coachId)
+        .single();
+      const clientName = current?.name ?? "Client";
+
       const { error } = await supabase
         .from("clients")
         .update({
@@ -513,8 +313,16 @@ export async function quickAdvance(
         .eq("id", clientId)
         .eq("coach_id", coachId);
       if (error) return { success: false, error: error.message };
+
+      await logActivity(
+        coachId, clientId, "stage_changed",
+        `${clientName} moved from Proposal to Active`,
+        { from_stage: "proposal", to_stage: "active" }
+      );
+
       revalidatePath("/dashboard/pipeline");
       revalidatePath(`/dashboard/clients/${clientId}`);
+      revalidatePath("/dashboard");
       return { success: true };
     } catch (e) {
       console.error("quickAdvance(proposal) failed", e);

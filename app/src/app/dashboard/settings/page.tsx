@@ -1,10 +1,35 @@
 import { createClient } from "@/lib/supabase/server";
+import { Suspense } from "react";
 import Topbar from "@/components/Topbar";
 import SettingsForm from "./SettingsForm";
+import SettingsTabs from "./SettingsTabs";
 
 export const dynamic = "force-dynamic";
 
-export default async function SettingsPage() {
+async function ModulesEmbed() {
+  const ProToolsPage = (await import("@/app/dashboard/pro-tools/page")).default;
+  return <ProToolsPage />;
+}
+
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: { tab?: string };
+}) {
+  const isModulesTab = searchParams.tab === "modules";
+  if (isModulesTab) {
+    return (
+      <>
+        <Topbar title="Settings" />
+        <div className="flex-1">
+          <SettingsTabs activeTab="modules" />
+          <Suspense fallback={<div className="p-7 text-sm text-text-3">Loading modules...</div>}>
+            <ModulesEmbed />
+          </Suspense>
+        </div>
+      </>
+    );
+  }
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -70,9 +95,12 @@ export default async function SettingsPage() {
   return (
     <>
       <Topbar title="Settings" />
-      <div className="flex-1 p-4 lg:p-7">
-        <div className="mx-auto max-w-2xl">
-          <SettingsForm coach={coach} capacitySettings={capacitySettings} />
+      <div className="flex-1">
+        <SettingsTabs activeTab="general" />
+        <div className="p-4 lg:p-7">
+          <div className="mx-auto max-w-2xl">
+            <SettingsForm coach={coach} capacitySettings={capacitySettings} />
+          </div>
         </div>
       </div>
     </>

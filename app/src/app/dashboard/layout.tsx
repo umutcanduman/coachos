@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { SidebarProvider } from "@/components/SidebarContext";
 import SidebarWrapper from "@/components/SidebarWrapper";
-import { getEnabledModules } from "@/lib/modules";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +25,6 @@ export default async function DashboardLayout({
 
   let coachName = "Coach";
   let coachEmail = user.email ?? "";
-  let coachId: string | null = null;
 
   try {
     const supabase = await createClient();
@@ -37,39 +35,11 @@ export default async function DashboardLayout({
       .single();
 
     if (coach) {
-      coachId = coach.id;
       coachName = coach.name ?? coachName;
       coachEmail = coach.email ?? coachEmail;
     }
   } catch {
     // Coach profile query failed — use defaults from auth
-  }
-
-  // Fetch enabled modules for sidebar
-  let enabledModuleKeys: string[] = [];
-  if (coachId) {
-    try {
-      const modules = await getEnabledModules(coachId);
-      enabledModuleKeys = Array.from(modules);
-    } catch {
-      // modules table may not exist yet
-    }
-  }
-
-  // Pipeline badge: total leads + proposals
-  let pipelineBadgeCount = 0;
-  if (coachId) {
-    try {
-      const supabase = await createClient();
-      const { count } = await supabase
-        .from("clients")
-        .select("id", { count: "exact", head: true })
-        .eq("coach_id", coachId)
-        .in("lifecycle_stage", ["lead", "discovery", "proposal"]);
-      pipelineBadgeCount = count ?? 0;
-    } catch {
-      // lifecycle_stage column may not exist yet (pre-migration)
-    }
   }
 
   return (
@@ -78,8 +48,6 @@ export default async function DashboardLayout({
         <SidebarWrapper
           coachName={coachName}
           coachEmail={coachEmail}
-          enabledModules={enabledModuleKeys}
-          pipelineBadgeCount={pipelineBadgeCount}
         />
         <div className="flex flex-1 flex-col lg:ml-[260px]">{children}</div>
       </div>

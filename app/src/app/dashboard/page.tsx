@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   if (!user) {
     return (
       <>
-        <Topbar title="Today" />
+        <Topbar title="Dashboard" />
         <div className="flex-1 p-4 lg:p-7">
           <div className="rounded-card border border-border bg-surface py-16 text-center text-sm text-text-3">Session expired. Please refresh.</div>
         </div>
@@ -51,7 +51,7 @@ export default async function DashboardPage() {
     const subtitle = new Date().toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
     return (
       <>
-        <Topbar title="Today" subtitle={subtitle} />
+        <Topbar title="Dashboard" subtitle={subtitle} />
         <div className="flex-1 p-4 lg:p-7">
           <TodayView coachName={coachName} todaySessions={todaySessions} attention={attention} weekDays={weekDays} pipelineSnapshot={pipelineSnapshot} activities={activities} stats={stats} />
         </div>
@@ -342,7 +342,7 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <Topbar title="Today" subtitle={subtitle} />
+      <Topbar title="Dashboard" subtitle={subtitle} />
       <div className="flex-1 p-4 lg:p-7">
         <TodayView
           coachName={coachName}

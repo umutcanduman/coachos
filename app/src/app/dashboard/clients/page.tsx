@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { Suspense } from "react";
 import Link from "next/link";
 import Topbar from "@/components/Topbar";
 import ClientFilters from "./ClientFilters";
 import ClientActions from "./ClientActions";
+import ClientViewToggle from "./ClientViewToggle";
 import {
   STAGE_LABELS,
   STAGE_BADGE_CLASS,
@@ -12,11 +14,33 @@ import {
 
 export const dynamic = "force-dynamic";
 
+// Lazy-load the pipeline page when needed
+async function PipelineEmbed() {
+  const PipelinePage = (await import("@/app/dashboard/pipeline/page")).default;
+  return <PipelinePage />;
+}
+
 export default async function ClientsPage({
   searchParams,
 }: {
-  searchParams: { filter?: string };
+  searchParams: { filter?: string; view?: string };
 }) {
+  const isPipelineView = searchParams.view === "pipeline";
+  if (isPipelineView) {
+    return (
+      <>
+        <Topbar title="Clients" subtitle="Pipeline view" />
+        <div className="flex-1">
+          <div className="flex items-center gap-3 px-4 pt-4 lg:px-7">
+            <ClientViewToggle />
+          </div>
+          <Suspense fallback={<div className="p-7 text-sm text-text-3">Loading pipeline...</div>}>
+            <PipelineEmbed />
+          </Suspense>
+        </div>
+      </>
+    );
+  }
   const supabase = await createClient();
   const {
     data: { user },
@@ -99,7 +123,8 @@ export default async function ClientsPage({
       <div className="flex-1 p-4 lg:p-7">
         <div className="mb-5 flex flex-wrap items-center gap-3">
           <ClientFilters activeFilter={filter} />
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <ClientViewToggle />
             <ClientActions existingClients={clients.map((c) => ({ id: c.id, name: c.name }))} />
           </div>
         </div>

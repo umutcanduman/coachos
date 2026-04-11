@@ -1,11 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import Topbar from "@/components/Topbar";
-import PipelineBoard, { type PipelineCard } from "./PipelineBoard";
-import {
-  LIFECYCLE_STAGES,
-  isLifecycleStage,
-  type LifecycleStage,
-} from "@/lib/lifecycle";
+import PipelineView from "./PipelineView";
+import { isLifecycleStage } from "@/lib/lifecycle";
+import type { PipelineCard, PipelineSummary } from "./types";
 
 export const dynamic = "force-dynamic";
 
@@ -21,12 +18,16 @@ type RawClient = {
   discovery_call_date: string | null;
   proposal_sent_date: string | null;
   reengagement_date: string | null;
-  packages: { price: number; status: string }[] | null;
+  next_follow_up_date: string | null;
+  created_at: string;
 };
 
 function nextActionFor(c: RawClient): string | null {
   switch (c.lifecycle_stage) {
     case "lead":
+      if (c.next_follow_up_date) {
+        return `Follow up ${new Date(c.next_follow_up_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+      }
       return c.discovery_call_date
         ? `Call ${new Date(c.discovery_call_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
         : "Schedule discovery";
@@ -82,15 +83,8 @@ export default async function PipelinePage() {
     coachId = coach?.id ?? null;
   } catch { /* coaches table may not exist */ }
 
-  // Initialise empty buckets so the UI renders even before migration runs
-  const cardsByStage: Record<LifecycleStage, PipelineCard[]> = {
-    lead: [], discovery: [], proposal: [], onboarding: [],
-    active: [], completing: [], offboarding: [], alumni: [],
-  };
-  const totalsByStage: Record<LifecycleStage, number> = {
-    lead: 0, discovery: 0, proposal: 0, onboarding: 0,
-    active: 0, completing: 0, offboarding: 0, alumni: 0,
-  };
+  let cards: PipelineCard[] = [];
+  let existingClients: { id: string; name: string }[] = [];
 
   if (coachId) {
     try {
@@ -100,56 +94,105 @@ export default async function PipelinePage() {
           id, name, email, package_type, source, lifecycle_stage,
           lifecycle_stage_updated_at, proposal_price,
           discovery_call_date, proposal_sent_date, reengagement_date,
-          packages ( price, status )
+          next_follow_up_date, created_at
         `)
         .eq("coach_id", coachId)
         .order("lifecycle_stage_updated_at", { ascending: false });
 
       const rows = (data ?? []) as RawClient[];
-      for (const row of rows) {
-        const stage = isLifecycleStage(row.lifecycle_stage) ? row.lifecycle_stage : "active";
-        const card: PipelineCard = {
-          id: row.id,
-          name: row.name,
-          email: row.email,
-          package_type: row.package_type,
-          source: row.source,
-          lifecycle_stage: stage,
-          lifecycle_stage_updated_at: row.lifecycle_stage_updated_at,
-          proposal_price: row.proposal_price !== null ? Number(row.proposal_price) : null,
-          next_action: nextActionFor(row),
-        };
-        cardsByStage[stage].push(card);
+      cards = rows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        package_type: row.package_type,
+        source: row.source,
+        lifecycle_stage: isLifecycleStage(row.lifecycle_stage) ? row.lifecycle_stage : "active",
+        lifecycle_stage_updated_at: row.lifecycle_stage_updated_at,
+        proposal_price: row.proposal_price !== null ? Number(row.proposal_price) : null,
+        next_action: nextActionFor(row),
+      }));
 
-        // Stage totals: sum proposal_price for proposal column,
-        // active package price for active/completing/onboarding.
-        if (stage === "proposal" && card.proposal_price) {
-          totalsByStage[stage] += card.proposal_price;
-        } else if (stage === "active" || stage === "completing" || stage === "onboarding") {
-          const pkgs = Array.isArray(row.packages) ? row.packages : [];
-          const active = pkgs.find((p) => p.status === "active") ?? pkgs[0];
-          if (active?.price) totalsByStage[stage] += Number(active.price);
-        }
-      }
-    } catch { /* clients query may fail */ }
+      existingClients = rows.map((r) => ({ id: r.id, name: r.name }));
+    } catch { /* clients query may fail or columns may not exist yet */ }
   }
 
-  const totalCards = LIFECYCLE_STAGES.reduce(
-    (sum, s) => sum + cardsByStage[s].length,
-    0
-  );
+  // ----- summary metrics ---------------------------------------
+  const summary: PipelineSummary = {
+    leadsThisMonth: 0,
+    inProposalCount: 0,
+    inProposalValue: 0,
+    activeCount: 0,
+    completingCount: 0,
+  };
+
+  if (coachId) {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    const startOfMonthIso = startOfMonth.toISOString();
+
+    try {
+      const { count } = await supabase
+        .from("clients")
+        .select("id", { count: "exact", head: true })
+        .eq("coach_id", coachId)
+        .in("lifecycle_stage", ["lead", "discovery", "proposal"])
+        .gte("created_at", startOfMonthIso);
+      summary.leadsThisMonth = count ?? 0;
+    } catch { /* lifecycle column may not exist yet */ }
+
+    try {
+      const { data } = await supabase
+        .from("clients")
+        .select("proposal_price")
+        .eq("coach_id", coachId)
+        .eq("lifecycle_stage", "proposal");
+      const rows = data ?? [];
+      summary.inProposalCount = rows.length;
+      summary.inProposalValue = rows.reduce(
+        (sum, r) => sum + (r.proposal_price !== null ? Number(r.proposal_price) : 0),
+        0
+      );
+    } catch { /* proposal_price column may not exist yet */ }
+
+    try {
+      const { count } = await supabase
+        .from("clients")
+        .select("id", { count: "exact", head: true })
+        .eq("coach_id", coachId)
+        .eq("lifecycle_stage", "active");
+      summary.activeCount = count ?? 0;
+    } catch { /* fall back to overall active count via status */ }
+
+    if (summary.activeCount === 0) {
+      try {
+        const { count } = await supabase
+          .from("clients")
+          .select("id", { count: "exact", head: true })
+          .eq("coach_id", coachId)
+          .eq("status", "active");
+        summary.activeCount = count ?? 0;
+      } catch { /* clients table may not exist */ }
+    }
+
+    try {
+      const { count } = await supabase
+        .from("clients")
+        .select("id", { count: "exact", head: true })
+        .eq("coach_id", coachId)
+        .in("lifecycle_stage", ["completing", "offboarding"]);
+      summary.completingCount = count ?? 0;
+    } catch { /* lifecycle column may not exist yet */ }
+  }
 
   return (
     <>
       <Topbar
         title="Pipeline"
-        subtitle={totalCards === 0 ? "No clients yet" : `${totalCards} clients across stages`}
+        subtitle={cards.length === 0 ? "No clients yet" : `${cards.length} clients across stages`}
       />
       <div className="flex-1 p-4 lg:p-7">
-        <div className="mb-4 hidden text-xs text-text-3 lg:block">
-          Drag a card between columns to update its lifecycle stage.
-        </div>
-        <PipelineBoard cardsByStage={cardsByStage} totalsByStage={totalsByStage} />
+        <PipelineView cards={cards} summary={summary} existingClients={existingClients} />
       </div>
     </>
   );

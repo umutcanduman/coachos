@@ -2,7 +2,28 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { isLifecycleStage } from "@/lib/lifecycle";
+import { isLifecycleStage, STAGE_LABELS, type LifecycleStage } from "@/lib/lifecycle";
+
+async function logActivity(
+  coachId: string,
+  clientId: string | null,
+  action: string,
+  description: string,
+  metadata?: Record<string, unknown>
+) {
+  try {
+    const supabase = await createClient();
+    await supabase.from("activity_log").insert({
+      coach_id: coachId,
+      client_id: clientId,
+      action,
+      description,
+      metadata: metadata ?? null,
+    });
+  } catch {
+    // Non-critical — activity logging should never block the main action
+  }
+}
 
 async function getCoachId(): Promise<string | null> {
   try {
@@ -53,12 +74,33 @@ export async function moveClientStage(clientId: string, stage: string) {
 
   try {
     const supabase = await createClient();
+    // Fetch current stage + name for the activity log
+    const { data: current } = await supabase
+      .from("clients")
+      .select("name, lifecycle_stage")
+      .eq("id", clientId)
+      .eq("coach_id", coachId)
+      .single();
+    const fromStage = current?.lifecycle_stage ?? "unknown";
+    const clientName = current?.name ?? "Client";
+
     const { error } = await supabase
       .from("clients")
       .update(updates)
       .eq("id", clientId)
       .eq("coach_id", coachId);
     if (error) return { success: false, error: error.message };
+
+    const fromLabel = STAGE_LABELS[fromStage as LifecycleStage] ?? fromStage;
+    const toLabel = STAGE_LABELS[stage as LifecycleStage] ?? stage;
+    await logActivity(
+      coachId,
+      clientId,
+      "stage_changed",
+      `${clientName} moved from ${fromLabel} to ${toLabel}`,
+      { from_stage: fromStage, to_stage: stage }
+    );
+
     revalidatePath("/dashboard/pipeline");
     revalidatePath("/dashboard/clients");
     revalidatePath(`/dashboard/clients/${clientId}`);
@@ -287,6 +329,14 @@ export async function reengageClient(clientId: string) {
   }
   try {
     const supabase = await createClient();
+    const { data: current } = await supabase
+      .from("clients")
+      .select("name")
+      .eq("id", clientId)
+      .eq("coach_id", coachId)
+      .single();
+    const clientName = current?.name ?? "Client";
+
     const today = new Date().toISOString().slice(0, 10);
     const { error } = await supabase
       .from("clients")
@@ -298,8 +348,16 @@ export async function reengageClient(clientId: string) {
       .eq("id", clientId)
       .eq("coach_id", coachId);
     if (error) return { success: false, error: error.message };
+
+    await logActivity(
+      coachId, clientId, "stage_changed",
+      `${clientName} re-engaged (Alumni → Lead)`,
+      { from_stage: "alumni", to_stage: "lead" }
+    );
+
     revalidatePath(`/dashboard/clients/${clientId}`);
     revalidatePath("/dashboard/pipeline");
+    revalidatePath("/dashboard");
     return { success: true };
   } catch (e) {
     console.error("reengageClient failed", e);
@@ -375,6 +433,15 @@ export async function convertLeadToActive(clientId: string, formData: FormData) 
 
   try {
     const supabase = await createClient();
+    const { data: current } = await supabase
+      .from("clients")
+      .select("name, lifecycle_stage")
+      .eq("id", clientId)
+      .eq("coach_id", coachId)
+      .single();
+    const clientName = current?.name ?? "Client";
+    const fromStage = current?.lifecycle_stage ?? "lead";
+
     const today = new Date().toISOString().slice(0, 10);
 
     const { error: pkgErr } = await supabase.from("packages").insert({
@@ -399,9 +466,17 @@ export async function convertLeadToActive(clientId: string, formData: FormData) 
       .eq("coach_id", coachId);
     if (clErr) return { success: false, error: clErr.message };
 
+    const fromLabel = STAGE_LABELS[fromStage as LifecycleStage] ?? fromStage;
+    await logActivity(
+      coachId, clientId, "stage_changed",
+      `${clientName} converted to active client (${fromLabel} → Active)`,
+      { from_stage: fromStage, to_stage: "active", package: packageType }
+    );
+
     revalidatePath(`/dashboard/clients/${clientId}`);
     revalidatePath("/dashboard/pipeline");
     revalidatePath("/dashboard/clients");
+    revalidatePath("/dashboard");
     return { success: true };
   } catch (e) {
     console.error("convertLeadToActive failed", e);

@@ -113,6 +113,20 @@ export default function NewClientModal({ open, onClose, existingClients }: NewCl
       return;
     }
 
+    // Log activity
+    if (newClient) {
+      try {
+        await supabase.from("activity_log").insert({
+          coach_id: coach.id,
+          client_id: newClient.id,
+          action: "client_added",
+          description: `${name} was added as a client`,
+        });
+      } catch {
+        // Non-critical
+      }
+    }
+
     // Auto-create referral record if referred_by is set
     if (referredBy && newClient) {
       try {

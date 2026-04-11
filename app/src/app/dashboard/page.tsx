@@ -5,6 +5,7 @@ import StatCard from "@/components/StatCard";
 import RevenueChart from "@/components/RevenueChart";
 import DashboardSessionActions from "./DashboardSessionActions";
 import NoteIndicator from "./NoteIndicator";
+import ActivityFeed from "./ActivityFeed";
 import {
   LIFECYCLE_STAGES,
   STAGE_LABELS,
@@ -82,6 +83,7 @@ async function getDashboardData() {
       allClients: [] as ClientWithRelations[],
       referrals: [] as Referral[],
       stageCounts: {} as Record<LifecycleStage, number>,
+      activities: [] as { id: string; action: string; description: string; created_at: string; metadata: { from_stage?: string; to_stage?: string } | null }[],
     };
   }
 
@@ -208,6 +210,18 @@ async function getDashboardData() {
     referrals = (data ?? []) as Referral[];
   } catch { /* referrals table may not exist */ }
 
+  type ActivityRow = { id: string; action: string; description: string; created_at: string; metadata: { from_stage?: string; to_stage?: string } | null };
+  let activities: ActivityRow[] = [];
+  try {
+    const { data } = await supabase
+      .from("activity_log")
+      .select("id, action, description, created_at, metadata")
+      .eq("coach_id", coachId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+    activities = (data ?? []) as ActivityRow[];
+  } catch { /* activity_log table may not exist yet */ }
+
   return {
     user,
     activeClients,
@@ -218,6 +232,7 @@ async function getDashboardData() {
     allClients,
     referrals,
     stageCounts,
+    activities,
   };
 }
 
@@ -238,6 +253,7 @@ export default async function DashboardPage() {
     allClients = [],
     referrals = [],
     stageCounts = emptyStages,
+    activities = [],
   } = data ?? {};
   const stageCountsResolved: Record<LifecycleStage, number> = { ...emptyStages, ...stageCounts };
   const totalLeads =
@@ -530,34 +546,7 @@ export default async function DashboardPage() {
                 </div>
               </div>
               <div className="px-5 py-2">
-                {upcomingSessions.length === 0 && allClients.length === 0 ? (
-                  <div className="py-8 text-center text-sm text-text-3">No activity yet</div>
-                ) : (
-                  <div className="flex flex-col">
-                    {allClients.slice(0, 4).map((client) => (
-                      <div
-                        key={client.id}
-                        className="flex items-start gap-3.5 border-b border-border py-3 last:border-b-0"
-                      >
-                        <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-accent-lt text-xs text-accent">
-                          ✓
-                        </div>
-                        <div>
-                          <p className="text-[0.8125rem] leading-relaxed text-text-2">
-                            <strong className="font-medium text-text">{client.name}</strong> was
-                            added as a client
-                          </p>
-                          <time className="text-[0.7rem] text-text-3">
-                            {new Date(client.created_at).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </time>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <ActivityFeed activities={activities} />
               </div>
             </div>
 
